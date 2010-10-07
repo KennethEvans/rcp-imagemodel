@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            icon="icons/evansApp32.gif">
+         <run
+               class="net.kenevans.gpxinspector.plugin.Application">
+         </run>
+      </application>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="net.kenevans.gpxinspector.perspectives.Perspective"
+            icon="icons/evansApp16.gif"
+            id="net.kenevans.gpxinspector.perspective"
+            name="Perspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="net.kenevans.gpxinspector.category"
+            class="net.kenevans.gpxinspector.views.GpxView"
+            icon="icons/GPXInspector16.png"
+            id="net.kenevans.gpxinspector.gpxView"
+            name="GPX"
+            restorable="true">
+      </view>
+      <view
+            category="net.kenevans.gpxinspector.category"
+            class="cbg.article.treeviewer.ui.MovingBoxView"
+            icon="icons/movingBox.gif"
+            id="net.kenevans.gpxinspector.MovingBoxView"
+            name="Moving Box"
+            restorable="true">
+      </view>
+      <view
+            category="net.kenevans.gpxinspector.category"
+            class="net.kenevans.gpxinspector.views.SampleView"
+            icon="icons/evansApp16.gif"
+            id="net.kenevans.gpxinspector.view"
+            name="Sample View">
+      </view>
+      <category
+            id="net.kenevans.gpxinspector.category"
+            name="GPX Inspector">
+      </category>
+   </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="net.kenevans.gpxinspector.application"
+            name="GPX Inspector">
+         <property
+               name="windowImages"
+               value="icons/GPXInspector16.png,icons/GPXInspector32.png">
+         </property>
+         <property
+               name="appName"
+               value="GPX Inspector">
+         </property>
+         <property
+               name="aboutImage"
+               value="icons/GPXInspectorAbout.png">
+         </property>
+         <property
+               name="aboutText"
+               value="GPS Inspector&#x0A;&#x0A;If this application works, it was written by&#x0A;Kenneth Evans&#x0A;&#x0A;kenevans.net">
+         </property>
+      </product>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:net.kenevans.gpxinspector.gpxView?after=additions">
+         <command
+               commandId="net.kenevans.gpxinspector.saveKml"
+               icon="icons/ge16.png"
+               label="Save KML..."
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:net.kenevans.gpxinspector.gpxView?after=additions">
+         <command
+               commandId="net.kenevans.gpxinspector.openGpxFile"
+               icon="icons/GPXInspector16.png"
+               label="Open GPX File..."
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.findNear"
+               label="Find Near..."
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.findFilesNear"
+               label="Find Files Near..."
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.saveKml"
+               icon="icons/ge16.png"
+               label="Save KML..."
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:net.kenevans.gpxinspector.gpxView?after=additions">
+         <command
+               commandId="net.kenevans.gpxinspector.saveKml"
+               icon="icons/ge16.png"
+               label="Save KML..."
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:file?after=additions">
+         <command
+               commandId="net.kenevans.gpxinspector.openGpxFile"
+               icon="icons/GPXInspector16.png"
+               label="Open GPX File..."
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.findNear"
+               label="Find Near..."
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.findFilesNear"
+               label="Find Files Near..."
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.saveKml"
+               icon="icons/ge16.png"
+               label="Save KML..."
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <command
+               commandId="net.kenevans.gpxinspector.saveKml"
+               icon="icons/ge16.png"
+               label="Save KML..."
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="net.kenevans.gpxinspector.category"
+            name="GPX Inspector">
+      </category>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            defaultHandler="net.kenevans.gpxinspector.handlers.SaveKmlHandler"
+            id="net.kenevans.gpxinspector.saveKml"
+            name="Save KML...">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            defaultHandler="net.kenevans.gpxinspector.handlers.OpenGpxFileHandler"
+            id="net.kenevans.gpxinspector.openGpxFile"
+            name="Open GPX File...">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            defaultHandler="net.kenevans.gpxinspector.handlers.FindNearHandler"
+            id="net.kenevans.gpxinspector.findNear"
+            name="Find Near...">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            defaultHandler="net.kenevans.gpxinspector.handlers.FindFilesNearHandler"
+            id="net.kenevans.gpxinspector.findFilesNear"
+            name="Find Files Near...">
+      </command>
+   </extension>
+
+</plugin>
