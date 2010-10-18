@@ -60,7 +60,7 @@ public class FindFilesNearHandler extends AbstractHandler
             options.setLongitude(view.getFindLongitude());
             options.setRadius(view.getFindRadius());
             options.setUnits(view.getFindUnits());
-            options.setDirName(view.getSearchDirectory());
+            options.setDirName(view.getGpxDirectory());
         }
 
         FindNearDialog dialog = null;

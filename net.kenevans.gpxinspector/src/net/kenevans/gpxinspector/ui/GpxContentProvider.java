@@ -109,8 +109,9 @@ public class GpxContentProvider implements ITreeContentProvider
             return concat(model.getWaypointModels().toArray(), model
                 .getTrackModels().toArray());
         } else if(parentElement instanceof GpxTrackModel) {
-            GpxTrackModel model = (GpxTrackModel)parentElement;
-            return model.getPropertyModels().toArray();
+            // TODO Implement properties
+//            GpxTrackModel model = (GpxTrackModel)parentElement;
+//            return model.getPropertyModels().toArray();
         }
         return EMPTY_ARRAY;
     }

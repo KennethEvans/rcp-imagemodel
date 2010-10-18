@@ -6,7 +6,7 @@
          id="application"
          point="org.eclipse.core.runtime.applications">
       <application
-            icon="icons/evansApp32.gif">
+            icon="icons/GPXInspector32.png">
          <run
                class="net.kenevans.gpxinspector.plugin.Application">
          </run>
@@ -16,7 +16,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="net.kenevans.gpxinspector.perspectives.Perspective"
-            icon="icons/evansApp16.gif"
+            icon="icons/GPXInspector16.png"
             id="net.kenevans.gpxinspector.perspective"
             name="Perspective">
       </perspective>
@@ -30,21 +30,6 @@
             id="net.kenevans.gpxinspector.gpxView"
             name="GPX"
             restorable="true">
-      </view>
-      <view
-            category="net.kenevans.gpxinspector.category"
-            class="cbg.article.treeviewer.ui.MovingBoxView"
-            icon="icons/movingBox.gif"
-            id="net.kenevans.gpxinspector.MovingBoxView"
-            name="Moving Box"
-            restorable="true">
-      </view>
-      <view
-            category="net.kenevans.gpxinspector.category"
-            class="net.kenevans.gpxinspector.views.SampleView"
-            icon="icons/evansApp16.gif"
-            id="net.kenevans.gpxinspector.view"
-            name="Sample View">
       </view>
       <category
             id="net.kenevans.gpxinspector.category"
@@ -71,29 +56,102 @@
          </property>
          <property
                name="aboutText"
-               value="GPS Inspector&#x0A;&#x0A;If this application works, it was written by&#x0A;Kenneth Evans&#x0A;&#x0A;kenevans.net">
+               value="GPX Inspector&#x0D;&#x0A;&#x0D;&#x0A;If this application works, it was written by&#x0D;&#x0A;Kenneth Evans&#x0D;&#x0A;&#x0D;&#x0A;kenevans.net">
          </property>
       </product>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
-            locationURI="popup:net.kenevans.gpxinspector.gpxView?after=additions">
+            locationURI="menu:net.kenevans.gpxinspector.gpxView?after=additions">
+         <separator
+               name="net.kenevans.gpxinspector.separator1"
+               visible="true">
+         </separator>
          <command
-               commandId="net.kenevans.gpxinspector.saveKml"
-               icon="icons/ge16.png"
-               label="Save KML..."
+               icon="icons/add.gif"
+               label="Add"
+               commandId="net.kenevans.gpxinspector.add">
+                style="push">
+         </command>
+         <command
+               icon="icons/remove.gif"
+               label="Remove"
+               commandId="net.kenevans.gpxinspector.remove">
+                style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.removeAll"
+               icon="icons/removeAll.gif"
+               label="Remove All"
                style="push">
          </command>
-      </menuContribution>
-      <menuContribution
-            locationURI="menu:net.kenevans.gpxinspector.gpxView?after=additions">
+         <separator
+               name="net.kenevans.gpxinspector.separator2"
+               visible="true">
+               style="push">
+         </separator>
+         <command
+               label="Check All"
+               commandId="net.kenevans.gpxinspector.checkAll">
+               style="push">
+         </command>
+         <command
+               label="Uncheck All"
+               commandId="net.kenevans.gpxinspector.uncheckAll">
+               style="push">
+         </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator3"
+               visible="true">
+         </separator>
+         <command
+               icon="icons/expandall.gif"
+               label="Expand Level"
+               commandId="net.kenevans.gpxinspector.expand">
+               style="push">
+         </command>
+         <command
+               icon="icons/collapseall.gif"
+               label="Collapse Level"
+               commandId="net.kenevans.gpxinspector.collapse">
+               style="push">
+         </command>
+         <command
+               icon="icons/collapseall.gif"
+               label="Collapse All"
+               commandId="net.kenevans.gpxinspector.collapse">
+               style="push">
+         </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator4"
+               visible="true">
+         </separator>
          <command
                commandId="net.kenevans.gpxinspector.openGpxFile"
                icon="icons/GPXInspector16.png"
                label="Open GPX File..."
                style="push">
          </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator5"
+               visible="true">
+         </separator>
+         <command
+               commandId="net.kenevans.gpxinspector.saveAsStartupPreference"
+               label="Save Checked as Startup Preference"
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.addStartupFilesFromPreferences"
+               icon="icons/add.gif"
+               label="Add Startup Files from Preferences"
+               style="push">
+         </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator6"
+               visible="true">
+         </separator>
          <command
                commandId="net.kenevans.gpxinspector.findNear"
                label="Find Near..."
@@ -104,6 +162,121 @@
                label="Find Files Near..."
                style="push">
          </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator7"
+               visible="true">
+         </separator>
+         <command
+               commandId="net.kenevans.gpxinspector.saveKml"
+               icon="icons/ge16.png"
+               label="Save KML..."
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="popup:net.kenevans.gpxinspector.gpxView?after=additions">
+         <separator
+               name="net.kenevans.gpxinspector.separator1"
+               visible="true">
+         </separator>
+         <command
+               icon="icons/add.gif"
+               label="Add"
+               commandId="net.kenevans.gpxinspector.add">
+                style="push">
+         </command>
+         <command
+               icon="icons/remove.gif"
+               label="Remove"
+               commandId="net.kenevans.gpxinspector.remove">
+                style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.removeAll"
+               icon="icons/removeAll.gif"
+               label="Remove All"
+               style="push">
+         </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator2"
+               visible="true">
+               style="push">
+         </separator>
+         <command
+               label="Check All"
+               commandId="net.kenevans.gpxinspector.checkAll">
+               style="push">
+         </command>
+         <command
+               label="Uncheck All"
+               commandId="net.kenevans.gpxinspector.uncheckAll">
+               style="push">
+         </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator3"
+               visible="true">
+         </separator>
+         <command
+               icon="icons/expandall.gif"
+               label="Expand Level"
+               commandId="net.kenevans.gpxinspector.expand">
+               style="push">
+         </command>
+         <command
+               icon="icons/collapseall.gif"
+               label="Collapse Level"
+               commandId="net.kenevans.gpxinspector.collapse">
+               style="push">
+         </command>
+         <command
+               icon="icons/collapseall.gif"
+               label="Collapse All"
+               commandId="net.kenevans.gpxinspector.collapse">
+               style="push">
+         </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator4"
+               visible="true">
+         </separator>
+         <command
+               commandId="net.kenevans.gpxinspector.openGpxFile"
+               icon="icons/GPXInspector16.png"
+               label="Open GPX File..."
+               style="push">
+         </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator5"
+               visible="true">
+         </separator>
+         <command
+               commandId="net.kenevans.gpxinspector.saveAsStartupPreference"
+               label="Save Checked as Startup Preference"
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.addStartupFilesFromPreferences"
+               icon="icons/add.gif"
+               label="Add Startup Files from Preferences"
+               style="push">
+         </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator6"
+               visible="true">
+         </separator>
+         <command
+               commandId="net.kenevans.gpxinspector.findNear"
+               label="Find Near..."
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.findFilesNear"
+               label="Find Files Near..."
+               style="push">
+         </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator7"
+               visible="true">
+         </separator>
          <command
                commandId="net.kenevans.gpxinspector.saveKml"
                icon="icons/ge16.png"
@@ -113,6 +286,42 @@
       </menuContribution>
       <menuContribution
             locationURI="toolbar:net.kenevans.gpxinspector.gpxView?after=additions">
+         <command
+               icon="icons/add.gif"
+               label="Add"
+               commandId="net.kenevans.gpxinspector.add">
+                style="push">
+         </command>
+         <command
+               icon="icons/remove.gif"
+               label="Remove"
+               commandId="net.kenevans.gpxinspector.remove">
+                style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.removeAll"
+               icon="icons/removeAll.gif"
+               label="Remove All"
+               style="push">
+         </command>
+         <command
+               icon="icons/expandall.gif"
+               label="Expand Level"
+               commandId="net.kenevans.gpxinspector.expand">
+               style="push">
+         </command>
+         <command
+               icon="icons/collapseall.gif"
+               label="Collapse Level"
+               commandId="net.kenevans.gpxinspector.collapse">
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.openGpxFile"
+               icon="icons/GPXInspector16.png"
+               label="Open GPX File..."
+               style="push">
+         </command>
          <command
                commandId="net.kenevans.gpxinspector.saveKml"
                icon="icons/ge16.png"
@@ -128,6 +337,10 @@
                label="Open GPX File..."
                style="push">
          </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator1"
+               visible="true">
+         </separator>
          <command
                commandId="net.kenevans.gpxinspector.findNear"
                label="Find Near..."
@@ -138,6 +351,10 @@
                label="Find Files Near..."
                style="push">
          </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator2"
+               visible="true">
+         </separator>
          <command
                commandId="net.kenevans.gpxinspector.saveKml"
                icon="icons/ge16.png"
@@ -157,6 +374,16 @@
    </extension>
    <extension
          point="org.eclipse.ui.commands">
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.add"
+            name="Add">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.saveAsStartupPreference"
+            name="Save Checked as Startup Preference">
+      </command>
       <category
             id="net.kenevans.gpxinspector.category"
             name="GPX Inspector">
@@ -185,6 +412,72 @@
             id="net.kenevans.gpxinspector.findFilesNear"
             name="Find Files Near...">
       </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.addStartupFilesFromPreferences"
+            name="Add Startup Files from Preferences">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.remove"
+            name="Remove">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.checkAll"
+            name="Check All">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.removeAll"
+            name="Remove All">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.uncheckAll"
+            name="Uncheck All">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.expand"
+            name="Expand Level">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.collapse"
+            name="Collapse Level">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.collapse"
+            name="Collapse All">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="net.kenevans.gpxinspector.preferences.GpxInspectorPreferencePage"
+            id="net.kenevans.gpxinspector.preferencePage"
+            name="GPX Inspector">
+      </page>
+      <page
+            category="net.kenevans.gpxinspector.preferencePage"
+            class="net.kenevans.gpxinspector.preferences.StartupPreferencePage"
+            id="net.kenevans.gpxinspector.startupPreferencePage"
+            name="Startup">
+      </page>
+      <page
+            category="net.kenevans.gpxinspector.preferencePage"
+            class="net.kenevans.gpxinspector.preferences.KMLPreferencePage"
+            id="net.kenevans.gpxinspector.kmlPreferencePage"
+            name="KML">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="net.kenevans.gpxinspector.preferences.PreferenceInitializer">
+      </initializer>
    </extension>
 
 </plugin>

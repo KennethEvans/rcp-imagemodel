@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
@@ -19,6 +20,7 @@ import net.kenevans.gpxinspector.model.GpxModel;
 import net.kenevans.gpxinspector.model.GpxTrackModel;
 import net.kenevans.gpxinspector.model.GpxWaypointModel;
 import net.kenevans.gpxinspector.plugin.Activator;
+import net.kenevans.gpxinspector.preferences.IPreferenceConstants;
 import net.kenevans.gpxinspector.ui.GpxCheckStateProvider;
 import net.kenevans.gpxinspector.ui.GpxContentProvider;
 import net.kenevans.gpxinspector.ui.GpxLabelProvider;
@@ -28,16 +30,18 @@ import net.kenevans.gpxinspector.utils.find.FindNear.Mode;
 import net.kenevans.gpxinspector.utils.find.FindNearOptions;
 import net.kenevans.gpxinspector.utils.find.FindNearOptions.Units;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -61,7 +65,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.ViewPart;
 import org.osgi.framework.Bundle;
 
@@ -72,30 +76,33 @@ import utils.ScrolledTextDialog;
  * 
  * @see ViewPart
  */
-public class GpxView extends ViewPart
+public class GpxView extends ViewPart implements IPreferenceConstants
 {
-    private static final String SEARCH_DIR = "C:/Users/evans/Documents/GPSLink";
     private boolean showSelectionText = false;
-    private static String[] TEST_FILES = {
-        // "C:/Users/evans/Documents/GPSLink/AAA.gpx",
-        "C:/Users/evans/Documents/GPSLink/CabinWaypoints.gpx",
-        "C:/Users/evans/Documents/GPSLink/CM2001.gpx",
-        "C:/Users/evans/Documents/GPSLink/CM2002.gpx",
-        "C:/Users/evans/Documents/GPSLink/CM2003.gpx",
-        "C:/Users/evans/Documents/GPSLink/CM2004.gpx",
-        "C:/Users/evans/Documents/GPSLink/CM2005.gpx",
-        "C:/Users/evans/Documents/GPSLink/CM2006.gpx",
-        "C:/Users/evans/Documents/GPSLink/CM2007.gpx",
-        "C:/Users/evans/Documents/GPSLink/CM2005.gpx",
-        "C:/Users/evans/Documents/GPSLink/CM2008.gpx",
-        "C:/Users/evans/Documents/GPSLink/CM2009.gpx",
-        "C:/Users/evans/Documents/GPSLink/CM2010.gpx",
-    // "C:/Users/evans/Documents/GPSLink/M082010.gpx",
-    // "C:/Users/evans/Documents/GPSLink/Segmented.gpx",
-    };
+    // private static String[] INITIAL_FILES = {
+    // // "C:/Users/evans/Documents/GPSLink/AAA.gpx",
+    // "C:/Users/evans/Documents/GPSLink/CabinWaypoints.gpx",
+    // "C:/Users/evans/Documents/GPSLink/CM2001.gpx",
+    // "C:/Users/evans/Documents/GPSLink/CM2002.gpx",
+    // "C:/Users/evans/Documents/GPSLink/CM2003.gpx",
+    // "C:/Users/evans/Documents/GPSLink/CM2004.gpx",
+    // "C:/Users/evans/Documents/GPSLink/CM2005.gpx",
+    // "C:/Users/evans/Documents/GPSLink/CM2006.gpx",
+    // "C:/Users/evans/Documents/GPSLink/CM2007.gpx",
+    // "C:/Users/evans/Documents/GPSLink/CM2005.gpx",
+    // "C:/Users/evans/Documents/GPSLink/CM2008.gpx",
+    // "C:/Users/evans/Documents/GPSLink/CM2009.gpx",
+    // "C:/Users/evans/Documents/GPSLink/CM2010.gpx",
+    // // "C:/Users/evans/Documents/GPSLink/M082010.gpx",
+    // // "C:/Users/evans/Documents/GPSLink/Segmented.gpx",
+    // };
 
+    /** The separator used for the initial files preference */
+    public static final String STARTUP_FILE_SEPARATOR = ",";
     /** Maximum number of messages printed for possible error storms */
     private static final int MAX_MESSAGES = 5;
+    /** A listener on preferences property change. */
+    private IPropertyChangeListener preferencesListener;
 
     protected CheckboxTreeViewer treeViewer;
     protected Text selectionText;
@@ -109,29 +116,24 @@ public class GpxView extends ViewPart
 
     protected GpxFileSetModel gpxFileSetModel;
 
-    protected Action addAction, removeAction;
-    protected Action collapseAction;
-    protected Action collapseAllAction;
-    protected Action expandAction;
-    protected Action checkAllAction;
-    protected Action uncheckAllAction;
-
     protected String initialPath;
 
     private double findLatitude = 46.068393;
     private double findLongitude = -89.596687;
     private double findRadius = FindNearOptions.DEFAULT_RADIUS;
     private Units findUnits = FindNearOptions.DEFAULT_UNITS;
-    protected String searchDirectory = SEARCH_DIR;
+    protected String gpxDirectory = D_GPX_DIR;
 
     /**
      * The maximum level to which the buttons can expand the tree. This should
      * be the maximum level it is possible to expand it. treeLevel is restricted
      * to be less than or equal to this value.
      */
-    public static final int MAX_TREE_LEVEL = 4;
+    public static final int MAX_TREE_LEVEL = 3;
+    /** The initial tree level */
+    public static final int INITIAL_TREE_LEVEL = 1;
     /** The current level to which the tree is expanded. Should be non-negative. */
-    private int treeLevel = 2;
+    private int treeLevel = INITIAL_TREE_LEVEL;
 
     /**
      * The constructor.
@@ -143,6 +145,19 @@ public class GpxView extends ViewPart
      * @see IWorkbenchPart#createPartControl(Composite)
      */
     public void createPartControl(Composite parent) {
+        // Get preferences
+        final IPreferenceStore prefs = Activator.getDefault()
+            .getPreferenceStore();
+        gpxDirectory = prefs.getString(P_GPX_DIR);
+        preferencesListener = new IPropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent event) {
+                if(event.getProperty().equals(P_GPX_DIR)) {
+                    gpxDirectory = prefs.getString(P_GPX_DIR);
+                }
+            }
+        };
+
+        prefs.addPropertyChangeListener(preferencesListener);
         if(false) {
             try {
                 Bundle bundle = Platform.getBundle("net.kenevans.jaxb");
@@ -242,7 +257,7 @@ public class GpxView extends ViewPart
                         model = new GpxFileModel(gpxFileSetModel, fileName);
                         gpxFileSetModel.add(model);
                     } catch(JAXBException ex) {
-                        SWTUtils.excMsg("Error parsing " + fileName, ex);
+                        SWTUtils.excMsgAsync("Error parsing " + fileName, ex);
                     }
                 } else if(FileTransfer.getInstance().isSupportedType(
                     event.currentDataType)) {
@@ -253,7 +268,8 @@ public class GpxView extends ViewPart
                             model = new GpxFileModel(gpxFileSetModel, fileName);
                             gpxFileSetModel.add(model);
                         } catch(JAXBException ex) {
-                            SWTUtils.excMsg("Error parsing " + fileName, ex);
+                            SWTUtils.excMsgAsync("Error parsing " + fileName,
+                                ex);
                         }
                     }
                 }
@@ -262,9 +278,7 @@ public class GpxView extends ViewPart
 
         // Create menu, toolbars, filters, sorters.
         createFiltersAndSorters();
-        createActions();
-        createMenus();
-        createToolbar();
+        createHandlers();
         hookListeners();
         hookContextMenu(treeViewer.getControl());
 
@@ -278,6 +292,18 @@ public class GpxView extends ViewPart
         // onlyBoardGamesFilter = new BoardgameFilter();
         // booksBoxesGamesSorter = new BookBoxBoardSorter();
         // noArticleSorter = new NoArticleSorter();
+    }
+
+    /**
+     * Adds a menu listener to hook the context menu when it is invoked.
+     * 
+     * @param control
+     */
+    private void hookContextMenu(Control control) {
+        MenuManager menuMgr = new MenuManager("#PopupMenu");
+        Menu menu = menuMgr.createContextMenu(control);
+        control.setMenu(menu);
+        getSite().registerContextMenu(menuMgr, treeViewer);
     }
 
     protected void hookListeners() {
@@ -313,139 +339,134 @@ public class GpxView extends ViewPart
         });
     }
 
-    protected void createActions() {
-        // onlyBoardGamesAction = new Action("Only Board Games") {
-        // public void run() {
-        // updateFilter(onlyBoardGamesAction);
-        // }
-        // };
-        // onlyBoardGamesAction.setChecked(false);
-        //
-        // atLeatThreeItems = new Action("Boxes With At Least Three Items") {
-        // public void run() {
-        // updateFilter(atLeatThreeItems);
-        // }
-        // };
-        // atLeatThreeItems.setChecked(false);
-        //
-        // booksBoxesGamesAction = new Action("Books, Boxes, Games") {
-        // public void run() {
-        // updateSorter(booksBoxesGamesAction);
-        // }
-        // };
-        // booksBoxesGamesAction.setChecked(false);
-        //
-        // noArticleAction = new Action("Ignoring Articles") {
-        // public void run() {
-        // updateSorter(noArticleAction);
-        // }
-        // };
-        // noArticleAction.setChecked(false);
+    protected void createHandlers() {
+        // Get the handler service from the view site
+        IHandlerService handlerService = (IHandlerService)getSite().getService(
+            IHandlerService.class);
 
         // Add
-        addAction = new Action("Add") {
-            public void run() {
-                addSelected();
+        AbstractHandler handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                openGpxFile();
+                return null;
             }
         };
-        addAction.setToolTipText("Add a new item to the tree.");
-        addAction.setImageDescriptor(Activator.imageDescriptorFromPlugin(
-            Activator.PLUGIN_ID, "icons/add.gif"));
+        String id = "net.kenevans.gpxinspector.add";
+        handlerService.activateHandler(id, handler);
 
         // Remove
-        removeAction = new Action("Delete") {
-            public void run() {
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
                 removeSelected();
+                return null;
             }
         };
-        removeAction
-            .setToolTipText("Delete the selected item(s) from the tree.");
-        removeAction.setImageDescriptor(Activator.imageDescriptorFromPlugin(
-            Activator.PLUGIN_ID, "icons/remove.gif"));
+        id = "net.kenevans.gpxinspector.remove";
+        handlerService.activateHandler(id, handler);
 
         // Collapse
-        collapseAction = new Action("Collapse Level") {
-            @Override
-            public void run() {
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
                 collapseTreeToNextLevel();
+                return null;
             }
         };
-        collapseAction.setToolTipText("Collapse the tree one level");
-        collapseAction.setImageDescriptor(Activator.imageDescriptorFromPlugin(
-            Activator.PLUGIN_ID, "icons/collapseall.gif"));
+        id = "net.kenevans.gpxinspector.collapse";
+        handlerService.activateHandler(id, handler);
 
         // Collapse all
-        collapseAllAction = new Action("Collapse All") {
-            @Override
-            public void run() {
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
                 collapseAll();
+                return null;
             }
         };
-        collapseAllAction.setToolTipText("Collapse the tree entirely");
-        collapseAllAction.setImageDescriptor(Activator
-            .imageDescriptorFromPlugin(Activator.PLUGIN_ID,
-                "icons/collapseall.gif"));
+        id = "net.kenevans.gpxinspector.collapseAll";
+        handlerService.activateHandler(id, handler);
 
         // Expand
-        expandAction = new Action("Expand Level") {
-            @Override
-            public void run() {
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
                 expandTreeToNextLevel();
+                return null;
             }
         };
-        expandAction.setToolTipText("Expand the tree one level");
-        expandAction.setImageDescriptor(Activator.imageDescriptorFromPlugin(
-            Activator.PLUGIN_ID, "icons/expandall.gif"));
+        id = "net.kenevans.gpxinspector.expand";
+        handlerService.activateHandler(id, handler);
 
         // Check all
-        checkAllAction = new Action("Check All") {
-            @Override
-            public void run() {
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
                 checkAll(true);
+                return null;
             }
         };
-        checkAllAction.setToolTipText("Check this element and sub elements");
+        id = "net.kenevans.gpxinspector.checkAll";
+        handlerService.activateHandler(id, handler);
 
-        // Unheck all
-        uncheckAllAction = new Action("Uncheck All") {
-            @Override
-            public void run() {
+        // Uncheck all
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
                 checkAll(false);
+                return null;
             }
         };
-        uncheckAllAction
-            .setToolTipText("Uncheck this element and sub elements");
+        id = "net.kenevans.gpxinspector.uncheckAll";
+        handlerService.activateHandler(id, handler);
 
+        // Add startup files from preferences
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                addStartupFilesFromPreferences();
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.addStartupFilesFromPreferences";
+        handlerService.activateHandler(id, handler);
+
+        // Save Checked as Startup Preference
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                saveCheckedAsStartupPreference();
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.saveAsStartupPreference";
+        handlerService.activateHandler(id, handler);
+
+        // Remove all
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                removeAll();
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.removeAll";
+        handlerService.activateHandler(id, handler);
     }
 
-    /**
-     * Remove the selected domain object(s). If multiple objects are selected
-     * remove all of them.
+    /*
+     * (non-Javadoc)
      * 
-     * If nothing is selected do nothing.
+     * @see org.eclipse.ui.part.WorkbenchPart#dispose()
      */
-    protected void addSelected() {
-        GpxModel model = null;
-        if(treeViewer.getSelection().isEmpty()) {
-            // Use the root, should be the same as using gpxFileSetModel
-            model = (GpxModel)treeViewer.getInput();
-        } else {
-            IStructuredSelection selection = (IStructuredSelection)treeViewer
-                .getSelection();
-            model = (GpxModel)selection.getFirstElement();
+    @Override
+    public void dispose() {
+        if(preferencesListener != null) {
+            Activator.getDefault().getPreferenceStore()
+                .removePropertyChangeListener(preferencesListener);
         }
-        if(model == null) {
-            return;
-        }
-        // Eventually fix this to add elements of the type supported by the
-        // selected model. For now always add a file to the GpxFileSetModel
-        openGpxFile();
-        // if(model instanceof GpxFileSetModel) {
-        // openGpxFile();
-        // } else {
-        // SWTUtils.errMsg("Add not implemented for "
-        // + model.getClass().getName());
-        // }
+        super.dispose();
     }
 
     /**
@@ -497,6 +518,19 @@ public class GpxView extends ViewPart
             }
             treeViewer.getTree().setRedraw(true);
         }
+    }
+
+    /**
+     * Removes all items from the tree
+     */
+    private void removeAll() {
+        // Tell the tree to not redraw until we finish removing everything
+        treeViewer.getTree().setRedraw(false);
+        List<GpxFileModel> fileSetModels = gpxFileSetModel.getGpxFileModels();
+        fileSetModels.clear();
+        treeViewer.getTree().setRedraw(true);
+        treeViewer.refresh();
+        treeLevel = 1;
     }
 
     /**
@@ -585,7 +619,7 @@ public class GpxView extends ViewPart
                     newModel = new GpxFileModel(gpxFileSetModel, filePath);
                     gpxFileSetModel.add(newModel);
                 } catch(JAXBException ex) {
-                    SWTUtils.excMsg("Error parsing " + fileName, ex);
+                    SWTUtils.excMsgAsync("Error parsing " + fileName, ex);
                 }
             }
         }
@@ -731,44 +765,6 @@ public class GpxView extends ViewPart
         }
     }
 
-    protected void createMenus() {
-        IMenuManager rootMenuManager = getViewSite().getActionBars()
-            .getMenuManager();
-        rootMenuManager.setRemoveAllWhenShown(false);
-        // rootMenuManager.setRemoveAllWhenShown(true);
-        // rootMenuManager.addMenuListener(new IMenuListener() {
-        // public void menuAboutToShow(IMenuManager mgr) {
-        // fillMenu(mgr);
-        // }
-        // });
-        fillMenu(rootMenuManager);
-    }
-
-    protected void fillMenu(IMenuManager rootMenuManager) {
-        // IMenuManager filterSubmenu = new MenuManager("Filters");
-        // rootMenuManager.add(filterSubmenu);
-        // filterSubmenu.add(onlyBoardGamesAction);
-        // filterSubmenu.add(atLeatThreeItems);
-        //
-        // IMenuManager sortSubmenu = new MenuManager("Sort By");
-        // rootMenuManager.add(sortSubmenu);
-        // sortSubmenu.add(booksBoxesGamesAction);
-        // sortSubmenu.add(noArticleAction);
-        //
-        // rootMenuManager.add(new Separator());
-        rootMenuManager.add(addAction);
-        rootMenuManager.add(removeAction);
-        rootMenuManager.add(new Separator());
-        rootMenuManager.add(checkAllAction);
-        rootMenuManager.add(uncheckAllAction);
-        rootMenuManager.add(new Separator());
-        rootMenuManager.add(expandAction);
-        rootMenuManager.add(collapseAction);
-        rootMenuManager.add(collapseAllAction);
-        rootMenuManager.add(new Separator(
-            IWorkbenchActionConstants.MB_ADDITIONS));
-    }
-
     protected void updateSorter(Action action) {
         // if(action == booksBoxesGamesAction) {
         // noArticleAction.setChecked(!booksBoxesGamesAction.isChecked());
@@ -804,20 +800,22 @@ public class GpxView extends ViewPart
         // }
     }
 
-    protected void createToolbar() {
-        IToolBarManager toolbarManager = getViewSite().getActionBars()
-            .getToolBarManager();
-        toolbarManager.add(addAction);
-        toolbarManager.add(removeAction);
-        toolbarManager.add(expandAction);
-        toolbarManager.add(collapseAction);
-    }
-
     public GpxFileSetModel getInitalInput() {
+        IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
+        boolean useStartupFiles = prefs.getBoolean(P_USE_STARTUP_FILES);
+        String initalFilesString = prefs.getString(P_STARTUP_FILES);
+        String[] initialFiles;
         try {
-            gpxFileSetModel = new GpxFileSetModel(TEST_FILES);
-        } catch(JAXBException ex) {
-            SWTUtils.excMsg("Error parsing initial input", ex);
+            // Note a blank string will give 1 blank item, not 0.
+            if(!useStartupFiles || initalFilesString == null
+                || initalFilesString.length() == 0) {
+                initialFiles = new String[0];
+            } else {
+                initialFiles = initalFilesString.split(STARTUP_FILE_SEPARATOR);
+            }
+            gpxFileSetModel = new GpxFileSetModel(initialFiles);
+        } catch(Exception ex) {
+            SWTUtils.excMsgAsync("Error parsing initial input", ex);
         }
         return gpxFileSetModel;
     }
@@ -826,40 +824,6 @@ public class GpxView extends ViewPart
      * @see IWorkbenchPart#setFocus()
      */
     public void setFocus() {
-    }
-
-    /**
-     * Adds a menu listener to hook the context menu when it is invoked.
-     * 
-     * @param control
-     */
-    private void hookContextMenu(Control control) {
-        MenuManager menuMgr = new MenuManager("#PopupMenu");
-        menuMgr.setRemoveAllWhenShown(true);
-        menuMgr.addMenuListener(new IMenuListener() {
-            @Override
-            public void menuAboutToShow(IMenuManager manager) {
-                GpxView.this.fillContextMenu(manager);
-            }
-        });
-        Menu menu = menuMgr.createContextMenu(control);
-        control.setMenu(menu);
-        getSite().registerContextMenu(menuMgr, treeViewer);
-    }
-
-    /**
-     * Adds the contents to the context menu.
-     * 
-     * @param manager
-     */
-    private void fillContextMenu(IMenuManager manager) {
-        manager.add(checkAllAction);
-        manager.add(uncheckAllAction);
-        manager.add(new Separator());
-        manager.add(expandAction);
-        manager.add(collapseAction);
-        manager.add(collapseAllAction);
-        manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
     }
 
     /**
@@ -895,6 +859,44 @@ public class GpxView extends ViewPart
     private void collapseAll() {
         treeViewer.collapseAll();
         treeLevel = 1;
+    }
+
+    /**
+     * Save the file in the cuurent GpxFileSetModel as the startup preferences,
+     */
+    private void saveCheckedAsStartupPreference() {
+        IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
+        StringBuffer buf;
+        List<GpxFileModel> fileSetModels = gpxFileSetModel.getGpxFileModels();
+        buf = new StringBuffer(fileSetModels.size());
+        for(GpxFileModel model : fileSetModels) {
+            if(!model.getChecked()) {
+                continue;
+            }
+            if(buf.length() > 0) {
+                buf.append(STARTUP_FILE_SEPARATOR);
+            }
+            buf.append(model.getFile().getPath());
+        }
+        prefs.setValue(P_STARTUP_FILES, buf.toString());
+    }
+
+    /**
+     * Save the file in the cuurent GpxFileSetModel as the startup preferences,
+     */
+    private void addStartupFilesFromPreferences() {
+        IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
+        String initalFilesString = prefs.getString(P_STARTUP_FILES);
+        String[] initialFiles = initalFilesString.split(STARTUP_FILE_SEPARATOR);
+        GpxFileModel newModel = null;
+        for(String fileName : initialFiles) {
+            try {
+                newModel = new GpxFileModel(gpxFileSetModel, fileName);
+                gpxFileSetModel.add(newModel);
+            } catch(JAXBException ex) {
+                SWTUtils.excMsgAsync("Error parsing " + fileName, ex);
+            }
+        }
     }
 
     /**
@@ -961,17 +963,17 @@ public class GpxView extends ViewPart
     }
 
     /**
-     * @return The value of searchDirectory.
+     * @return The value of gpxDirectory.
      */
-    public String getSearchDirectory() {
-        return searchDirectory;
+    public String getGpxDirectory() {
+        return gpxDirectory;
     }
 
     /**
-     * @param searchDirectory The new value for searchDirectory.
+     * @param gpxDirectory The new value for gpxDirectory.
      */
-    public void setSearchDirectory(String searchDirectory) {
-        this.searchDirectory = searchDirectory;
+    public void setGpxDirectory(String gpxDirectory) {
+        this.gpxDirectory = gpxDirectory;
     }
 
 }

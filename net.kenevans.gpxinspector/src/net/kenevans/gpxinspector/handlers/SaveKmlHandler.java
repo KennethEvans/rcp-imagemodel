@@ -13,7 +13,6 @@ import net.kenevans.gpxinspector.kml.SaveKmlDialog;
 import net.kenevans.gpxinspector.model.GpxFileSetModel;
 import net.kenevans.gpxinspector.utils.SWTUtils;
 import net.kenevans.gpxinspector.utils.Utils;
-import net.kenevans.gpxinspector.utils.find.FindNearDialog;
 import net.kenevans.gpxinspector.views.GpxView;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -91,7 +90,7 @@ public class SaveKmlHandler extends AbstractHandler
         }
         try {
             KmlUtils.createKml(fileSetModel, options);
-        } catch(IOException ex) {
+        } catch(Exception ex) {
             SWTUtils.excMsgAsync(
                 "Error creating KML file: " + options.getKmlFileName(), ex);
         }

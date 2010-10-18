@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import net.kenevans.gpxinspector.utils.SWTUtils;
+
 /*
  * Created on Aug 22, 2010
  * By Kenneth Evans, Jr.
@@ -18,20 +20,35 @@ public class GpxFileSetModel extends GpxModel
     private LinkedList<GpxFileModel> gpxFileModels;
     private String name = "GPX Files";
 
-    public GpxFileSetModel(String[] fileNames) throws JAXBException {
-        gpxFileModels = new LinkedList<GpxFileModel>();
-        for(String fileName : fileNames) {
-            gpxFileModels.add(new GpxFileModel(this, fileName));
-        }
+    public GpxFileSetModel(String[] fileNames) {
         disposed = false;
+        gpxFileModels = new LinkedList<GpxFileModel>();
+        String fileInProgress = null;
+        try {
+            for(String fileName : fileNames) {
+                // Trap any blank items
+                if(fileName.length() == 0) {
+                    continue;
+                }
+                fileInProgress = fileName;
+                gpxFileModels.add(new GpxFileModel(this, fileName));
+            }
+        } catch(JAXBException ex) {
+            SWTUtils.excMsgAsync("JAXB Error parsing " + fileInProgress, ex);
+        }
     }
 
-    public GpxFileSetModel(File[] files) throws JAXBException {
-        gpxFileModels = new LinkedList<GpxFileModel>();
-        for(File file : files) {
-            gpxFileModels.add(new GpxFileModel(this, file));
-        }
+    public GpxFileSetModel(File[] files) {
         disposed = false;
+        gpxFileModels = new LinkedList<GpxFileModel>();
+        String fileInProgress = null;
+        try {
+            for(File file : files) {
+                gpxFileModels.add(new GpxFileModel(this, file));
+            }
+        } catch(JAXBException ex) {
+            SWTUtils.excMsgAsync("JAXB Error parsing " + fileInProgress, ex);
+        }
     }
 
     /*

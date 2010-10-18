@@ -21,7 +21,7 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor
 
     public void preWindowOpen() {
         IWorkbenchWindowConfigurer configurer = getWindowConfigurer();
-        configurer.setInitialSize(new Point(800, 1000));
+        configurer.setInitialSize(new Point(800, 800));
         // TODO Determine why the icons are not going to the main toolbar. Set
         // this to true to test.
         configurer.setShowCoolBar(false);
