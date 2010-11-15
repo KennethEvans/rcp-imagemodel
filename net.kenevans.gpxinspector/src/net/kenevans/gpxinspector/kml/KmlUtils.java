@@ -129,9 +129,21 @@ public class KmlUtils implements IPreferenceConstants
                 }
                 System.out.println(waypointModel.getLabel());
                 waypoint = waypointModel.getWaypoint();
-                lat = waypoint.getLat().doubleValue();
-                lon = waypoint.getLon().doubleValue();
-                alt = waypoint.getEle().doubleValue();
+                if(waypoint.getLat() != null) {
+                    lat = waypoint.getLat().doubleValue();
+                } else {
+                    lat = 0;
+                }
+                if(waypoint.getLon() != null) {
+                    lon = waypoint.getLon().doubleValue();
+                } else {
+                    lon = 0;
+                }
+                if(waypoint.getEle() != null) {
+                    alt = waypoint.getEle().doubleValue();
+                } else {
+                    alt = 0;
+                }
                 // Make a Placemark with MultiGeometry
                 placemark = folder.createAndAddPlacemark()
                     .withName(waypointModel.getLabel())
@@ -164,9 +176,21 @@ public class KmlUtils implements IPreferenceConstants
                         .withTessellate(true);
                     trackPoints = trackSegment.getTrkpt();
                     for(WptType trackPoint : trackPoints) {
-                        lat = trackPoint.getLat().doubleValue();
-                        lon = trackPoint.getLon().doubleValue();
-                        alt = trackPoint.getEle().doubleValue();
+                        if(trackPoint.getLat() != null) {
+                            lat = trackPoint.getLat().doubleValue();
+                        } else {
+                            lat = 0;
+                        }
+                        if(trackPoint.getLon() != null) {
+                            lon = trackPoint.getLon().doubleValue();
+                        } else {
+                            lon = 0;
+                        }
+                        if(trackPoint.getEle() != null) {
+                            alt = trackPoint.getEle().doubleValue();
+                        } else {
+                            alt = 0;
+                        }
                         // Add coordinates to the LineString
                         ls.addToCoordinates(lon, lat, alt);
                         if(first) {
@@ -243,7 +267,7 @@ public class KmlUtils implements IPreferenceConstants
             alpha = "00";
         } else if(alpha.length() == 1) {
             alpha = "0" + alpha;
-        } else if(alpha.length() > 2){
+        } else if(alpha.length() > 2) {
             alpha = alpha.substring(0, 2);
         }
         for(int i = 0; i < nColors; i++) {
@@ -279,7 +303,7 @@ public class KmlUtils implements IPreferenceConstants
             alpha = "00";
         } else if(alpha.length() == 1) {
             alpha = "0" + alpha;
-        } else if(alpha.length() > 2){
+        } else if(alpha.length() > 2) {
             alpha = alpha.substring(0, 2);
         }
         for(int i = 0; i < nColors; i++) {
@@ -287,11 +311,13 @@ public class KmlUtils implements IPreferenceConstants
             red = color.getRed();
             green = color.getGreen();
             blue = color.getBlue();
-            colors[i] = String.format("%s%02x%02x%02x", alpha, blue, green,
-                red);
-            System.out.println(colors[i]);
+            colors[i] = String
+                .format("%s%02x%02x%02x", alpha, blue, green, red);
+            // DEBUG
+            // System.out.println(colors[i]);
         }
-        System.out.println("nColors=" + nColors);
+        // DEBUG
+        // System.out.println("nColors=" + nColors);
     }
 
 }
