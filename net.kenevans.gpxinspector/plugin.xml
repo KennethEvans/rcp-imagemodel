@@ -56,7 +56,7 @@
          </property>
          <property
                name="aboutText"
-               value="GPX Inspector&#x0D;&#x0A;&#x0D;&#x0A;If this application works, it was written by&#x0D;&#x0A;Kenneth Evans&#x0D;&#x0A;&#x0D;&#x0A;kenevans.net">
+               value="GPX Inspector&#x0A;&#x0A;If this application works, it was written by&#x0A;Kenneth Evans&#x0A;&#x0A;kenevans.net">
          </property>
       </product>
    </extension>
