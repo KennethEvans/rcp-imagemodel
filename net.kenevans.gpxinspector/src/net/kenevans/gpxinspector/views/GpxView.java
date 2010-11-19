@@ -158,6 +158,8 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         };
 
         prefs.addPropertyChangeListener(preferencesListener);
+
+        // DEBUG
         if(false) {
             try {
                 Bundle bundle = Platform.getBundle("net.kenevans.jaxb");
@@ -217,6 +219,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
             }
         });
         treeViewer.setUseHashlookup(true);
+
         // Create a drop target
         DropTarget dropTarget = new DropTarget(treeViewer.getControl(),
             DND.DROP_COPY | DND.DROP_DEFAULT);
@@ -306,6 +309,11 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         getSite().registerContextMenu(menuMgr, treeViewer);
     }
 
+    /**
+     * Adds a ISelectionChangedListener to the tree. It is used to display the
+     * selection in a Text. It only does something if showSelectionText is true,
+     * and is only intended for debugging.
+     */
     protected void hookListeners() {
         // DEBUG
         if(!showSelectionText) {
@@ -329,7 +337,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                         toShow.append(value);
                         toShow.append(", ");
                     }
-                    // remove the trailing comma space pair
+                    // Remove the trailing comma space pair
                     if(toShow.length() > 0) {
                         toShow.setLength(toShow.length() - 2);
                     }
@@ -339,6 +347,9 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         });
     }
 
+    /**
+     * Creates handlers.
+     */
     protected void createHandlers() {
         // Get the handler service from the view site
         IHandlerService handlerService = (IHandlerService)getSite().getService(
@@ -453,6 +464,17 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         };
         id = "net.kenevans.gpxinspector.removeAll";
         handlerService.activateHandler(id, handler);
+        
+        // Show info
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                showInfo();
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.showInfo";
+        handlerService.activateHandler(id, handler);
     }
 
     /*
@@ -467,6 +489,25 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                 .removePropertyChangeListener(preferencesListener);
         }
         super.dispose();
+    }
+
+    /**
+     * Show information for the selected item. If nothing is selected do
+     * nothing.
+     */
+    protected void showInfo() {
+        if(treeViewer.getSelection().isEmpty()) {
+            SWTUtils.errMsg("Nothing selected");
+            return;
+        }
+        IStructuredSelection selection = (IStructuredSelection)treeViewer
+            .getSelection();
+        for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+            GpxModel model = (GpxModel)iterator.next();
+            model.showInfo();
+            // Only do the first one
+            break;
+        }
     }
 
     /**

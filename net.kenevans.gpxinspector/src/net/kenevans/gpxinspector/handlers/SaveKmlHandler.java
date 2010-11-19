@@ -5,8 +5,6 @@ package net.kenevans.gpxinspector.handlers;
  * By Kenneth Evans, Jr.
  */
 
-import java.io.IOException;
-
 import net.kenevans.gpxinspector.kml.KmlOptions;
 import net.kenevans.gpxinspector.kml.KmlUtils;
 import net.kenevans.gpxinspector.kml.SaveKmlDialog;

@@ -4,6 +4,8 @@ import java.util.EventListener;
 
 import javax.swing.event.EventListenerList;
 
+import net.kenevans.gpxinspector.utils.SWTUtils;
+
 /*
  * Created on Aug 22, 2010
  * By Kenneth Evans, Jr.
@@ -46,6 +48,13 @@ public abstract class GpxModel
      * @see #fireCheckStateChangedEvent(GpxModel)
      */
     public static final String CHECKSTATE_CHANGED = "gpxModel.checkStateChanged";
+    /**
+     * Denotes that a model was changed.
+     * 
+     * @see #fireChangedEvent(GpxModel)
+     */
+    public static final String CHANGED = "gpxModel.changed";
+    public boolean dirty = false;
 
     public GpxModel() {
     }
@@ -111,6 +120,16 @@ public abstract class GpxModel
     }
 
     /**
+     * Fires an event denoting a model was changed. The oldValue and the
+     * newValue are the model.
+     * 
+     * @param model The model changed.
+     */
+    protected void fireChangedEvent(GpxModel model) {
+        fireGpxModelEvent(CHANGED, model, model);
+    }
+
+    /**
      * Fires an event denoting a model was removed. The oldValue is the model
      * removed, and the newValue is null.
      * 
@@ -121,13 +140,23 @@ public abstract class GpxModel
     }
 
     /**
-     * Fires an event denoting a check state was changes. The oldValue is null,
-     * and the newValue is the new value of checked.
+     * Fires an event denoting a check state was changes. The oldValue and the
+     * newValue is the new value of checked.
      * 
      * @param model The model removed.
      */
     protected void fireCheckStateChangedEvent(GpxModel model) {
         fireGpxModelEvent(CHECKSTATE_CHANGED, null, model.getChecked());
+    }
+
+    /**
+     * Brings up a dialog with information about the model.
+     */
+    public void showInfo() {
+        String className = this.getClass().toString();
+        int lastDot = className.lastIndexOf('.');
+        String shortName = className.substring(lastDot + 1);
+        SWTUtils.errMsg("No information implemented for " + shortName + "'s");
     }
 
     /**
@@ -172,4 +201,18 @@ public abstract class GpxModel
         fireCheckStateChangedEvent(this);
     }
 
+    /**
+     * @return The value of dirty.
+     */
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    /**
+     * @param dirty The new value for dirty.
+     */
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+    
 }

@@ -10,7 +10,11 @@ import javax.xml.bind.JAXBException;
 import net.kenevans.gpx.GpxType;
 import net.kenevans.gpx.TrkType;
 import net.kenevans.gpx.WptType;
+import net.kenevans.gpxinspector.ui.FileInfoDialog;
+import net.kenevans.gpxinspector.utils.SWTUtils;
 import net.kenevans.parser.GPXParser;
+
+import org.eclipse.swt.widgets.Display;
 
 /*
  * Created on Aug 22, 2010
@@ -56,6 +60,25 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
         propertyModels.add(model);
         model = new GpxPropertyModel(this, LINE_WIDTH_KEY, LINE_WIDTH_DEFAULT);
         propertyModels.add(model);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.kenevans.gpxinspector.model.GpxModel#showInfo()
+     */
+    @Override
+    public void showInfo() {
+        FileInfoDialog dialog = null;
+        // Without this try/catch, the application hangs on error
+        try {
+            dialog = new FileInfoDialog(Display.getDefault().getActiveShell(),
+                this);
+            // Always returns true, do nothing
+            dialog.open();
+        } catch(Exception ex) {
+            SWTUtils.excMsgAsync("Error with TrkInfoDialog", ex);
+        }
     }
 
     /*

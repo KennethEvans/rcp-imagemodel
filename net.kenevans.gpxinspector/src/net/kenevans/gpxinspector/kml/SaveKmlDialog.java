@@ -34,6 +34,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import utils.LabeledText;
+
 /*
  * Created on Aug 23, 2010
  * By Kenneth Evans, Jr.
@@ -480,70 +482,6 @@ public class SaveKmlDialog extends Dialog implements IPreferenceConstants
         useTrkIconButton
             .setToolTipText("Whether the tracks will have a placemark "
                 + "and icon at the start.");
-    }
-
-    /**
-     * LabeledText creates a zero-margin Composite with a Label and a Text.
-     * 
-     * @author Kenneth Evans, Jr.
-     */
-    public class LabeledText
-    {
-        private Composite composite;
-        private Label label;
-        private Text text;
-
-        /**
-         * LabeledText constructor.
-         * 
-         * @param parent The parent of the composite.
-         * @param labelText The text for the Label.
-         * @param textWidth The suggested width in columns for the Text.
-         */
-        LabeledText(Composite parent, String labelText, int textWidth) {
-            // Make a zero margin composite
-            composite = new Composite(parent, SWT.NONE);
-            GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL)
-                .grab(true, false).applyTo(composite);
-            GridLayout gridLayout = new GridLayout();
-            gridLayout.marginHeight = 0;
-            gridLayout.marginWidth = 0;
-            gridLayout.numColumns = 2;
-            composite.setLayout(gridLayout);
-
-            label = new Label(composite, SWT.NONE);
-            label.setText(labelText);
-            GridDataFactory.fillDefaults().applyTo(label);
-
-            text = new Text(composite, SWT.NONE);
-            GridDataFactory
-                .fillDefaults()
-                .hint(
-                    new Point(SWTUtils.getTextWidth(kmlNameText, textWidth),
-                        SWT.DEFAULT)).align(SWT.FILL, SWT.FILL)
-                .grab(true, true).applyTo(text);
-        }
-
-        /**
-         * @return The value of composite.
-         */
-        public Composite getComposite() {
-            return composite;
-        }
-
-        /**
-         * @return The value of label.
-         */
-        public Label getLabel() {
-            return label;
-        }
-
-        /**
-         * @return The value of text.
-         */
-        public Text getText() {
-            return text;
-        }
     }
 
     private void setKmlOptionsFromWidgets() {

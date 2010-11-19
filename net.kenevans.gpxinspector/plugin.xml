@@ -239,6 +239,11 @@
                visible="true">
          </separator>
          <command
+               commandId="net.kenevans.gpxinspector.showInfo"
+               label="Info..."
+               style="push">
+         </command>
+         <command
                commandId="net.kenevans.gpxinspector.openGpxFile"
                icon="icons/GPXInspector16.png"
                label="Open GPX File..."
@@ -452,6 +457,11 @@
             id="net.kenevans.gpxinspector.collapse"
             name="Collapse All">
       </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.showInfo"
+            name="Info...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
@@ -478,6 +488,13 @@
       <initializer
             class="net.kenevans.gpxinspector.preferences.PreferenceInitializer">
       </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.help.toc">
+      <toc
+            file="toc.xml"
+            primary="true">
+      </toc>
    </extension>
 
 </plugin>

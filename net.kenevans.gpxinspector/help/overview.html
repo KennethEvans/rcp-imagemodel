@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="book.css" rel="stylesheet" type="text/css" />
+<title>GPX Inspector</title>
+</head>
+<body>
+<h1 align="center">GPX Inspector</h1>
+<p>GPX Inspector is an application that allows you to view and manage GPX files.  Its main contribution is to let you see your tracks, routes, and waypoints in Google Earth. It is is based on <a href="http://eclipse.org/">Eclipse</a> and requires Java to be installed. You shlould be able to get Java <a href="http://www.java.com/en/download/index.jsp">here</a>. </p>
+<p> The main part of the interface is a tree view, which consists of all the files you have loaded and the tracks, routes, and waypoints in them. You can expand or contract the tree, and other options are available by right clicking a tree item. You can drag and drop GPX files to the tree view. You can select all visible items in the tree with Ctrl-A.</p>
+<h2>Menus</h2>
+<h3>File Menu </h3>
+<h4>Open GPX File</h4>
+Brings up a file dialog to open GPX files.  You can select multiple files. They will then appear in the tree.
+<h4>Find Near</h4>
+Brings up a dialog that lets you choose find options.  On clicking OK, it sets the check mark on only the files already loaded that match the criteria.
+ See <a href="#FindNear">Find Near</a> for more information.
+<h4>Find Files Near</h4>
+Similar to find files, excepts that it searches a specified directory and loads any files that have a element (waypoint or trackpoint) that matches the criterion. Only the matching elements are added. See <a href="#FindNear">Find Near</a> for more information.
+<h4>Save KML</h4>
+Creates a KML file using the loaded files that are checked.  There is a dialog to specify options.  Optionally you can send the KML file to Google Earth.
+ See <a href="#KML">KML</a> for more information.
+<h4>Exit</h4>
+Exits GPX Inspector.
+<h3>Window Menu </h3>
+<h4>Open Perspective</h4>
+<p> This menu item allows you to open a new perspective. A perspective is an arrangement of the views and other interface elements in your workspace window. You can move these elements around and add or delete them. The perspective is remembered between sessions. </p>
+<h4>Show View</h4>
+<p>Allows you to add another view to your current perspective. You delete a view by clicking on the X in its tab. There are other options available for views by right clicking on their tab. </p>
+<h4>Customize Perspective</h4>
+<p>You can customize your perspective with this option. Possible customizations include setting the menu and toolbar visibility. </p>
+<h4>Save Perspective As</h4>
+<p>Save your current perspective layout so you can return to it later via Open Perspective. </p>
+<h4>Reset Perspective</h4>
+<p>Resets the perspective to the default. This can be used to clean up when your workspace gets messy. </p>
+<h4>Close Perspective</h4>
+<p>Closes the current perspective. </p>
+<h4>Close All Perspectives</h4>
+<p>Closes all perspectives.</p>
+<h4>Preferences</h4>
+Brings up the preferences dialog. Preferences are values you can set for for parameters, such as the GPX files you want to be loaded at startup. These persist between sessions and and allow you to customize your workspace. See <a href="#Preferences">Preferences</a> for more information.
+<h3>Help Menu </h3>
+<h4>Help Contents</h4>
+<p>Brings up HTML help, including this page, for GPX Inspector in its own built-in browser. </p>
+<h4>About GPX Inspector</h4>
+<p>Brings up a dialog with information about GPX Inspector including the installed Eclipse plug-ins and information about your Java and Eclipse environment. </p>
+<h2><a name="KML" id="KML"></a>KML</h2>
+<h2><a name="FindNear" id="FindNear"></a>Find Near</h2>
+<h2><a name="Preferences" id="Preferences"></a>Preferences</h2>
+<h2>Not Implemented Yet</h2>
+<ul>
+  <li>Routes</li>
+  <li>Cut, Copy, Paste</li>
+  <li>Viewing and editing parameters  for tracks, routes, and waypoints.</li>
+  <li>Save</li>
+</ul>
+</body>
+</html>

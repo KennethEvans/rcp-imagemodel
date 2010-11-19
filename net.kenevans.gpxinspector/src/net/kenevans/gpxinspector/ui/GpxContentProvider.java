@@ -39,7 +39,7 @@ public class GpxContentProvider implements ITreeContentProvider
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
         this.viewer = (CheckboxTreeViewer)viewer;
         if(oldInput != null && gpxModelListener != null) {
-            removeListenersFrom(new Object[] {newInput});
+            removeListenersFrom(new Object[] {oldInput});
         }
         if(newInput != null && gpxModelListener != null) {
             addListenersTo(new Object[] {newInput});
@@ -174,6 +174,11 @@ public class GpxContentProvider implements ITreeContentProvider
                         GpxModel parent = model.getParent();
                         model.dispose();
                         viewer.refresh(parent, false);
+                    } else if(ev.getPropertyName().equals(GpxModel.CHANGED)) {
+                        // Refresh the tree starting with the parent model
+                        GpxModel model = (GpxModel)ev.getOldValue();
+                        // Use true since the name may have changed
+                        viewer.refresh(model, true);
                     }
                 }
             };

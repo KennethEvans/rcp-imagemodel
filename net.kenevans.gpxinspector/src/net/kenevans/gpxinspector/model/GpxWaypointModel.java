@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.kenevans.gpx.WptType;
+import net.kenevans.gpxinspector.ui.WptInfoDialog;
+import net.kenevans.gpxinspector.utils.SWTUtils;
+
+import org.eclipse.swt.widgets.Display;
 
 /*
  * Created on Aug 22, 2010
@@ -26,6 +30,29 @@ public class GpxWaypointModel extends GpxModel implements IGpxElementConstants
         propertyModels.add(model);
         model = new GpxPropertyModel(this, LINE_WIDTH_KEY, LINE_WIDTH_DEFAULT);
         propertyModels.add(model);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.kenevans.gpxinspector.model.GpxModel#showInfo()
+     */
+    @Override
+    public void showInfo() {
+        WptInfoDialog dialog = null;
+        boolean success = false;
+        // Without this try/catch, the application hangs on error
+        try {
+            dialog = new WptInfoDialog(Display.getDefault().getActiveShell(),
+                this);
+            success = dialog.open();
+            if(success) {
+                fireChangedEvent(this);
+                dirty = true;
+            }
+        } catch(Exception ex) {
+            SWTUtils.excMsgAsync("Error with WptInfoDialog", ex);
+        }
     }
 
     /*
