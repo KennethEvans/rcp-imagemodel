@@ -165,28 +165,32 @@ public class FileInfoDialog extends Dialog
         // Name
         LabeledText labeledText = new LabeledText(box, "Name:", TEXT_COLS_LARGE);
         labeledText.getText().setEditable(false);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        GridDataFactory.fillDefaults().grab(true, false).grab(true, false)
+            .applyTo(labeledText.getComposite());
         nameText = labeledText.getText();
         nameText.setToolTipText("Name.");
 
         // Size
         labeledText = new LabeledText(box, "Size (bytes):", TEXT_COLS_LARGE);
         labeledText.getText().setEditable(false);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        GridDataFactory.fillDefaults().grab(true, false).grab(true, false)
+            .applyTo(labeledText.getComposite());
         sizeText = labeledText.getText();
         sizeText.setToolTipText("Size.");
 
         // Date
         labeledText = new LabeledText(box, "Last Modified:", TEXT_COLS_LARGE);
         labeledText.getText().setEditable(false);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        GridDataFactory.fillDefaults().grab(true, false).grab(true, false)
+            .applyTo(labeledText.getComposite());
         dateText = labeledText.getText();
         dateText.setToolTipText("Last modified date.");
 
         // Creator
         labeledText = new LabeledText(box, "Creator:", TEXT_COLS_LARGE);
         // labeledText.getText().setEditable(false);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         creatorText = labeledText.getText();
         creatorText
             .setToolTipText("All GPX files must include the name of the application or\n"
@@ -198,7 +202,8 @@ public class FileInfoDialog extends Dialog
         // Version
         labeledText = new LabeledText(box, "Version:", TEXT_COLS_LARGE);
         labeledText.getText().setEditable(false);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         versionText = labeledText.getText();
         versionText
             .setToolTipText("All GPX files must include the version of the GPX schema\n"
