@@ -1,9 +1,5 @@
 package net.kenevans.gpxinspector.ui;
 
-import java.math.BigDecimal;
-
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import net.kenevans.gpx.WptType;
 import net.kenevans.gpxinspector.model.GpxWaypointModel;
 
@@ -46,6 +42,14 @@ public class WptInfoDialog extends Dialog
     private Text fixText;
     private Text srcText;
     private Text symText;
+    private Text ageOfText;
+    private Text dgpsidText;
+    private Text geoidHeightText;
+    private Text hdopText;
+    private Text magvarText;
+    private Text pdopText;
+    private Text satText;
+    private Text vdopText;
 
     /**
      * Constructor.
@@ -170,177 +174,269 @@ public class WptInfoDialog extends Dialog
 
         // Name
         LabeledText labeledText = new LabeledText(box, "Name:", TEXT_COLS_LARGE);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         nameText = labeledText.getText();
         nameText.setToolTipText("The GPS name of the element.");
 
         // Desc
         labeledText = new LabeledText(box, "Desc:", TEXT_COLS_LARGE);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         descText = labeledText.getText();
-        descText.setToolTipText("A text description of the element. Holds "
-            + "additional information about the element intended for the "
-            + "user, not the GPS. ");
+        descText.setToolTipText("A text description of the element.Holds "
+            + "additional\n"
+            + "information about the element intended for the\n"
+            + "user, not the GPS.");
 
         // Comment
         labeledText = new LabeledText(box, "Cmt:", TEXT_COLS_LARGE);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         cmtText = labeledText.getText();
         cmtText.setToolTipText("GPS waypoint comment. Sent to GPS as comment.");
 
         // Lat
         labeledText = new LabeledText(box, "Lat:", TEXT_COLS_LARGE);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         latText = labeledText.getText();
-        latText.setToolTipText("The latitude of the point.");
+        latText.setToolTipText("The latitude of the point. Decimal degrees, "
+            + "WGS84 datum.");
 
         // Lon
         labeledText = new LabeledText(box, "Lon:", TEXT_COLS_LARGE);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         lonText = labeledText.getText();
-        lonText.setToolTipText("The longitude of the point.");
+        lonText.setToolTipText("The longitude of the point. Decimal degrees, "
+            + "WGS84 datum.");
 
         // Ele
         labeledText = new LabeledText(box, "Ele:", TEXT_COLS_LARGE);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         eleText = labeledText.getText();
         eleText.setToolTipText("Elevation in meters of the point.");
 
         // Symbol
         labeledText = new LabeledText(box, "Sym:", TEXT_COLS_LARGE);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         symText = labeledText.getText();
         symText.setToolTipText("Text of GPS symbol name. For interchange with "
-            + "other programs, use the exact spelling of the symbol on the "
+            + "other\n"
+            + "programs. Use the exact spelling of the symbol on the\n"
             + "GPS, if known.");
+
+        // Ageofdgpsdata
+        labeledText = new LabeledText(box, "Ageofdgpsdata:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        ageOfText = labeledText.getText();
+        ageOfText.setToolTipText("Number of seconds since last DGPS update.");
+
+        // Dgpsid
+        labeledText = new LabeledText(box, "Dgpsid:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        dgpsidText = labeledText.getText();
+        dgpsidText.setToolTipText("ID of DGPS station used in differential "
+            + "correction.");
 
         // Fix
         labeledText = new LabeledText(box, "Fix:", TEXT_COLS_LARGE);
-        labeledText.getText().setEditable(false);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        // labeledText.getText().setEditable(false);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         fixText = labeledText.getText();
         fixText.setToolTipText("Type of GPX fix.");
 
+        // Geoidheight
+        labeledText = new LabeledText(box, "Geoidheight:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        geoidHeightText = labeledText.getText();
+        geoidHeightText
+            .setToolTipText("Height, in meters, of geoid (mean sea level) "
+                + "above\n" + "WGS-84 earth ellipsoid. (NMEA GGA message).");
+
+        // Hdop
+        labeledText = new LabeledText(box, "Hdop:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        hdopText = labeledText.getText();
+        hdopText.setToolTipText("Horizontal dilution of precision.");
+
+        // Vdop
+        labeledText = new LabeledText(box, "Vdop:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        vdopText = labeledText.getText();
+        vdopText.setToolTipText("Vertical dilution of precision.");
+
+        // Pdop
+        labeledText = new LabeledText(box, "Pdop:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        pdopText = labeledText.getText();
+        pdopText.setToolTipText("Position dilution of precision.");
+
+        // Magvar
+        labeledText = new LabeledText(box, "Magvar:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        magvarText = labeledText.getText();
+        magvarText.setToolTipText("Magnetic variation at the point.");
+
+        // Sat
+        labeledText = new LabeledText(box, "Sat:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        satText = labeledText.getText();
+        satText
+            .setToolTipText("Number of satellites used to calculate the GPS fix.\n"
+                + "(Not number of satellites in view).");
+
         // Source
         labeledText = new LabeledText(box, "Src:", TEXT_COLS_LARGE);
-        labeledText.getText().setEditable(false);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        // labeledText.getText().setEditable(false);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         srcText = labeledText.getText();
-        srcText.setToolTipText("Source of data. Included to give user some "
+        srcText.setToolTipText("Source of data. Included to give user some\n"
             + "idea of reliability and accuracy of data.");
 
         // Type
         labeledText = new LabeledText(box, "Type:", TEXT_COLS_LARGE);
-        labeledText.getText().setEditable(false);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        // labeledText.getText().setEditable(false);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         typeText = labeledText.getText();
         typeText.setToolTipText("Type (classification) of element.");
 
         // Time
         labeledText = new LabeledText(box, "Time:", TEXT_COLS_LARGE);
-        labeledText.getText().setEditable(false);
-        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        // labeledText.getText().setEditable(false);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
         timeText = labeledText.getText();
         timeText.setToolTipText("Creation/modification timestamp for element. "
-            + "Date and time in are in Univeral Coordinated Time (UTC), not "
-            + "local time! Conforms to ISO 8601 specification for date/time "
-            + "representation. Fractional seconds are allowed for millisecond "
-            + "timing in tracklogs. ");
+            + "Date and time\n"
+            + "in are in Univeral Coordinated Time (UTC), notlocal time!\n"
+            + "Conforms to ISO 8601 specification for date/time\n"
+            + "representation. Fractional seconds are allowed for\n"
+            + "millisecond timing in tracklogs.");
     }
 
+    /**
+     * Sets the values from the Text's to the model. Only does this if the Text
+     * is editable.
+     */
     private void setModelFromWidgets() {
         WptType wpt = model.getWaypoint();
-
-        wpt.setName(nameText.getText());
-        wpt.setDesc(descText.getText());
-        wpt.setSym(symText.getText());
-        double val = Double.parseDouble(latText.getText());
-        wpt.setLat(BigDecimal.valueOf(val));
-        val = Double.parseDouble(lonText.getText());
-        wpt.setLon(BigDecimal.valueOf(val));
-        val = Double.parseDouble(eleText.getText());
-        wpt.setEle(BigDecimal.valueOf(val));
+        Text text = cmtText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setCmt(LabeledText.toString(text));
+        }
+        text = descText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setDesc(LabeledText.toString(text));
+        }
+        text = eleText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setEle(LabeledText.toBigDecimal(text));
+        }
+        text = fixText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setFix(LabeledText.toString(text));
+        }
+        text = latText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setLat(LabeledText.toBigDecimal(text));
+        }
+        text = lonText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setLon(LabeledText.toBigDecimal(text));
+        }
+        text = nameText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setName(LabeledText.toString(text));
+        }
+        text = srcText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setSrc(LabeledText.toString(text));
+        }
+        text = symText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setSym(LabeledText.toString(text));
+        }
+        text = timeText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setTime(LabeledText.toXMLGregorianCalendar(text));
+        }
+        text = typeText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setType(LabeledText.toString(text));
+        }
+        text = ageOfText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setAgeofdgpsdata(LabeledText.toBigDecimal(text));
+        }
+        text = dgpsidText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setDgpsid(LabeledText.toInteger(text));
+        }
+        text = geoidHeightText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setGeoidheight(LabeledText.toBigDecimal(text));
+        }
+        text = hdopText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setHdop(LabeledText.toBigDecimal(text));
+        }
+        text = magvarText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setMagvar(LabeledText.toBigDecimal(text));
+        }
+        text = pdopText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setPdop(LabeledText.toBigDecimal(text));
+        }
+        text = satText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setSat(LabeledText.toBigInteger(text));
+        }
+        text = vdopText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            wpt.setVdop(LabeledText.toBigDecimal(text));
+        }
     }
 
+    /**
+     * Sets the values form the model to the Text's.
+     */
     private void setWidgetsFromModel() {
         WptType wpt = model.getWaypoint();
-        String stringVal = wpt.getName();
-        if(stringVal != null) {
-            nameText.setText(stringVal);
-        } else {
-            nameText.setText("");
-        }
-        stringVal = wpt.getDesc();
-        if(stringVal != null) {
-            descText.setText(stringVal);
-        } else {
-            descText.setText("");
-        }
-        stringVal = wpt.getCmt();
-        if(stringVal != null) {
-            cmtText.setText(stringVal);
-        } else {
-            cmtText.setText("");
-        }
-        stringVal = wpt.getType();
-        if(stringVal != null) {
-            typeText.setText(stringVal);
-        } else {
-            typeText.setText("null");
-        }
-        stringVal = wpt.getFix();
-        if(stringVal != null) {
-            fixText.setText(stringVal);
-        } else {
-            fixText.setText("null");
-        }
-        stringVal = wpt.getSrc();
-        if(stringVal != null) {
-            srcText.setText(stringVal);
-        } else {
-            srcText.setText("null");
-        }
-        stringVal = wpt.getSym();
-        if(stringVal != null) {
-            symText.setText(stringVal);
-        } else {
-            symText.setText("null");
-        }
-        BigDecimal bigDecimalVal = wpt.getLat();
-        if(bigDecimalVal != null) {
-            stringVal = String.format("%g", bigDecimalVal);
-            latText.setText(stringVal);
-        } else {
-            latText.setText("0");
-        }
-        bigDecimalVal = wpt.getLon();
-        if(bigDecimalVal != null) {
-            stringVal = String.format("%g", bigDecimalVal);
-            lonText.setText(stringVal);
-        } else {
-            lonText.setText("0");
-        }
-        bigDecimalVal = wpt.getEle();
-        if(bigDecimalVal != null) {
-            stringVal = String.format("%g", bigDecimalVal);
-            eleText.setText(stringVal);
-        } else {
-            eleText.setText("0");
-        }
-        bigDecimalVal = wpt.getEle();
-        if(bigDecimalVal != null) {
-            stringVal = String.format("%g", bigDecimalVal);
-            eleText.setText(stringVal);
-        } else {
-            eleText.setText("0");
-        }
-        XMLGregorianCalendar calendarVal = wpt.getTime();
-        if(calendarVal != null) {
-            stringVal = calendarVal.toString();
-            timeText.setText(stringVal);
-        } else {
-            timeText.setText("null");
-        }
+        LabeledText.read(cmtText, wpt.getCmt());
+        LabeledText.read(descText, wpt.getDesc());
+        LabeledText.read(eleText, wpt.getEle());
+        LabeledText.read(fixText, wpt.getFix());
+        LabeledText.read(latText, wpt.getLat());
+        LabeledText.read(lonText, wpt.getLon());
+        LabeledText.read(nameText, wpt.getName());
+        LabeledText.read(srcText, wpt.getSrc());
+        LabeledText.read(symText, wpt.getSym());
+        LabeledText.read(timeText, wpt.getTime());
+        LabeledText.read(typeText, wpt.getType());
+        LabeledText.read(ageOfText, wpt.getAgeofdgpsdata());
+        LabeledText.read(dgpsidText, wpt.getDgpsid());
+        LabeledText.read(geoidHeightText, wpt.getGeoidheight());
+        LabeledText.read(hdopText, wpt.getHdop());
+        LabeledText.read(magvarText, wpt.getMagvar());
+        LabeledText.read(pdopText, wpt.getPdop());
+        LabeledText.read(satText, wpt.getSat());
+        LabeledText.read(vdopText, wpt.getVdop());
     }
 
     /**

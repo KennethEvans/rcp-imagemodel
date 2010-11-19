@@ -3,6 +3,8 @@ package net.kenevans.gpxinspector.ui;
 import java.io.File;
 import java.util.Date;
 
+import net.kenevans.gpx.GpxType;
+import net.kenevans.gpx.TrkType;
 import net.kenevans.gpxinspector.model.GpxFileModel;
 
 import org.eclipse.jface.layout.GridDataFactory;
@@ -36,6 +38,8 @@ public class FileInfoDialog extends Dialog
     private Text nameText;
     private Text dateText;
     private Text sizeText;
+    private Text creatorText;
+    private Text versionText;
 
     /**
      * Constructor.
@@ -111,12 +115,34 @@ public class FileInfoDialog extends Dialog
         composite.setLayout(gridLayout);
 
         Button button = new Button(composite, SWT.PUSH);
-        button.setText("OK");
+        button.setText("Reset");
         GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL)
             .grab(true, true).applyTo(button);
         button.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent event) {
+                setWidgetsFromModel();
+            }
+        });
+
+        button = new Button(composite, SWT.PUSH);
+        button.setText("Save");
+        GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL)
+            .grab(true, true).applyTo(button);
+        button.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent event) {
+                setModelFromWidgets();
                 success = true;
+                shell.close();
+            }
+        });
+
+        button = new Button(composite, SWT.PUSH);
+        button.setText("Cancel");
+        GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL)
+            .grab(true, true).applyTo(button);
+        button.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent event) {
+                success = false;
                 shell.close();
             }
         });
@@ -156,8 +182,48 @@ public class FileInfoDialog extends Dialog
         GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
         dateText = labeledText.getText();
         dateText.setToolTipText("Last modified date.");
+
+        // Creator
+        labeledText = new LabeledText(box, "Creator:", TEXT_COLS_LARGE);
+        // labeledText.getText().setEditable(false);
+        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        creatorText = labeledText.getText();
+        creatorText
+            .setToolTipText("All GPX files must include the name of the application or\n"
+                + "web service which created the file. This is to assist\n"
+                + "developers in tracking down the source of a mal-formed GPX\n"
+                + "document, and to provide a hint to users as to how they can\n"
+                + "open the file.");
+
+        // Version
+        labeledText = new LabeledText(box, "Version:", TEXT_COLS_LARGE);
+        labeledText.getText().setEditable(false);
+        GridDataFactory.fillDefaults().applyTo(labeledText.getComposite());
+        versionText = labeledText.getText();
+        versionText
+            .setToolTipText("All GPX files must include the version of the GPX schema\n"
+                + "which the file references.");
     }
 
+    /**
+     * Sets the values from the Text's to the model. Only does this if the Text
+     * is editable.
+     */
+    private void setModelFromWidgets() {
+        GpxType gpx = model.getGpx();
+        Text text = creatorText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            gpx.setCreator(LabeledText.toString(text));
+        }
+        text = versionText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            gpx.setVersion(LabeledText.toString(text));
+        }
+    }
+
+    /**
+     * Sets the values form the model to the Text's.
+     */
     private void setWidgetsFromModel() {
         File file = model.getFile();
         nameText.setText(file.getPath());
@@ -166,6 +232,10 @@ public class FileInfoDialog extends Dialog
         longVal = file.lastModified();
         Date date = new Date(longVal);
         dateText.setText(date.toString());
+
+        GpxType gpx = model.getGpx();
+        LabeledText.read(creatorText, gpx.getCreator());
+        LabeledText.read(versionText, gpx.getVersion());
     }
 
     /**

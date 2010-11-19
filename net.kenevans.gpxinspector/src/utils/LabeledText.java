@@ -1,5 +1,11 @@
 package utils;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import net.kenevans.gpxinspector.utils.SWTUtils;
 
 import org.eclipse.jface.layout.GridDataFactory;
@@ -37,7 +43,7 @@ public class LabeledText
         // Make a zero margin composite
         composite = new Composite(parent, SWT.NONE);
         GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL)
-            .grab(true, false).applyTo(composite);
+        .grab(true, false).applyTo(composite);
         GridLayout gridLayout = new GridLayout();
         gridLayout.marginHeight = 0;
         gridLayout.marginWidth = 0;
@@ -54,6 +60,213 @@ public class LabeledText
             .hint(
                 new Point(SWTUtils.getTextWidth(text, textWidth), SWT.DEFAULT))
             .align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(text);
+    }
+
+    /**
+     * Converts the value of text.getText() to a String. Returns null if the
+     * text is not editable.
+     * 
+     * @param text
+     * @return The converted value or null on error.
+     */
+    public static String toString(Text text) {
+        if(text.isDisposed() || !text.getEditable()) {
+            return null;
+        }
+        String val = text.getText();
+        if(val == null || val.equals("null")) {
+            return null;
+        } else {
+            return val;
+        }
+    }
+
+    /**
+     * Converts the value of text.getText() to an Integer destination. Returns
+     * null if the text is not editable.
+     * 
+     * @param text
+     * @return The converted value or null on error.
+     */
+    public static Integer toInteger(Text text) {
+        if(text.isDisposed() || !text.getEditable()) {
+            return null;
+        }
+        String val = text.getText();
+        if(val == null || val.equals("null")) {
+            return null;
+        } else {
+            try {
+                return new Integer(val);
+            } catch(Exception ex) {
+                String msg = "Failed to convert \"" + val + "\" to Integer";
+                SWTUtils.excMsg(msg, ex);
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Converts the value of text.getText() to a BigInteger destination. Returns
+     * null if the text is not editable.
+     * 
+     * @param text
+     * @return The converted value or null on error.
+     */
+    public static BigInteger toBigInteger(Text text) {
+        if(text.isDisposed() || !text.getEditable()) {
+            return null;
+        }
+        String val = text.getText();
+        if(val == null || val.equals("null")) {
+            return null;
+        } else {
+            try {
+                return new BigInteger(val);
+            } catch(Exception ex) {
+                String msg = "Failed to convert \"" + val + "\" to BigInteger";
+                SWTUtils.excMsg(msg, ex);
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Converts the value of text.getText() to a BigDecimal destination. Returns
+     * null if the text is not editable.
+     * 
+     * @param text
+     * @return The converted value or null on error.
+     */
+    public static BigDecimal toBigDecimal(Text text) {
+        if(text.isDisposed() || !text.getEditable()) {
+            return null;
+        }
+        String val = text.getText();
+        if(val == null || val.equals("null")) {
+            return null;
+        } else {
+            try {
+                return new BigDecimal(val);
+            } catch(Exception ex) {
+                String msg = "Failed to convert \"" + val + "\" to BigDecimal";
+                SWTUtils.excMsg(msg, ex);
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Converts the value of text.getText() to a XMLGregorianCalendar
+     * destination. Returns null if the text is not editable.
+     * 
+     * @param text
+     * @return The converted value or null on error.
+     */
+    public static XMLGregorianCalendar toXMLGregorianCalendar(Text text) {
+        if(text.isDisposed() || !text.getEditable()) {
+            return null;
+        }
+        String val = text.getText();
+        if(val == null || val.equals("null")) {
+            return null;
+        } else {
+            DatatypeFactory dtf = null;
+            try {
+                dtf = DatatypeFactory.newInstance();
+                return dtf.newXMLGregorianCalendar(val);
+            } catch(Exception ex) {
+                String msg = "Failed to convert \"" + val
+                    + "\" to XMLGregorianCalendar";
+                SWTUtils.excMsg(msg, ex);
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Sets text.setText() from a String source.
+     * 
+     * @param text
+     * @param src
+     */
+    public static void read(Text text, String src) {
+        if(text.isDisposed()) {
+            return;
+        }
+        if(src == null) {
+            text.setText("null");
+        } else {
+            text.setText(src);
+        }
+    }
+
+    /**
+     * Sets text.setText() from an Integer source.
+     * 
+     * @param text
+     * @param src
+     */
+    public static void read(Text text, Integer src) {
+        if(text.isDisposed()) {
+            return;
+        }
+        if(src == null) {
+            text.setText("null");
+        } else {
+            text.setText(src.toString());
+        }
+    }
+
+    /**
+     * Sets text.setText() from a BigInteger source.
+     * 
+     * @param text
+     * @param src
+     */
+    public static void read(Text text, BigInteger src) {
+        if(text.isDisposed()) {
+            return;
+        }
+        if(src == null) {
+            text.setText("null");
+        } else {
+            text.setText(src.toString());
+        }
+    }
+
+    /**
+     * Sets text.setText() from a BigDecimal source.
+     * 
+     * @param text
+     * @param src
+     */
+    public static void read(Text text, BigDecimal src) {
+        if(text.isDisposed()) {
+            return;
+        }
+        if(src == null) {
+            text.setText("null");
+        } else {
+            text.setText(src.toString());
+        }
+    }
+
+    /**
+     * Sets text.setText() from a XMLGregorianCalendar source.
+     * 
+     * @param text
+     * @param src
+     */
+    public static void read(Text text, XMLGregorianCalendar src) {
+        if(text.isDisposed()) {
+            return;
+        }
+        if(src == null) {
+            text.setText("null");
+        } else {
+            text.setText(src.toString());
+        }
     }
 
     /**
@@ -76,4 +289,5 @@ public class LabeledText
     public Text getText() {
         return text;
     }
+
 }
