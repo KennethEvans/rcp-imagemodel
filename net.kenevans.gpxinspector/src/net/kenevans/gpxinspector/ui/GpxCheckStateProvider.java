@@ -1,10 +1,8 @@
 package net.kenevans.gpxinspector.ui;
 
 import net.kenevans.gpxinspector.model.GpxModel;
-import net.kenevans.gpxinspector.model.GpxPropertyModel;
 
 import org.eclipse.jface.viewers.ICheckStateProvider;
-import org.eclipse.ui.internal.dialogs.TreeManager.CheckStateProvider;
 
 /*
  * Created on Sep 1, 2010
@@ -37,9 +35,6 @@ public class GpxCheckStateProvider implements ICheckStateProvider
      */
     @Override
     public boolean isGrayed(Object element) {
-        if(element instanceof GpxPropertyModel) {
-            return true;
-        }
         return false;
     }
 

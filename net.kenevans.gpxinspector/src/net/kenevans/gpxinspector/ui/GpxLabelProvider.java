@@ -4,9 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import net.kenevans.gpxinspector.model.GpxModel;
 import net.kenevans.gpxinspector.model.GpxFileModel;
-import net.kenevans.gpxinspector.model.GpxPropertyModel;
+import net.kenevans.gpxinspector.model.GpxModel;
 import net.kenevans.gpxinspector.model.GpxTrackModel;
 import net.kenevans.gpxinspector.model.GpxWaypointModel;
 import net.kenevans.gpxinspector.plugin.Activator;
@@ -31,8 +30,6 @@ public class GpxLabelProvider extends LabelProvider
             descriptor = Activator.getImageDescriptor("icons/track.png");
         } else if(element instanceof GpxWaypointModel) {
             descriptor = Activator.getImageDescriptor("icons/waypoint.png");
-        } else if(element instanceof GpxPropertyModel) {
-            descriptor = Activator.getImageDescriptor("icons/properties.gif");
         } else {
             throw unknownElementException(element);
         }

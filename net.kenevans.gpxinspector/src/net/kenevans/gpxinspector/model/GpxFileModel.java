@@ -28,7 +28,6 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
     private GpxType gpx;
     private LinkedList<GpxTrackModel> trackModels;
     private LinkedList<GpxWaypointModel> waypointModels;
-    private LinkedList<GpxPropertyModel> propertyModels;
     /** Indicates whether the file has changed or not. */
     private boolean dirty = false;
 
@@ -65,14 +64,6 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
         for(WptType waypoint : waypoints) {
             waypointModels.add(new GpxWaypointModel(this, waypoint));
         }
-
-        // Add properties for this element
-        propertyModels = new LinkedList<GpxPropertyModel>();
-        GpxPropertyModel model = new GpxPropertyModel(this, COLOR_KEY,
-            COLOR_DEFAULT);
-        propertyModels.add(model);
-        model = new GpxPropertyModel(this, LINE_WIDTH_KEY, LINE_WIDTH_DEFAULT);
-        propertyModels.add(model);
     }
 
     /*
@@ -120,10 +111,6 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
             model.dispose();
         }
         waypointModels.clear();
-        for(GpxModel model : propertyModels) {
-            model.dispose();
-        }
-        propertyModels.clear();
         removeAllGpxModelListeners();
         disposed = true;
     }
@@ -216,7 +203,7 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
             SWTUtils.excMsg("Error saving " + file.getPath(), ex);
         }
     }
-    
+
     /**
      * Synchronizes the GpxType to the current model.
      */
@@ -227,7 +214,7 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
         for(GpxTrackModel model : tracks) {
             trkTypes.add(model.getTrack());
         }
-        
+
         List<GpxWaypointModel> waypoints = getWaypointModels();
         List<WptType> wptTypes = gpx.getWpt();
         wptTypes.clear();
@@ -283,13 +270,6 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
      */
     public List<GpxWaypointModel> getWaypointModels() {
         return waypointModels;
-    }
-
-    /**
-     * @return The value of propertyModels.
-     */
-    public List<GpxPropertyModel> getPropertyModels() {
-        return propertyModels;
     }
 
     /*

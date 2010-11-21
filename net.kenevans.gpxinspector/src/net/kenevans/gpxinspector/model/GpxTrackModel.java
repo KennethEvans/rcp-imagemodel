@@ -1,8 +1,5 @@
 package net.kenevans.gpxinspector.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.kenevans.gpx.TrkType;
 import net.kenevans.gpxinspector.ui.TrkInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
@@ -17,19 +14,10 @@ import org.eclipse.swt.widgets.Display;
 public class GpxTrackModel extends GpxModel implements IGpxElementConstants
 {
     private TrkType track;
-    private List<GpxPropertyModel> propertyModels;
 
     public GpxTrackModel(GpxModel parent, TrkType track) {
         this.parent = parent;
         this.track = track;
-
-        // Add properties for this element
-        propertyModels = new ArrayList<GpxPropertyModel>();
-        GpxPropertyModel model = new GpxPropertyModel(this, COLOR_KEY,
-            COLOR_DEFAULT);
-        propertyModels.add(model);
-        model = new GpxPropertyModel(this, LINE_WIDTH_KEY, LINE_WIDTH_DEFAULT);
-        propertyModels.add(model);
     }
 
     /*
@@ -64,10 +52,6 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
         if(disposed) {
             return;
         }
-        for(GpxModel model : propertyModels) {
-            model.dispose();
-        }
-        propertyModels.clear();
         removeAllGpxModelListeners();
         disposed = true;
     }
@@ -77,13 +61,6 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
      */
     public TrkType getTrack() {
         return track;
-    }
-
-    /**
-     * @return The value of propertyModels.
-     */
-    public List<GpxPropertyModel> getPropertyModels() {
-        return propertyModels;
     }
 
     /*
