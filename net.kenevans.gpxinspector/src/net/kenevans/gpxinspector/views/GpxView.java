@@ -17,6 +17,7 @@ import javax.xml.bind.JAXBException;
 import net.kenevans.gpxinspector.model.GpxFileModel;
 import net.kenevans.gpxinspector.model.GpxFileSetModel;
 import net.kenevans.gpxinspector.model.GpxModel;
+import net.kenevans.gpxinspector.model.GpxRouteModel;
 import net.kenevans.gpxinspector.model.GpxTrackModel;
 import net.kenevans.gpxinspector.model.GpxWaypointModel;
 import net.kenevans.gpxinspector.plugin.Activator;
@@ -497,7 +498,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         };
         id = "net.kenevans.gpxinspector.showInfo";
         handlerService.activateHandler(id, handler);
-        
+
         // Refresh
         handler = new AbstractHandler() {
             public Object execute(ExecutionEvent event)
@@ -575,6 +576,8 @@ public class GpxView extends ViewPart implements IPreferenceConstants
             } else if(parent instanceof GpxFileModel) {
                 if(model instanceof GpxTrackModel) {
                     ((GpxFileModel)parent).remove((GpxTrackModel)model);
+                } else if(model instanceof GpxRouteModel) {
+                    ((GpxFileModel)parent).remove((GpxRouteModel)model);
                 } else if(model instanceof GpxWaypointModel) {
                     ((GpxFileModel)parent).remove((GpxWaypointModel)model);
                 }
@@ -655,10 +658,15 @@ public class GpxView extends ViewPart implements IPreferenceConstants
             for(GpxTrackModel trkModel : fileModel.getTrackModels()) {
                 check(trkModel, checked);
             }
+            for(GpxRouteModel rteModel : fileModel.getRouteModels()) {
+                check(rteModel, checked);
+            }
             for(GpxWaypointModel wptModel : fileModel.getWaypointModels()) {
                 check(wptModel, checked);
             }
         } else if(model instanceof GpxTrackModel) {
+            model.setChecked(checked);
+        } else if(model instanceof GpxRouteModel) {
             model.setChecked(checked);
         } else if(model instanceof GpxWaypointModel) {
             model.setChecked(checked);
@@ -763,7 +771,8 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                     initialPath = selectedPath;
                     // Loop over the selected file
                     String fileName = dlg.getFileName();
-                    String filePath = initialDirectory + File.separator + fileName;
+                    String filePath = initialDirectory + File.separator
+                        + fileName;
                     File file = new File(filePath);
                     boolean doIt = true;
                     if(file.exists()) {

@@ -8,6 +8,7 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import net.kenevans.gpx.GpxType;
+import net.kenevans.gpx.RteType;
 import net.kenevans.gpx.TrkType;
 import net.kenevans.gpx.WptType;
 import net.kenevans.gpxinspector.ui.FileInfoDialog;
@@ -27,6 +28,7 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
     private File file;
     private GpxType gpx;
     private LinkedList<GpxTrackModel> trackModels;
+    private LinkedList<GpxRouteModel> routeModels;
     private LinkedList<GpxWaypointModel> waypointModels;
     /** Indicates whether the file has changed or not. */
     private boolean dirty = false;
@@ -58,6 +60,11 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
         List<TrkType> tracks = gpx.getTrk();
         for(TrkType track : tracks) {
             trackModels.add(new GpxTrackModel(this, track));
+        }
+        routeModels = new LinkedList<GpxRouteModel>();
+        List<RteType> routes = gpx.getRte();
+        for(RteType route : routes) {
+            routeModels.add(new GpxRouteModel(this, route));
         }
         waypointModels = new LinkedList<GpxWaypointModel>();
         List<WptType> waypoints = gpx.getWpt();
@@ -107,6 +114,10 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
             model.dispose();
         }
         trackModels.clear();
+        for(GpxModel model : routeModels) {
+            model.dispose();
+        }
+        routeModels.clear();
         for(GpxModel model : waypointModels) {
             model.dispose();
         }
@@ -141,6 +152,39 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
      */
     public boolean add(GpxTrackModel model) {
         boolean retVal = trackModels.add(model);
+        if(retVal) {
+            model.setParent(this);
+            fireAddedEvent(model);
+        }
+        return retVal;
+    }
+
+    /**
+     * Removes an element from the GpxRouteModel list.
+     * 
+     * @param model
+     * @return true if this list contained the specified element.
+     * @see java.util.List#remove
+     */
+    public boolean remove(GpxRouteModel model) {
+        boolean retVal = routeModels.remove(model);
+        if(retVal) {
+            model.dispose();
+            fireRemovedEvent(model);
+        }
+        return retVal;
+    }
+
+    /**
+     * Adds an element to the GpxFileModel route list.
+     * 
+     * @param model
+     * @return true if the list changed (as specified by {@link Collection#add}
+     *         ).
+     * @see java.util.List#add
+     */
+    public boolean add(GpxRouteModel model) {
+        boolean retVal = routeModels.add(model);
         if(retVal) {
             model.setParent(this);
             fireAddedEvent(model);
@@ -215,6 +259,13 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
             trkTypes.add(model.getTrack());
         }
 
+        List<GpxRouteModel> routes = getRouteModels();
+        List<RteType> rteTypes = gpx.getRte();
+        rteTypes.clear();
+        for(GpxRouteModel model : routes) {
+            rteTypes.add(model.getRoute());
+        }
+
         List<GpxWaypointModel> waypoints = getWaypointModels();
         List<WptType> wptTypes = gpx.getWpt();
         wptTypes.clear();
@@ -263,6 +314,13 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
      */
     public List<GpxTrackModel> getTrackModels() {
         return trackModels;
+    }
+
+    /**
+     * @return The value of routeModels.
+     */
+    public LinkedList<GpxRouteModel> getRouteModels() {
+        return routeModels;
     }
 
     /**

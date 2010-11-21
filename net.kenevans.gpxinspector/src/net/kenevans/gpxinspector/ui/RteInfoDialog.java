@@ -1,8 +1,7 @@
 package net.kenevans.gpxinspector.ui;
 
-import net.kenevans.gpx.TrkType;
-import net.kenevans.gpx.TrksegType;
-import net.kenevans.gpxinspector.model.GpxTrackModel;
+import net.kenevans.gpx.RteType;
+import net.kenevans.gpxinspector.model.GpxRouteModel;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
@@ -25,27 +24,26 @@ import utils.LabeledText;
  * By Kenneth Evans, Jr.
  */
 
-public class TrkInfoDialog extends Dialog
+public class RteInfoDialog extends Dialog
 {
     private static final int TEXT_COLS_LARGE = 50;
     // private static final int TEXT_COLS_SMALL = 10;
     private boolean success = false;
 
-    private GpxTrackModel model;
+    private GpxRouteModel model;
     private Text nameText;
     private Text descText;
     private Text numberText;
     private Text srcText;
     private Text typeText;
-    private Text segText;
-    private Text trkPointsText;
+    private Text wptText;
 
     /**
      * Constructor.
      * 
      * @param parent
      */
-    public TrkInfoDialog(Shell parent, GpxTrackModel model) {
+    public RteInfoDialog(Shell parent, GpxRouteModel model) {
         // We want this to be modeless
         this(parent, SWT.DIALOG_TRIM | SWT.NONE, model);
     }
@@ -56,7 +54,7 @@ public class TrkInfoDialog extends Dialog
      * @param parent The parent of this dialog.
      * @param style Style passed to the parent.
      */
-    public TrkInfoDialog(Shell parent, int style, GpxTrackModel model) {
+    public RteInfoDialog(Shell parent, int style, GpxRouteModel model) {
         super(parent, style);
         this.model = model;
     }
@@ -203,21 +201,13 @@ public class TrkInfoDialog extends Dialog
         typeText = labeledText.getText();
         typeText.setToolTipText("Type (classification) of element.");
 
-        // Segments
-        labeledText = new LabeledText(box, "Segments:", TEXT_COLS_LARGE);
+        // Waypoints
+        labeledText = new LabeledText(box, "Waypoints:", TEXT_COLS_LARGE);
         labeledText.getText().setEditable(false);
         GridDataFactory.fillDefaults().grab(true, false)
             .applyTo(labeledText.getComposite());
-        segText = labeledText.getText();
-        segText.setToolTipText("Number of segments.");
-
-        // Trackpoints
-        labeledText = new LabeledText(box, "Trackpoints:", TEXT_COLS_LARGE);
-        labeledText.getText().setEditable(false);
-        GridDataFactory.fillDefaults().grab(true, false)
-            .applyTo(labeledText.getComposite());
-        trkPointsText = labeledText.getText();
-        trkPointsText.setToolTipText("Number of trackpoints by segment.");
+        wptText = labeledText.getText();
+        wptText.setToolTipText("Number of waypoints.");
     }
 
     /**
@@ -225,26 +215,26 @@ public class TrkInfoDialog extends Dialog
      * is editable.
      */
     private void setModelFromWidgets() {
-        TrkType trk = model.getTrack();
+        RteType rte = model.getRoute();
         Text text = descText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
-            trk.setDesc(LabeledText.toString(text));
+            rte.setDesc(LabeledText.toString(text));
         }
         text = nameText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
-            trk.setName(LabeledText.toString(text));
+            rte.setName(LabeledText.toString(text));
         }
         text = numberText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
-            trk.setNumber(LabeledText.toBigInteger(text));
+            rte.setNumber(LabeledText.toBigInteger(text));
         }
         text = srcText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
-            trk.setSrc(LabeledText.toString(text));
+            rte.setSrc(LabeledText.toString(text));
         }
         text = typeText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
-            trk.setType(LabeledText.toString(text));
+            rte.setType(LabeledText.toString(text));
         }
     }
 
@@ -252,36 +242,22 @@ public class TrkInfoDialog extends Dialog
      * Sets the values form the model to the Text's.
      */
     private void setWidgetsFromModel() {
-        TrkType trk = model.getTrack();
-        LabeledText.read(descText, trk.getDesc());
-        LabeledText.read(nameText, trk.getName());
-        LabeledText.read(numberText, trk.getNumber());
-        LabeledText.read(srcText, trk.getSrc());
-        LabeledText.read(typeText, trk.getType());
+        RteType rte = model.getRoute();
+        LabeledText.read(descText, rte.getDesc());
+        LabeledText.read(nameText, rte.getName());
+        LabeledText.read(numberText, rte.getNumber());
+        LabeledText.read(srcText, rte.getSrc());
+        LabeledText.read(typeText, rte.getType());
 
         // Calculated
-        int intVal = trk.getTrkseg().size();
-        segText.setText(String.format("%d", intVal));
-        String nPointsString = "";
-        int nPointsTotal = 0;
-        int nPoints = 0;
-        for(TrksegType seg : trk.getTrkseg()) {
-            nPoints = seg.getTrkpt().size();
-            nPointsString += "+" + nPoints;
-            nPointsTotal += nPoints;
-        }
-        // Lose the first +
-        if(nPointsString.length() > 0) {
-            nPointsString = nPointsString.substring(1);
-        }
-        nPointsString = nPointsTotal + "=" + nPointsString;
-        trkPointsText.setText(nPointsString);
+        int intVal = rte.getRtept().size();
+        wptText.setText(String.format("%d", intVal));
     }
 
     /**
      * @return The value of model.
      */
-    public GpxTrackModel getModel() {
+    public GpxRouteModel getModel() {
         return model;
     }
 
