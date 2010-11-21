@@ -3,12 +3,11 @@ package net.kenevans.gpxinspector.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.swt.widgets.Display;
-
 import net.kenevans.gpx.TrkType;
 import net.kenevans.gpxinspector.ui.TrkInfoDialog;
-import net.kenevans.gpxinspector.ui.WptInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
+
+import org.eclipse.swt.widgets.Display;
 
 /*
  * Created on Aug 22, 2010
@@ -48,8 +47,8 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
                 this);
             success = dialog.open();
             if(success) {
+                // This also sets dirty
                 fireChangedEvent(this);
-                dirty = true;
             }
         } catch(Exception ex) {
             SWTUtils.excMsgAsync("Error with TrkInfoDialog", ex);

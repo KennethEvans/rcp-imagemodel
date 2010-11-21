@@ -95,8 +95,11 @@ public class GpxFileSetModel extends GpxModel
     public boolean add(GpxFileModel model) {
         boolean retVal = gpxFileModels.add(model);
         if(retVal) {
+            boolean origDirty = model.isDirty();
             model.setParent(this);
             fireAddedEvent(model);
+            // Reset dirty from the value set by fireAddedEvent.
+            model.setDirty(origDirty);
         }
         return retVal;
     }

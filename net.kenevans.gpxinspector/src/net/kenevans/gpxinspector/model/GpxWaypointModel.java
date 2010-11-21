@@ -47,8 +47,8 @@ public class GpxWaypointModel extends GpxModel implements IGpxElementConstants
                 this);
             success = dialog.open();
             if(success) {
+                // This also sets dirty
                 fireChangedEvent(this);
-                dirty = true;
             }
         } catch(Exception ex) {
             SWTUtils.excMsgAsync("Error with WptInfoDialog", ex);

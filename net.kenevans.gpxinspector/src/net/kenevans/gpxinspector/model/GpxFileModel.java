@@ -29,6 +29,8 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
     private LinkedList<GpxTrackModel> trackModels;
     private LinkedList<GpxWaypointModel> waypointModels;
     private LinkedList<GpxPropertyModel> propertyModels;
+    /** Indicates whether the file has changed or not. */
+    private boolean dirty = false;
 
     public GpxFileModel(GpxModel parent, String fileName) throws JAXBException {
         this(parent, new File(fileName));
@@ -36,10 +38,21 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
 
     public GpxFileModel(GpxModel parent, File file) throws JAXBException {
         this.parent = parent;
+        reset(file);
+    }
+
+    /**
+     * Resets the contents of this model from the given file.
+     * 
+     * @param file
+     * @throws JAXBException
+     */
+    public void reset(File file) throws JAXBException {
+        dirty = false;
         // try {
         gpx = GPXParser.parse(file);
         // } catch(JAXBException ex) {
-        // Utils.excMsg("Error parsing " + file.getPath(), ex);
+        // SWTUtils.excMsg("Error parsing " + file.getPath(), ex);
         // }
         this.file = file;
         trackModels = new LinkedList<GpxTrackModel>();
@@ -70,14 +83,18 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
     @Override
     public void showInfo() {
         FileInfoDialog dialog = null;
+        boolean success = false;
         // Without this try/catch, the application hangs on error
         try {
             dialog = new FileInfoDialog(Display.getDefault().getActiveShell(),
                 this);
-            // Always returns true, do nothing
-            dialog.open();
+            success = dialog.open();
+            if(success) {
+                // This also sets dirty
+                fireChangedEvent(this);
+            }
         } catch(Exception ex) {
-            SWTUtils.excMsgAsync("Error with TrkInfoDialog", ex);
+            SWTUtils.excMsgAsync("Error with FileInfoDialog", ex);
         }
     }
 
@@ -89,6 +106,11 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
     public void dispose() {
         if(disposed) {
             return;
+        }
+        if(isDirty()) {
+            // FIXME
+            SWTUtils.warnMsg(this.getLabel()
+                + " has been modified and not saved");
         }
         for(GpxModel model : trackModels) {
             model.dispose();
@@ -170,6 +192,69 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
             fireAddedEvent(model);
         }
         return retVal;
+    }
+
+    /**
+     * Saves the GpxType in the original file.
+     */
+    public void save() {
+        saveAs(file);
+    }
+
+    /**
+     * Saves the GpxType in a new file.
+     */
+    public void saveAs(File file) {
+        try {
+            synchronizeGpx();
+            GPXParser.save("GPX Inspector", gpx, file);
+            reset(file);
+            fireChangedEvent(this);
+            // Reset dirty, which was set by fireChangedEvent to true
+            setDirty(false);
+        } catch(JAXBException ex) {
+            SWTUtils.excMsg("Error saving " + file.getPath(), ex);
+        }
+    }
+    
+    /**
+     * Synchronizes the GpxType to the current model.
+     */
+    public void synchronizeGpx() {
+        List<GpxTrackModel> tracks = getTrackModels();
+        List<TrkType> trkTypes = gpx.getTrk();
+        trkTypes.clear();
+        for(GpxTrackModel model : tracks) {
+            trkTypes.add(model.getTrack());
+        }
+        
+        List<GpxWaypointModel> waypoints = getWaypointModels();
+        List<WptType> wptTypes = gpx.getWpt();
+        wptTypes.clear();
+        for(GpxWaypointModel model : waypoints) {
+            wptTypes.add(model.getWaypoint());
+        }
+    }
+
+    /**
+     * Overrides GpxModel.isDirty() and does not search for a parent
+     * GpxFileModel.
+     * 
+     * @return The value of dirty for this GpxFileModel.
+     */
+    @Override
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    /**
+     * Overrides GpxModel.setDirty() and does not search for a parent
+     * GpxFileModel.
+     * 
+     * @param dirty The new value for dirty for this GpxFileModel.
+     */
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
     }
 
     /**

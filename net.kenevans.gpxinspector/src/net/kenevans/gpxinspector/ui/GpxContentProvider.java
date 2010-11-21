@@ -110,8 +110,8 @@ public class GpxContentProvider implements ITreeContentProvider
                 .getTrackModels().toArray());
         } else if(parentElement instanceof GpxTrackModel) {
             // TODO Implement properties
-//            GpxTrackModel model = (GpxTrackModel)parentElement;
-//            return model.getPropertyModels().toArray();
+            // GpxTrackModel model = (GpxTrackModel)parentElement;
+            // return model.getPropertyModels().toArray();
         }
         return EMPTY_ARRAY;
     }
@@ -167,17 +167,24 @@ public class GpxContentProvider implements ITreeContentProvider
                         GpxModel model = (GpxModel)ev.getNewValue();
                         GpxModel parent = model.getParent();
                         model.addGpxModelListener(gpxModelListener);
-                        viewer.refresh(parent, false);
+                        if(parent != null) {
+                            viewer.refresh(parent, false);
+                        }
                     } else if(ev.getPropertyName().equals(GpxModel.REMOVED)) {
                         // Refresh the tree starting with the parent model
                         GpxModel model = (GpxModel)ev.getOldValue();
                         GpxModel parent = model.getParent();
                         model.dispose();
-                        viewer.refresh(parent, false);
+                        if(parent != null) {
+                            viewer.refresh(parent, false);
+                        }
                     } else if(ev.getPropertyName().equals(GpxModel.CHANGED)) {
                         // Refresh the tree starting with the parent model
                         GpxModel model = (GpxModel)ev.getOldValue();
-                        // Use true since the name may have changed
+//                        GpxModel parent = model.getParent();
+//                        if(parent != null) {
+//                            viewer.refresh(parent, false);
+//                        }
                         viewer.refresh(model, true);
                     }
                 }

@@ -234,6 +234,11 @@
                commandId="net.kenevans.gpxinspector.collapse">
                style="push">
          </command>
+         <command
+               commandId="net.kenevans.gpxinspector.refreshTree"
+               label="Refresh Tree"
+               style="push">
+         </command>
          <separator
                name="net.kenevans.gpxinspector.separator4"
                visible="true">
@@ -286,6 +291,16 @@
                commandId="net.kenevans.gpxinspector.saveKml"
                icon="icons/ge16.png"
                label="Save KML..."
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.save"
+               label="Save Selected GPX Files"
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.saveAs"
+               label="Save Selected GPX Files As..."
                style="push">
          </command>
       </menuContribution>
@@ -461,6 +476,21 @@
             categoryId="net.kenevans.gpxinspector.category"
             id="net.kenevans.gpxinspector.showInfo"
             name="Info...">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.save"
+            name="Save Selected GPX Files">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.saveAs"
+            name="Save Selected GPX Files As...">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.refreshTree"
+            name="Refresh Tree">
       </command>
    </extension>
    <extension

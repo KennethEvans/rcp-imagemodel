@@ -208,6 +208,18 @@ public class FileInfoDialog extends Dialog
         versionText
             .setToolTipText("All GPX files must include the version of the GPX schema\n"
                 + "which the file references.");
+
+        // Dirty
+        if(model.isDirty()) {
+            // Really only need a label here
+            labeledText = new LabeledText(box,
+                "* File has been modified but not saved", TEXT_COLS_LARGE);
+            labeledText.getText().setEditable(false);
+            GridDataFactory.fillDefaults().grab(true, false)
+                .applyTo(labeledText.getComposite());
+            labeledText.getText().setToolTipText(
+                "Indicates if the file has been modified.");
+        }
     }
 
     /**

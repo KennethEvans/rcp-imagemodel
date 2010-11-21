@@ -54,7 +54,6 @@ public abstract class GpxModel
      * @see #fireChangedEvent(GpxModel)
      */
     public static final String CHANGED = "gpxModel.changed";
-    public boolean dirty = false;
 
     public GpxModel() {
     }
@@ -111,31 +110,34 @@ public abstract class GpxModel
 
     /**
      * Fires an event denoting a model was added. The oldValue is null, and the
-     * newValue is the model added.
+     * newValue is the model added. Also sets the model to be dirty.
      * 
      * @param model The model added.
      */
     protected void fireAddedEvent(GpxModel model) {
+        model.setDirty(true);
         fireGpxModelEvent(ADDED, null, model);
     }
 
     /**
      * Fires an event denoting a model was changed. The oldValue and the
-     * newValue are the model.
+     * newValue are the model. Also sets the model to be dirty.
      * 
      * @param model The model changed.
      */
     protected void fireChangedEvent(GpxModel model) {
+        model.setDirty(true);
         fireGpxModelEvent(CHANGED, model, model);
     }
 
     /**
      * Fires an event denoting a model was removed. The oldValue is the model
-     * removed, and the newValue is null.
+     * removed, and the newValue is null. Also sets the model to be dirty.
      * 
      * @param model The model removed.
      */
     protected void fireRemovedEvent(GpxModel model) {
+        model.setDirty(true);
         fireGpxModelEvent(REMOVED, model, null);
     }
 
@@ -143,7 +145,7 @@ public abstract class GpxModel
      * Fires an event denoting a check state was changes. The oldValue and the
      * newValue is the new value of checked.
      * 
-     * @param model The model removed.
+     * @param model The model checked.
      */
     protected void fireCheckStateChangedEvent(GpxModel model) {
         fireGpxModelEvent(CHECKSTATE_CHANGED, null, model.getChecked());
@@ -202,17 +204,43 @@ public abstract class GpxModel
     }
 
     /**
-     * @return The value of dirty.
+     * @return The value of dirty for the GpxFileModel in the hierarchy.
      */
     public boolean isDirty() {
-        return dirty;
+        GpxFileModel fileModel = getGpxFileModel();
+        if(fileModel == null) {
+            return false;
+        } else {
+            return fileModel.isDirty();
+        }
     }
 
     /**
-     * @param dirty The new value for dirty.
+     * @param dirty The new value for dirty for the GpxFileModel in the
+     *            hierarchy.
      */
     public void setDirty(boolean dirty) {
-        this.dirty = dirty;
+        GpxFileModel fileModel = getGpxFileModel();
+        if(fileModel != null) {
+            fileModel.setDirty(dirty);
+        }
     }
-    
+
+    /**
+     * Finds the GpxFileModel parent of the current model. Note that the
+     * GpxFileSetModel does not have such a parent.
+     * 
+     * @return The GpxFileModel or null if not found.
+     */
+    public GpxFileModel getGpxFileModel() {
+        GpxModel parent = this;
+        while(!(parent instanceof GpxFileSetModel) && parent != null) {
+            if(parent instanceof GpxFileModel) {
+                return (GpxFileModel)parent;
+            }
+            parent = parent.getParent();
+        }
+        return null;
+    }
+
 }

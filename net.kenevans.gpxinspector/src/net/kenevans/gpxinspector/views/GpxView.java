@@ -366,6 +366,28 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         String id = "net.kenevans.gpxinspector.add";
         handlerService.activateHandler(id, handler);
 
+        // Save
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                saveGpxFiles();
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.save";
+        handlerService.activateHandler(id, handler);
+
+        // SaveAs
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                saveGpxFilesAs();
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.saveAs";
+        handlerService.activateHandler(id, handler);
+
         // Remove
         handler = new AbstractHandler() {
             public Object execute(ExecutionEvent event)
@@ -464,7 +486,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         };
         id = "net.kenevans.gpxinspector.removeAll";
         handlerService.activateHandler(id, handler);
-        
+
         // Show info
         handler = new AbstractHandler() {
             public Object execute(ExecutionEvent event)
@@ -475,6 +497,20 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         };
         id = "net.kenevans.gpxinspector.showInfo";
         handlerService.activateHandler(id, handler);
+        
+        // Refresh
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                if(treeViewer != null) {
+                    treeViewer.refresh();
+                }
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.refreshTree";
+        handlerService.activateHandler(id, handler);
+
     }
 
     /*
@@ -648,7 +684,6 @@ public class GpxView extends ViewPart implements IPreferenceConstants
             int index = selectedPath.lastIndexOf(File.separator);
             if(index > 0) {
                 initialDirectory = selectedPath.substring(0, index);
-
             }
             // Loop over the selected files
             String fileNames[] = dlg.getFileNames();
@@ -663,6 +698,94 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                     SWTUtils.excMsgAsync("Error parsing " + fileName, ex);
                 }
             }
+        }
+    }
+
+    /**
+     * Saves the selected GPX files.
+     */
+    public void saveGpxFiles() {
+        if(treeViewer.getSelection().isEmpty()) {
+            SWTUtils.errMsg("No files selected");
+            return;
+        }
+        IStructuredSelection selection = (IStructuredSelection)treeViewer
+            .getSelection();
+        int count = 0;
+        for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+            GpxModel model = (GpxModel)iterator.next();
+            if(model instanceof GpxFileModel) {
+                ((GpxFileModel)model).save();
+                treeViewer.refresh();
+                count++;
+            }
+        }
+        if(count == 0) {
+            SWTUtils.errMsg("No files selected");
+        } else {
+            // Reset the input to cause the listeners to change
+            Object oldInput = treeViewer.getInput();
+            treeViewer.setInput(oldInput);
+            treeViewer.expandToLevel(treeLevel);
+        }
+    }
+
+    /**
+     * Saves the selected GPX files with new names.
+     */
+    public void saveGpxFilesAs() {
+        if(treeViewer.getSelection().isEmpty()) {
+            SWTUtils.errMsg("No files selected");
+            return;
+        }
+        IStructuredSelection selection = (IStructuredSelection)treeViewer
+            .getSelection();
+        int count = 0;
+        for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+            GpxModel model = (GpxModel)iterator.next();
+            if(model instanceof GpxFileModel) {
+                GpxFileModel fileModel = (GpxFileModel)model;
+                // Open a FileDialog
+                FileDialog dlg = new FileDialog(Display.getDefault()
+                    .getActiveShell(), SWT.NONE);
+
+                dlg.setFilterPath(fileModel.getFile().getPath());
+                dlg.setFilterExtensions(new String[] {"*.gpx"});
+                dlg.setFileName(fileModel.getFile().getName());
+                String selectedPath = dlg.open();
+                if(selectedPath != null) {
+                    // Extract the directory part of the selectedPath
+                    String initialDirectory = initialPath;
+                    int index = selectedPath.lastIndexOf(File.separator);
+                    if(index > 0) {
+                        initialDirectory = selectedPath.substring(0, index);
+                    }
+                    initialPath = selectedPath;
+                    // Loop over the selected file
+                    String fileName = dlg.getFileName();
+                    String filePath = initialDirectory + File.separator + fileName;
+                    File file = new File(filePath);
+                    boolean doIt = true;
+                    if(file.exists()) {
+                        Boolean res = SWTUtils.confirmMsg("File exists: "
+                            + file.getPath() + "\nOK to overwrite?");
+                        if(!res) {
+                            doIt = false;
+                        }
+                    }
+                    if(doIt) {
+                        fileModel.saveAs(file);
+                        // Reset the input to cause the listeners to change
+                        Object oldInput = treeViewer.getInput();
+                        treeViewer.setInput(oldInput);
+                        treeViewer.expandToLevel(treeLevel);
+                    }
+                }
+                count++;
+            }
+        }
+        if(count == 0) {
+            SWTUtils.errMsg("No files selected");
         }
     }
 
