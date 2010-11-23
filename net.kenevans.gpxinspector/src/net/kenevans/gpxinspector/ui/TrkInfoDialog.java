@@ -6,9 +6,11 @@ import net.kenevans.gpxinspector.model.GpxTrackModel;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -94,16 +96,23 @@ public class TrkInfoDialog extends Dialog
      * @param shell
      */
     private void createContents(final Shell shell) {
+        shell.setLayout(new FillLayout());
+
+        // Make it scroll
+        ScrolledComposite scrolledComposite = new ScrolledComposite(shell,
+            SWT.H_SCROLL | SWT.V_SCROLL);
+        Composite parent = new Composite(scrolledComposite, SWT.NONE);
+        scrolledComposite.setContent(parent);
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 1;
-        shell.setLayout(gridLayout);
+        parent.setLayout(gridLayout);
 
         // Create the groups
-        createInfoGroup(shell);
+        createInfoGroup(parent);
 
         // Create the buttons
         // Make a zero margin composite for the OK and Cancel buttons
-        Composite composite = new Composite(shell, SWT.NONE);
+        Composite composite = new Composite(parent, SWT.NONE);
         // Change END to FILL to center the buttons
         GridDataFactory.fillDefaults().align(SWT.END, SWT.FILL)
             .grab(true, false).applyTo(composite);
@@ -146,15 +155,20 @@ public class TrkInfoDialog extends Dialog
             }
         });
         shell.setDefaultButton(button);
+
+        scrolledComposite.setMinSize(parent.computeSize(SWT.DEFAULT,
+            SWT.DEFAULT));
+        scrolledComposite.setExpandHorizontal(true);
+        scrolledComposite.setExpandVertical(true);
     }
 
     /**
      * Creates the icons group.
      * 
-     * @param shell
+     * @param parent
      */
-    private void createInfoGroup(Shell shell) {
-        Group box = new Group(shell, SWT.BORDER);
+    private void createInfoGroup(Composite parent) {
+        Group box = new Group(parent, SWT.BORDER);
         box.setText("Track");
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 1;

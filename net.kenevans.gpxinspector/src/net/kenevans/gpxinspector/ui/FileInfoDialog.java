@@ -14,9 +14,11 @@ import net.kenevans.gpxinspector.model.GpxFileModel;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -117,18 +119,25 @@ public class FileInfoDialog extends Dialog
      * @param shell
      */
     private void createContents(final Shell shell) {
+        shell.setLayout(new FillLayout());
+
+        // Make it scroll
+        ScrolledComposite scrolledComposite = new ScrolledComposite(shell,
+            SWT.H_SCROLL | SWT.V_SCROLL);
+        Composite parent = new Composite(scrolledComposite, SWT.NONE);
+        scrolledComposite.setContent(parent);
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 1;
-        shell.setLayout(gridLayout);
+        parent.setLayout(gridLayout);
 
         // Create the groups
-        createFileGroup(shell);
-        createGpxGroup(shell);
-        createMetadataGroup(shell);
+        createFileGroup(parent);
+        createGpxGroup(parent);
+        createMetadataGroup(parent);
 
         // Create the buttons
         // Make a zero margin composite for the OK and Cancel buttons
-        Composite composite = new Composite(shell, SWT.NONE);
+        Composite composite = new Composite(parent, SWT.NONE);
         // Change END to FILL to center the buttons
         GridDataFactory.fillDefaults().align(SWT.END, SWT.FILL)
             .grab(true, false).applyTo(composite);
@@ -171,6 +180,10 @@ public class FileInfoDialog extends Dialog
             }
         });
         shell.setDefaultButton(button);
+        
+        scrolledComposite.setMinSize(parent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        scrolledComposite.setExpandHorizontal(true);
+        scrolledComposite.setExpandVertical(true);
     }
 
     /**
@@ -333,8 +346,7 @@ public class FileInfoDialog extends Dialog
         createLinkGroup(box);
 
         // Name
-        LabeledText labeledText = new LabeledText(box, "Name:",
-            TEXT_COLS_LARGE);
+        LabeledText labeledText = new LabeledText(box, "Name:", TEXT_COLS_LARGE);
         GridDataFactory.fillDefaults().grab(true, false)
             .applyTo(labeledText.getComposite());
         authorNameText = labeledText.getText();
@@ -355,16 +367,14 @@ public class FileInfoDialog extends Dialog
         GridDataFactory.fillDefaults().grab(true, true).applyTo(box);
 
         // Id
-        LabeledText labeledText = new LabeledText(box, "Id:",
-            TEXT_COLS_LARGE);
+        LabeledText labeledText = new LabeledText(box, "Id:", TEXT_COLS_LARGE);
         GridDataFactory.fillDefaults().grab(true, false)
             .applyTo(labeledText.getComposite());
         idText = labeledText.getText();
         idText.setToolTipText("Id part of author's email (id@domain).");
 
         // Domain
-        labeledText = new LabeledText(box, "Domain:",
-            TEXT_COLS_LARGE);
+        labeledText = new LabeledText(box, "Domain:", TEXT_COLS_LARGE);
         GridDataFactory.fillDefaults().grab(true, false)
             .applyTo(labeledText.getComposite());
         domainText = labeledText.getText();
@@ -385,24 +395,21 @@ public class FileInfoDialog extends Dialog
         GridDataFactory.fillDefaults().grab(true, true).applyTo(box);
 
         // Link
-        LabeledText labeledText = new LabeledText(box, "Href:",
-            TEXT_COLS_LARGE);
+        LabeledText labeledText = new LabeledText(box, "Href:", TEXT_COLS_LARGE);
         GridDataFactory.fillDefaults().grab(true, false)
             .applyTo(labeledText.getComposite());
         linkHrefText = labeledText.getText();
         linkHrefText.setToolTipText("Href.");
 
         // Text
-        labeledText = new LabeledText(box, "Text:",
-            TEXT_COLS_LARGE);
+        labeledText = new LabeledText(box, "Text:", TEXT_COLS_LARGE);
         GridDataFactory.fillDefaults().grab(true, false)
             .applyTo(labeledText.getComposite());
         linkTextText = labeledText.getText();
         linkTextText.setToolTipText("Author's name.");
-        
+
         // Text
-        labeledText = new LabeledText(box, "Type:",
-            TEXT_COLS_LARGE);
+        labeledText = new LabeledText(box, "Type:", TEXT_COLS_LARGE);
         GridDataFactory.fillDefaults().grab(true, false)
             .applyTo(labeledText.getComposite());
         linkTypeText = labeledText.getText();
@@ -431,31 +438,28 @@ public class FileInfoDialog extends Dialog
         minLatText.setToolTipText("Minimum latiture.");
 
         // MaxLat
-        labeledText = new LabeledText(box, "MaxLat:",
-            TEXT_COLS_LARGE);
+        labeledText = new LabeledText(box, "MaxLat:", TEXT_COLS_LARGE);
         GridDataFactory.fillDefaults().grab(true, false)
             .applyTo(labeledText.getComposite());
         maxLatText = labeledText.getText();
         maxLatText.setToolTipText("Minimum latiture.");
 
         // MinLon
-        labeledText = new LabeledText(box, "MinLon:",
-            TEXT_COLS_LARGE);
+        labeledText = new LabeledText(box, "MinLon:", TEXT_COLS_LARGE);
         GridDataFactory.fillDefaults().grab(true, false)
             .applyTo(labeledText.getComposite());
         minLonText = labeledText.getText();
         minLonText.setToolTipText("Minimum latiture.");
 
         // MaxLon
-        labeledText = new LabeledText(box, "MaxLon:",
-            TEXT_COLS_LARGE);
+        labeledText = new LabeledText(box, "MaxLon:", TEXT_COLS_LARGE);
         GridDataFactory.fillDefaults().grab(true, false)
             .applyTo(labeledText.getComposite());
         maxLonText = labeledText.getText();
         maxLonText.setToolTipText("Minimum latiture.");
     }
 
-   /**
+    /**
      * Creates the copyright group.
      * 
      * @param parent
@@ -512,7 +516,7 @@ public class FileInfoDialog extends Dialog
         if(text != null && !text.isDisposed() && text.getEditable()) {
             gpx.setVersion(LabeledText.toString(text));
         }
-        
+
         // Author
         text = authorNameText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
@@ -520,7 +524,7 @@ public class FileInfoDialog extends Dialog
                 metadataType = new MetadataType();
                 gpx.setMetadata(metadataType);
             }
-            if(gpx.getMetadata().getAuthor()== null) {
+            if(gpx.getMetadata().getAuthor() == null) {
                 personType = new PersonType();
             }
             personType.setName(LabeledText.toString(text));
@@ -531,10 +535,10 @@ public class FileInfoDialog extends Dialog
                 metadataType = new MetadataType();
                 gpx.setMetadata(metadataType);
             }
-            if(gpx.getMetadata().getAuthor()== null) {
+            if(gpx.getMetadata().getAuthor() == null) {
                 personType = new PersonType();
             }
-            if(gpx.getMetadata().getAuthor().getEmail()== null) {
+            if(gpx.getMetadata().getAuthor().getEmail() == null) {
                 emailType = new EmailType();
             }
             emailType.setId(LabeledText.toString(text));
@@ -545,10 +549,10 @@ public class FileInfoDialog extends Dialog
                 metadataType = new MetadataType();
                 gpx.setMetadata(metadataType);
             }
-            if(gpx.getMetadata().getAuthor()== null) {
+            if(gpx.getMetadata().getAuthor() == null) {
                 personType = new PersonType();
             }
-            if(gpx.getMetadata().getAuthor().getEmail()== null) {
+            if(gpx.getMetadata().getAuthor().getEmail() == null) {
                 emailType = new EmailType();
             }
             emailType.setDomain(LabeledText.toString(text));
@@ -559,13 +563,13 @@ public class FileInfoDialog extends Dialog
                 metadataType = new MetadataType();
                 gpx.setMetadata(metadataType);
             }
-            if(gpx.getMetadata().getAuthor()== null) {
+            if(gpx.getMetadata().getAuthor() == null) {
                 personType = new PersonType();
             }
-            if(gpx.getMetadata().getAuthor().getEmail()== null) {
+            if(gpx.getMetadata().getAuthor().getEmail() == null) {
                 linkType = new LinkType();
             }
-           linkType.setHref(LabeledText.toString(text));
+            linkType.setHref(LabeledText.toString(text));
         }
         text = linkTextText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
@@ -573,13 +577,13 @@ public class FileInfoDialog extends Dialog
                 metadataType = new MetadataType();
                 gpx.setMetadata(metadataType);
             }
-            if(gpx.getMetadata().getAuthor()== null) {
+            if(gpx.getMetadata().getAuthor() == null) {
                 personType = new PersonType();
             }
-            if(gpx.getMetadata().getAuthor().getEmail()== null) {
+            if(gpx.getMetadata().getAuthor().getEmail() == null) {
                 linkType = new LinkType();
             }
-           linkType.setText(LabeledText.toString(text));
+            linkType.setText(LabeledText.toString(text));
         }
         text = linkTypeText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
@@ -587,15 +591,15 @@ public class FileInfoDialog extends Dialog
                 metadataType = new MetadataType();
                 gpx.setMetadata(metadataType);
             }
-            if(gpx.getMetadata().getAuthor()== null) {
+            if(gpx.getMetadata().getAuthor() == null) {
                 personType = new PersonType();
             }
-            if(gpx.getMetadata().getAuthor().getEmail()== null) {
+            if(gpx.getMetadata().getAuthor().getEmail() == null) {
                 linkType = new LinkType();
             }
-           linkType.setType(LabeledText.toString(text));
+            linkType.setType(LabeledText.toString(text));
         }
-        
+
         // Bounds
         text = minLatText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
@@ -676,7 +680,7 @@ public class FileInfoDialog extends Dialog
             }
             copyrightType.setYear(LabeledText.toXMLGregorianCalendar(text));
         }
-        
+
         text = descText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
             if(gpx.getMetadata() == null) {
@@ -751,31 +755,30 @@ public class FileInfoDialog extends Dialog
             LabeledText.read(timeText,
                 metadataType != null ? metadataType.getTime() : null);
         }
-        
+
         // Author
-        LabeledText.read(idText,
-            emailType != null ? emailType.getId(): null);
-        LabeledText.read(domainText,
-            emailType != null ? emailType.getDomain(): null);
-        LabeledText.read(linkHrefText,
-            linkType != null ? linkType.getHref(): null);
-        LabeledText.read(linkTextText,
-            linkType != null ? linkType.getText(): null);
-        LabeledText.read(linkTypeText,
-            linkType != null ? linkType.getType(): null);
+        LabeledText.read(idText, emailType != null ? emailType.getId() : null);
+        LabeledText.read(domainText, emailType != null ? emailType.getDomain()
+            : null);
+        LabeledText.read(linkHrefText, linkType != null ? linkType.getHref()
+            : null);
+        LabeledText.read(linkTextText, linkType != null ? linkType.getText()
+            : null);
+        LabeledText.read(linkTypeText, linkType != null ? linkType.getType()
+            : null);
         LabeledText.read(authorNameText,
-            personType != null ? personType.getName(): null);
-        
+            personType != null ? personType.getName() : null);
+
         // Bounds
         LabeledText.read(minLatText,
-            boundsType != null ? boundsType.getMinlat(): null);
+            boundsType != null ? boundsType.getMinlat() : null);
         LabeledText.read(maxLatText,
-            boundsType != null ? boundsType.getMaxlat(): null);
+            boundsType != null ? boundsType.getMaxlat() : null);
         LabeledText.read(minLonText,
-            boundsType != null ? boundsType.getMinlon(): null);
+            boundsType != null ? boundsType.getMinlon() : null);
         LabeledText.read(maxLonText,
-            boundsType != null ? boundsType.getMaxlon(): null);
-        
+            boundsType != null ? boundsType.getMaxlon() : null);
+
         // Copyright
         LabeledText.read(authorText,
             copyrightType != null ? copyrightType.getAuthor() : null);
