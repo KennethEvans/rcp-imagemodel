@@ -1,14 +1,22 @@
 package net.kenevans.parser;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
 
+import net.kenevans.gpx.BoundsType;
+import net.kenevans.gpx.EmailType;
 import net.kenevans.gpx.GpxType;
+import net.kenevans.gpx.MetadataType;
+import net.kenevans.gpx.PersonType;
 import net.kenevans.gpx.RteType;
 import net.kenevans.gpx.TrkType;
 import net.kenevans.gpx.TrksegType;
@@ -28,10 +36,54 @@ import net.kenevans.gpx10.Gpx.Wpt;
 
 public class GPXParser
 {
+    /** Hard-coded file name for testing with the main method. */
     private static String TEST_FILE = "C:/Users/evans/Documents/GPSLink/CM2008.gpx";
     /** This is the package specified when XJC was run. */
     private static String GPX_11_PACKAGE = "net.kenevans.gpx";
+    /** This is the GPX 1.0 package. */
     private static String GPX_10_PACKAGE = "net.kenevans.gpx10";
+
+    /**
+     * Save a GpxType object into a file with the given name.
+     * 
+     * @param gpx
+     * @param fileName
+     * @throws JAXBException
+     */
+    public static void save(String creator, GpxType gpx, String fileName)
+        throws JAXBException {
+        save(creator, gpx, new File(fileName));
+    }
+
+    /**
+     * Save a GpxType object into a File.
+     * 
+     * @param gpx
+     * @param file
+     * @throws JAXBException
+     */
+    public static void save(String creator, GpxType gpx, File file)
+        throws JAXBException {
+        // Set the creator
+        if(creator != null) {
+            gpx.setCreator(creator);
+        }
+        // Reset the version
+        gpx.setVersion("1.1");
+
+        // Create a new JAXBElement<GpxType> for the marshaller
+        QName qName = new QName("http://www.topografix.com/GPX/1/1", "gpx");
+        JAXBElement<GpxType> root = new JAXBElement<GpxType>(qName,
+            GpxType.class, gpx);
+        // Create a context
+        JAXBContext jc = JAXBContext.newInstance(GPX_11_PACKAGE);
+        // Create a marshaller
+        Marshaller marshaller = jc.createMarshaller();
+        // Set it to be formatted, otherwise it is one long line
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        // Marshal
+        marshaller.marshal(root, file);
+    }
 
     /**
      * Parses a GPX file with the given name.
@@ -106,8 +158,94 @@ public class GPXParser
      */
     public static GpxType convertGpx10toGpx11(Gpx gpx10) {
         GpxType gpx = new GpxType();
-        gpx.setCreator(gpx10.getCreator());
-        gpx.setVersion(gpx10.getVersion());
+        String stringVal = gpx10.getCreator();
+        if(stringVal != null) {
+            gpx.setCreator(stringVal);
+        }
+        stringVal = gpx10.getVersion();
+        if(stringVal != null) {
+            gpx.setVersion(stringVal);
+        }
+
+        // Metadata
+        MetadataType metadataType = new MetadataType();
+        boolean doMetadata = false;
+        // Author
+        boolean doPerson = false;
+        PersonType personType = new PersonType();
+        String email = gpx10.getEmail();
+        EmailType emailType = null;
+        if(emailType != null) {
+            doPerson = true;
+            emailType = new EmailType();
+            int index = email.indexOf("@");
+            emailType.setId(email.substring(0, index));
+            emailType.setDomain(email.substring(index + 1));
+            personType.setEmail(emailType);
+        }
+        // Link (not implemented, no person link in GPX 1.0)
+        // personType.setLink(value);
+        // Name (not implemented, no person name in GPX 1.0)
+        // personType.setName(value);
+        if(doPerson) {
+            doMetadata = true;
+            metadataType.setAuthor(personType);
+        }
+        // Bounds
+        boolean doBounds = false;
+        BoundsType boundsType = new BoundsType();
+        net.kenevans.gpx10.BoundsType boundsType10 = gpx10.getBounds();
+        if(boundsType10 != null) {
+            BigDecimal val = boundsType10.getMaxlat();
+            if(val != null) {
+                doBounds = true;
+                boundsType.setMaxlat(val);
+            }
+            val = boundsType10.getMaxlon();
+            if(val != null) {
+                doBounds = true;
+                boundsType.setMaxlon(val);
+            }
+            val = boundsType10.getMinlat();
+            if(val != null) {
+                doBounds = true;
+                boundsType.setMinlat(val);
+            }
+            val = boundsType10.getMinlon();
+            if(val != null) {
+                doBounds = true;
+                boundsType.setMinlon(val);
+            }
+            if(doBounds) {
+                doMetadata = true;
+                metadataType.setBounds(boundsType);
+            }
+        }
+        // Copyright (not implemented, no copyright in GPX 1.0)
+        stringVal = gpx10.getDesc();
+        if(stringVal != null) {
+            doMetadata = true;
+            metadataType.setDesc(stringVal);
+        }
+        stringVal = gpx10.getName();
+        if(stringVal != null) {
+            doMetadata = true;
+            metadataType.setName(stringVal);
+        }
+        stringVal = gpx10.getKeywords();
+        if(stringVal != null) {
+            doMetadata = true;
+            metadataType.setKeywords(stringVal);
+        }
+        metadataType.setTime(gpx10.getTime());
+        XMLGregorianCalendar timeVal = gpx10.getTime();
+        if(timeVal != null) {
+            doMetadata = true;
+            metadataType.setTime(timeVal);
+        }
+        if(doMetadata) {
+            gpx.setMetadata(metadataType);
+        }
 
         // Waypoints
         List<Wpt> wpts10 = gpx10.getWpt();
