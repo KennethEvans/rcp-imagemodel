@@ -106,8 +106,9 @@ public class GpxContentProvider implements ITreeContentProvider
             return model.getGpxFileModels().toArray();
         } else if(parentElement instanceof GpxFileModel) {
             GpxFileModel model = (GpxFileModel)parentElement;
-            return concat(model.getRouteModels().toArray(), model
-                .getTrackModels().toArray(), model.getWaypointModels().toArray());
+            return concat(model.getTrackModels().toArray(), model
+                .getRouteModels().toArray(), model.getWaypointModels()
+                .toArray());
         } else if(parentElement instanceof GpxTrackModel) {
             // TODO Implement properties
             // GpxTrackModel model = (GpxTrackModel)parentElement;
@@ -181,10 +182,10 @@ public class GpxContentProvider implements ITreeContentProvider
                     } else if(ev.getPropertyName().equals(GpxModel.CHANGED)) {
                         // Refresh the tree starting with the parent model
                         GpxModel model = (GpxModel)ev.getOldValue();
-//                        GpxModel parent = model.getParent();
-//                        if(parent != null) {
-//                            viewer.refresh(parent, false);
-//                        }
+                        // GpxModel parent = model.getParent();
+                        // if(parent != null) {
+                        // viewer.refresh(parent, false);
+                        // }
                         viewer.refresh(model, true);
                     }
                 }

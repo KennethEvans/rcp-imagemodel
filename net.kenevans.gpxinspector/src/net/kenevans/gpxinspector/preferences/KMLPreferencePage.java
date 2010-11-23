@@ -5,7 +5,6 @@ import net.kenevans.gpxinspector.plugin.Activator;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;
-import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
@@ -20,8 +19,8 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
  * 
  * @author Kenneth Evans, Jr.
  */
-public class KMLPreferencePage extends FieldEditorPreferencePage
-    implements IWorkbenchPreferencePage, IPreferenceConstants
+public class KMLPreferencePage extends FieldEditorPreferencePage implements
+    IWorkbenchPreferencePage, IPreferenceConstants
 {
 
     public KMLPreferencePage() {
@@ -47,14 +46,13 @@ public class KMLPreferencePage extends FieldEditorPreferencePage
 
         addField(new StringFieldEditor(IPreferenceConstants.P_ICON_SCALE,
             "Icon scale:", parent));
-        addField(new StringFieldEditor(IPreferenceConstants.P_WPT_ICON_URL,
-            "Waypoint icon URL:", parent));
         addField(new StringFieldEditor(IPreferenceConstants.P_TRK_ICON_URL,
             "Track icon URL:", parent));
-        addField(new StringFieldEditor(IPreferenceConstants.P_WPT_COLOR,
-            "Waypoint color:", parent));
-        addField(new StringFieldEditor(IPreferenceConstants.P_WPT_ALPHA,
-            "Waypoint alpha:", parent));
+        addField(new StringFieldEditor(IPreferenceConstants.P_RTE_ICON_URL,
+            "Route icon URL:", parent));
+        addField(new StringFieldEditor(IPreferenceConstants.P_WPT_ICON_URL,
+            "Waypoint icon URL:", parent));
+
         addField(new StringFieldEditor(IPreferenceConstants.P_TRK_COLOR,
             "Track color:", parent));
         addField(new StringFieldEditor(IPreferenceConstants.P_TRK_ALPHA,
@@ -66,9 +64,27 @@ public class KMLPreferencePage extends FieldEditorPreferencePage
         addField(new BooleanFieldEditor(IPreferenceConstants.P_USE_TRK_ICON,
             "Use icon at start of track:", parent));
 
+        addField(new StringFieldEditor(IPreferenceConstants.P_RTE_COLOR,
+            "Route color:", parent));
+        addField(new StringFieldEditor(IPreferenceConstants.P_RTE_ALPHA,
+            "Route alpha:", parent));
+        addField(new StringFieldEditor(IPreferenceConstants.P_RTE_LINEWIDTH,
+            "Route line width:", parent));
+        addField(new ComboFieldEditor(IPreferenceConstants.P_RTE_COLOR_MODE,
+            "Route color mode:", kmlColorModes, parent));
+        addField(new BooleanFieldEditor(IPreferenceConstants.P_USE_RTE_ICON,
+            "Use icon at start of route:", parent));
+
+        addField(new StringFieldEditor(IPreferenceConstants.P_WPT_COLOR,
+            "Waypoint color:", parent));
+        addField(new StringFieldEditor(IPreferenceConstants.P_WPT_ALPHA,
+            "Waypoint alpha:", parent));
+        addField(new ComboFieldEditor(IPreferenceConstants.P_WPT_COLOR_MODE,
+            "Waypoint color mode:", kmlColorModes, parent));
+
         Label label = new Label(parent, SWT.WRAP);
         label.setText("Note: Colors are text strings of the form bbggrr.\n"
-            + "Alphas are text strings of the form aa and represent the\n" 
+            + "Alphas are text strings of the form aa and represent the\n"
             + "transparency (00 is transparent and ff is opaque).  These\n"
             + "are combined internally to make a color of the form aabbggrr.\n"
             + "E.g. 77ff0000 is semi-transparent blue. Icon colors and\n"

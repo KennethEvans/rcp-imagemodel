@@ -52,15 +52,22 @@ public class SaveKmlDialog extends Dialog implements IPreferenceConstants
     private Text iconScaleText;
     private Text wptColorText;
     private Text wptAlphaText;
+    private Combo wptColorModeCombo;
     private Text trkIconUrlText;
+    private Text rteIconUrlText;
     private Text wptIconUrlText;
     private Text trkLineWidthText;
     private Text trkColorText;
     private Text trkAlphaText;
     private Combo trkColorModeCombo;
+    private Button useTrkIconButton;
+    private Text rteLineWidthText;
+    private Text rteColorText;
+    private Text rteAlphaText;
+    private Combo rteColorModeCombo;
+    private Button useRteIconButton;
     private Button promptToOverwriteButton;
     private Button sendToGoogleButton;
-    private Button useTrkIconButton;
 
     /**
      * Constructor.
@@ -123,8 +130,9 @@ public class SaveKmlDialog extends Dialog implements IPreferenceConstants
         // Create the groups
         createKmlFileGroup(shell);
         createIconGroup(shell);
-        createWaypointGroup(shell);
         createTrackGroup(shell);
+        createRouteGroup(shell);
+        createWaypointGroup(shell);
 
         // Create the buttons
         // Make a zero margin composite for the OK and Cancel buttons
@@ -345,21 +353,29 @@ public class SaveKmlDialog extends Dialog implements IPreferenceConstants
         gridLayout.horizontalSpacing = 10;
         composite.setLayout(gridLayout);
 
-        // Wpt icon URL
-        LabeledText labeledText = new LabeledText(composite, "Wpt icon URL:",
-            TEXT_COLS_SMALL);
-        GridDataFactory.fillDefaults().span(2, 1)
-            .applyTo(labeledText.getComposite());
-        wptIconUrlText = labeledText.getText();
-        wptIconUrlText.setToolTipText("The URL for the waypoint icons.");
-
         // Trk icon URL
-        labeledText = new LabeledText(composite, "Trk icon URL:",
+        LabeledText labeledText = new LabeledText(composite, "Trk icon URL:",
             TEXT_COLS_SMALL);
         GridDataFactory.fillDefaults().span(2, 1)
             .applyTo(labeledText.getComposite());
         trkIconUrlText = labeledText.getText();
         trkIconUrlText.setToolTipText("The URL for the track icons.");
+
+        // Rte icon URL
+        labeledText = new LabeledText(composite, "Rte icon URL:",
+            TEXT_COLS_SMALL);
+        GridDataFactory.fillDefaults().span(2, 1)
+            .applyTo(labeledText.getComposite());
+        rteIconUrlText = labeledText.getText();
+        rteIconUrlText.setToolTipText("The URL for the route icons.");
+
+        // Wpt icon URL
+        labeledText = new LabeledText(composite, "Wpt icon URL:",
+            TEXT_COLS_SMALL);
+        GridDataFactory.fillDefaults().span(2, 1)
+            .applyTo(labeledText.getComposite());
+        wptIconUrlText = labeledText.getText();
+        wptIconUrlText.setToolTipText("The URL for the waypoint icons.");
 
         // Icon scale
         labeledText = new LabeledText(composite, "Icon scale:", TEXT_COLS_SMALL);
@@ -368,7 +384,7 @@ public class SaveKmlDialog extends Dialog implements IPreferenceConstants
     }
 
     /**
-     * Creates the track group.
+     * Creates the waypoint group.
      * 
      * @param shell
      */
@@ -397,12 +413,127 @@ public class SaveKmlDialog extends Dialog implements IPreferenceConstants
         LabeledText labeledText = new LabeledText(composite, "Wpt alpha:",
             TEXT_COLS_SMALL);
         wptAlphaText = labeledText.getText();
-        wptAlphaText.setToolTipText("The alpha of the waypoints.");
+        wptAlphaText.setToolTipText("The alpha of the waypoints. Alphas are "
+            + "text strings of the form aa\n"
+            + "and represent the transparency (00 is transparent and ff "
+            + "is opaque).");
 
         // Wpt color
         labeledText = new LabeledText(composite, "Wpt color:", TEXT_COLS_SMALL);
         wptColorText = labeledText.getText();
-        wptColorText.setToolTipText("The color of the waypoints.");
+        wptColorText
+            .setToolTipText("The color of the waypoints when the color mode is "
+                + "Color.\n"
+                + "Note: Colors are text strings of the form bbggrr.");
+
+        // Wpt color mode
+        Composite composite1 = new Composite(composite, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL)
+            .grab(true, false).applyTo(composite1);
+        gridLayout = new GridLayout();
+        gridLayout.marginHeight = 0;
+        gridLayout.marginWidth = 0;
+        gridLayout.numColumns = 2;
+        composite1.setLayout(gridLayout);
+
+        Label label = new Label(composite1, SWT.NONE);
+        label.setText("Wpt color mode:");
+        GridDataFactory.fillDefaults().applyTo(label);
+
+        wptColorModeCombo = new Combo(composite1, SWT.NULL);
+        GridDataFactory.fillDefaults().grab(true, true)
+            .applyTo(wptColorModeCombo);
+        int len = kmlColorModes.length;
+        String[] items = new String[len];
+        for(int i = 0; i < len; i++) {
+            items[i] = kmlColorModes[i][0];
+        }
+        wptColorModeCombo.setItems(items);
+        wptColorModeCombo.setToolTipText("The color mode for waypoints.");
+    }
+
+    /**
+     * Creates the group.
+     * 
+     * @param shell
+     */
+    private void createRouteGroup(Shell shell) {
+        Group box = new Group(shell, SWT.BORDER);
+        box.setText("Routes");
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.numColumns = 1;
+        box.setLayout(gridLayout);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(box);
+
+        // Make a zero margin composite
+        Composite composite = new Composite(box, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL)
+            .grab(true, false).applyTo(composite);
+        gridLayout = new GridLayout();
+        gridLayout.marginHeight = 0;
+        gridLayout.marginWidth = 0;
+        gridLayout.numColumns = 2;
+        // Note
+        gridLayout.makeColumnsEqualWidth = true;
+        gridLayout.horizontalSpacing = 10;
+        composite.setLayout(gridLayout);
+
+        // Rte alpha
+        LabeledText labeledText = new LabeledText(composite, "Rte alpha:",
+            TEXT_COLS_SMALL);
+        rteAlphaText = labeledText.getText();
+        rteAlphaText.setToolTipText("The alpha of the routes. Alphas are "
+            + "text strings of the form aa\n"
+            + "and represent the transparency (00 is transparent and ff "
+            + "is opaque).");
+
+        // Rte color
+        labeledText = new LabeledText(composite, "Rte color:", TEXT_COLS_SMALL);
+        rteColorText = labeledText.getText();
+        rteColorText
+            .setToolTipText("The color of the routes when the color mode is "
+                + "Color.\n"
+                + "Note: Colors are text strings of the form bbggrr.");
+
+        // Rte color mode
+        Composite composite1 = new Composite(composite, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL)
+            .grab(true, false).applyTo(composite1);
+        gridLayout = new GridLayout();
+        gridLayout.marginHeight = 0;
+        gridLayout.marginWidth = 0;
+        gridLayout.numColumns = 2;
+        composite1.setLayout(gridLayout);
+
+        Label label = new Label(composite1, SWT.NONE);
+        label.setText("Rte color mode:");
+        GridDataFactory.fillDefaults().applyTo(label);
+
+        rteColorModeCombo = new Combo(composite1, SWT.NULL);
+        GridDataFactory.fillDefaults().grab(true, true)
+            .applyTo(rteColorModeCombo);
+        int len = kmlColorModes.length;
+        String[] items = new String[len];
+        for(int i = 0; i < len; i++) {
+            items[i] = kmlColorModes[i][0];
+        }
+        rteColorModeCombo.setItems(items);
+        rteColorModeCombo.setToolTipText("The color mode for routes.");
+
+        // Rte line width
+        labeledText = new LabeledText(composite, "Rte linewidth:",
+            TEXT_COLS_SMALL);
+        rteLineWidthText = labeledText.getText();
+        rteLineWidthText.setToolTipText("The linewidth of the routes.");
+
+        // Use rte icon
+        useRteIconButton = new Button(composite, SWT.CHECK);
+        GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.FILL)
+            .grab(true, false).applyTo(useRteIconButton);
+        useRteIconButton.setText("Use route icon");
+        useRteIconButton
+            .setToolTipText("Whether the tracks will have a placemark "
+                + "and icon at the start.");
     }
 
     /**
@@ -435,19 +566,18 @@ public class SaveKmlDialog extends Dialog implements IPreferenceConstants
         LabeledText labeledText = new LabeledText(composite, "Trk alpha:",
             TEXT_COLS_SMALL);
         trkAlphaText = labeledText.getText();
-        trkAlphaText.setToolTipText("The alpha of the tracks.");
+        trkAlphaText.setToolTipText("The alpha of the tracks. Alphas are "
+            + "text strings of the form aa\n"
+            + "and represent the transparency (00 is transparent and ff "
+            + "is opaque).");
 
         // Trk color
         labeledText = new LabeledText(composite, "Trk color:", TEXT_COLS_SMALL);
         trkColorText = labeledText.getText();
-        trkColorText.setToolTipText("The color of the tracks when "
-            + "the color mode is Color.");
-
-        // Trk line width
-        labeledText = new LabeledText(composite, "Trk linewidth:",
-            TEXT_COLS_SMALL);
-        trkLineWidthText = labeledText.getText();
-        trkLineWidthText.setToolTipText("The linewidth of the tracks.");
+        trkColorText
+            .setToolTipText("The color of the tracks when the color mode is "
+                + "Color.\n"
+                + "Note: Colors are text strings of the form bbggrr.");
 
         // Trk color mode
         Composite composite1 = new Composite(composite, SWT.NONE);
@@ -474,6 +604,12 @@ public class SaveKmlDialog extends Dialog implements IPreferenceConstants
         trkColorModeCombo.setItems(items);
         trkColorModeCombo.setToolTipText("The color mode for tracks.");
 
+        // Trk line width
+        labeledText = new LabeledText(composite, "Trk linewidth:",
+            TEXT_COLS_SMALL);
+        trkLineWidthText = labeledText.getText();
+        trkLineWidthText.setToolTipText("The linewidth of the tracks.");
+
         // Use trk icon
         useTrkIconButton = new Button(composite, SWT.CHECK);
         GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.FILL)
@@ -490,16 +626,24 @@ public class SaveKmlDialog extends Dialog implements IPreferenceConstants
         kmlOptions.setIconScale(val);
         kmlOptions.setWptColor(wptColorText.getText());
         kmlOptions.setWptAlpha(wptAlphaText.getText());
-        kmlOptions.setTrkIconUrl(trkIconUrlText.getText());
+        kmlOptions.setWptColorMode(wptColorModeCombo.getSelectionIndex());
         kmlOptions.setWptIconUrl(wptIconUrlText.getText());
         val = Double.parseDouble(trkLineWidthText.getText());
         kmlOptions.setTrkLineWidth(val);
         kmlOptions.setTrkColor(trkColorText.getText());
         kmlOptions.setTrkAlpha(trkAlphaText.getText());
-        kmlOptions.setPromptToOverwrite(promptToOverwriteButton.getSelection());
-        kmlOptions.setSendToGoogle(sendToGoogleButton.getSelection());
         kmlOptions.setUseTrkIcon(useTrkIconButton.getSelection());
         kmlOptions.setTrkColorMode(trkColorModeCombo.getSelectionIndex());
+        kmlOptions.setTrkIconUrl(trkIconUrlText.getText());
+        val = Double.parseDouble(rteLineWidthText.getText());
+        kmlOptions.setRteLineWidth(val);
+        kmlOptions.setRteColor(rteColorText.getText());
+        kmlOptions.setRteAlpha(rteAlphaText.getText());
+        kmlOptions.setUseRteIcon(useRteIconButton.getSelection());
+        kmlOptions.setRteColorMode(rteColorModeCombo.getSelectionIndex());
+        kmlOptions.setRteIconUrl(rteIconUrlText.getText());
+        kmlOptions.setPromptToOverwrite(promptToOverwriteButton.getSelection());
+        kmlOptions.setSendToGoogle(sendToGoogleButton.getSelection());
     }
 
     private void setWidgetsFromKmlOptions() {
@@ -508,16 +652,24 @@ public class SaveKmlDialog extends Dialog implements IPreferenceConstants
         iconScaleText.setText(stringVal);
         wptColorText.setText(kmlOptions.getWptColor());
         wptAlphaText.setText(kmlOptions.getWptAlpha());
-        trkIconUrlText.setText(kmlOptions.getTrkIconUrl());
+        wptColorModeCombo.select(kmlOptions.getWptColorMode());
         wptIconUrlText.setText(kmlOptions.getWptIconUrl());
         stringVal = String.format("%g", kmlOptions.getTrkLineWidth());
         trkLineWidthText.setText(stringVal);
         trkColorText.setText(kmlOptions.getTrkColor());
         trkAlphaText.setText(kmlOptions.getTrkAlpha());
-        promptToOverwriteButton.setSelection(kmlOptions.getPromptToOverwrite());
-        sendToGoogleButton.setSelection(kmlOptions.getSendToGoogle());
         useTrkIconButton.setSelection(kmlOptions.getUseTrkIcon());
         trkColorModeCombo.select(kmlOptions.getTrkColorMode());
+        trkIconUrlText.setText(kmlOptions.getTrkIconUrl());
+        stringVal = String.format("%g", kmlOptions.getRteLineWidth());
+        rteLineWidthText.setText(stringVal);
+        rteColorText.setText(kmlOptions.getRteColor());
+        rteAlphaText.setText(kmlOptions.getRteAlpha());
+        useRteIconButton.setSelection(kmlOptions.getUseRteIcon());
+        rteColorModeCombo.select(kmlOptions.getRteColorMode());
+        rteIconUrlText.setText(kmlOptions.getRteIconUrl());
+        promptToOverwriteButton.setSelection(kmlOptions.getPromptToOverwrite());
+        sendToGoogleButton.setSelection(kmlOptions.getSendToGoogle());
     }
 
     private void setWidgetsFromPreferences() {
@@ -526,17 +678,24 @@ public class SaveKmlDialog extends Dialog implements IPreferenceConstants
         iconScaleText.setText(prefs.getString(P_ICON_SCALE));
         wptColorText.setText(prefs.getString(P_WPT_COLOR));
         wptAlphaText.setText(prefs.getString(P_WPT_ALPHA));
-        trkIconUrlText.setText(prefs.getString(P_TRK_ICON_URL));
+        wptColorModeCombo.select(prefs.getInt(P_WPT_COLOR_MODE));
         wptIconUrlText.setText(prefs.getString(P_WPT_ICON_URL));
+        trkIconUrlText.setText(prefs.getString(P_TRK_ICON_URL));
         trkLineWidthText.setText(prefs.getString(P_TRK_LINEWIDTH));
         trkColorText.setText(prefs.getString(P_TRK_COLOR));
         trkAlphaText.setText(prefs.getString(P_TRK_ALPHA));
+        trkColorModeCombo.select(prefs.getInt(P_TRK_COLOR_MODE));
+        useTrkIconButton.setSelection(prefs.getBoolean(P_USE_TRK_ICON));
+        rteIconUrlText.setText(prefs.getString(P_RTE_ICON_URL));
+        rteLineWidthText.setText(prefs.getString(P_TRK_LINEWIDTH));
+        rteColorText.setText(prefs.getString(P_RTE_COLOR));
+        rteAlphaText.setText(prefs.getString(P_RTE_ALPHA));
+        rteColorModeCombo.select(prefs.getInt(P_RTE_COLOR_MODE));
+        useRteIconButton.setSelection(prefs.getBoolean(P_USE_RTE_ICON));
         promptToOverwriteButton.setSelection(prefs
             .getBoolean(P_KML_PROMPT_TO_OVERWRITE));
         sendToGoogleButton.setSelection(prefs
             .getBoolean(P_KML_SEND_TO_GOOGLE_EARTH));
-        useTrkIconButton.setSelection(prefs.getBoolean(P_USE_TRK_ICON));
-        trkColorModeCombo.select(prefs.getInt(P_TRK_COLOR_MODE));
     }
 
     /**

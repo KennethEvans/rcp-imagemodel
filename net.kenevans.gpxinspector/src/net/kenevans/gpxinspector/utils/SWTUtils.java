@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Dictionary;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -25,6 +26,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
@@ -45,6 +47,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
+import org.osgi.framework.Bundle;
 
 /*
  * Program to provide SWT utilities
@@ -481,8 +484,8 @@ public class SWTUtils
             IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
 
             if(wsRoot.getLocation().isPrefixOf(pathInput.getPath())) {
-                file = ResourcesPlugin.getWorkspace().getRoot().getFile(
-                    pathInput.getPath());
+                file = ResourcesPlugin.getWorkspace().getRoot()
+                    .getFile(pathInput.getPath());
             } else {
                 // Can't get an IFile for an arbitrary file on the file system;
                 // return null
@@ -805,6 +808,38 @@ public class SWTUtils
         // return false;
         // }
         return true;
+    }
+
+    /**
+     * Gets the plug-in name from its ID.
+     * 
+     * @param pluginId The plug-in's Activator ID.
+     * @return
+     */
+    public static String getPluginName(String pluginId) {
+        String name = "Unknown-Name";
+        Bundle bundle = Platform.getBundle(pluginId);
+        if(bundle == null) return name;
+        String pluginName = bundle.getSymbolicName();
+        if(pluginName != null) name = pluginName;
+        return name;
+    }
+
+    /**
+     * Gets the plug-in version from its ID.
+     * 
+     * @param pluginId The plug-in's Activator ID.
+     * @return
+     */
+    public static String getPluginVersion(String pluginId) {
+        String version = "Unknown-Version";
+        Bundle bundle = Platform.getBundle(pluginId);
+        if(bundle == null) return version;
+        Dictionary<?, ?> bundleHeaders = bundle.getHeaders();
+        if(bundleHeaders == null) return version;
+        String pluginVersion = (String)bundleHeaders.get("Bundle-Version");
+        if(pluginVersion != null) version = pluginVersion;
+        return version;
     }
 
 }

@@ -13,17 +13,26 @@ import org.eclipse.jface.preference.IPreferenceStore;
 public class KmlOptions implements IPreferenceConstants
 {
     private String kmlFileName;
+    private double iconScale;
+
     private String trkColor;
     private String trkAlpha;
     private double trkLineWidth;
     private int trkColorMode;
-
-    private double iconScale;
     private Boolean useTrkIcon;
     private String trkIconUrl;
+
+    private String rteColor;
+    private String rteAlpha;
+    private double rteLineWidth;
+    private int rteColorMode;
+    private Boolean useRteIcon;
+    private String rteIconUrl;
+
     private String wptColor;
     private String wptAlpha;
     private String wptIconUrl;
+    private int wptColorMode;
 
     private boolean promptToOverwrite;
     private boolean sendToGoogle;
@@ -39,8 +48,6 @@ public class KmlOptions implements IPreferenceConstants
 
         String stringVal = prefs.getString(P_ICON_SCALE);
         iconScale = Double.parseDouble(stringVal);
-        wptIconUrl = prefs.getString(P_WPT_ICON_URL);
-        trkIconUrl = prefs.getString(P_TRK_ICON_URL);
 
         trkColor = prefs.getString(P_TRK_COLOR);
         trkAlpha = prefs.getString(P_TRK_ALPHA);
@@ -48,9 +55,18 @@ public class KmlOptions implements IPreferenceConstants
         trkLineWidth = Double.parseDouble(stringVal);
         trkColorMode = prefs.getInt(P_TRK_COLOR_MODE);
         useTrkIcon = prefs.getBoolean(P_USE_TRK_ICON);
+        trkIconUrl = prefs.getString(P_TRK_ICON_URL);
+
+        rteColor = prefs.getString(P_RTE_COLOR);
+        rteAlpha = prefs.getString(P_RTE_ALPHA);
+        stringVal = prefs.getString(P_RTE_LINEWIDTH);
+        rteLineWidth = Double.parseDouble(stringVal);
+        useRteIcon = prefs.getBoolean(P_USE_RTE_ICON);
+        rteIconUrl = prefs.getString(P_RTE_ICON_URL);
 
         wptColor = prefs.getString(P_WPT_COLOR);
         wptAlpha = prefs.getString(P_WPT_ALPHA);
+        wptIconUrl = prefs.getString(P_WPT_ICON_URL);
     }
 
     /**
@@ -65,6 +81,20 @@ public class KmlOptions implements IPreferenceConstants
      */
     public void setKmlFileName(String kmlFileName) {
         this.kmlFileName = kmlFileName;
+    }
+
+    /**
+     * @return The value of iconScale.
+     */
+    public double getIconScale() {
+        return iconScale;
+    }
+
+    /**
+     * @param iconScale The new value for iconScale.
+     */
+    public void setIconScale(double iconScale) {
+        this.iconScale = iconScale;
     }
 
     /**
@@ -124,20 +154,6 @@ public class KmlOptions implements IPreferenceConstants
     }
 
     /**
-     * @return The value of iconScale.
-     */
-    public double getIconScale() {
-        return iconScale;
-    }
-
-    /**
-     * @param iconScale The new value for iconScale.
-     */
-    public void setIconScale(double iconScale) {
-        this.iconScale = iconScale;
-    }
-
-    /**
      * @return The value of useTrkIcon.
      */
     public Boolean getUseTrkIcon() {
@@ -166,6 +182,90 @@ public class KmlOptions implements IPreferenceConstants
     }
 
     /**
+     * @return The value of rteColor.
+     */
+    public String getRteColor() {
+        return rteColor;
+    }
+
+    /**
+     * @param rteColor The new value for rteColor.
+     */
+    public void setRteColor(String rteColor) {
+        this.rteColor = rteColor;
+    }
+
+    /**
+     * @return The value of rteAlpha.
+     */
+    public String getRteAlpha() {
+        return rteAlpha;
+    }
+
+    /**
+     * @param rteAlpha The new value for rteAlpha.
+     */
+    public void setRteAlpha(String rteAlpha) {
+        this.rteAlpha = rteAlpha;
+    }
+
+    /**
+     * @return The value of rteLineWidth.
+     */
+    public double getRteLineWidth() {
+        return rteLineWidth;
+    }
+
+    /**
+     * @param rteLineWidth The new value for rteLineWidth.
+     */
+    public void setRteLineWidth(double rteLineWidth) {
+        this.rteLineWidth = rteLineWidth;
+    }
+
+    /**
+     * @return The value of rteColorMode.
+     */
+    public int getRteColorMode() {
+        return rteColorMode;
+    }
+
+    /**
+     * @param rteColorMode The new value for rteColorMode.
+     */
+    public void setRteColorMode(int rteColorMode) {
+        this.rteColorMode = rteColorMode;
+    }
+
+    /**
+     * @return The value of useRteIcon.
+     */
+    public Boolean getUseRteIcon() {
+        return useRteIcon;
+    }
+
+    /**
+     * @param useRteIcon The new value for useRteIcon.
+     */
+    public void setUseRteIcon(Boolean useRteIcon) {
+        this.useRteIcon = useRteIcon;
+    }
+
+    /**
+     * @return The value of rteIconUrl.
+     */
+    public String getRteIconUrl() {
+        return rteIconUrl;
+    }
+
+    /**
+     * @param rteIconUrl The new value for rteIconUrl.
+     */
+    public void setRteIconUrl(String rteIconUrl) {
+        this.rteIconUrl = rteIconUrl;
+    }
+
+    /**
      * @return The value of wptColor.
      */
     public String getWptColor() {
@@ -175,8 +275,8 @@ public class KmlOptions implements IPreferenceConstants
     /**
      * @param wptColor The new value for wptColor.
      */
-    public void setWptColor(String wptIconColor) {
-        this.wptColor = wptIconColor;
+    public void setWptColor(String wptColor) {
+        this.wptColor = wptColor;
     }
 
     /**
@@ -233,6 +333,20 @@ public class KmlOptions implements IPreferenceConstants
      */
     public void setSendToGoogle(boolean sendToGoogle) {
         this.sendToGoogle = sendToGoogle;
+    }
+
+    /**
+     * @return The value of wptColorMode.
+     */
+    public int getWptColorMode() {
+        return wptColorMode;
+    }
+
+    /**
+     * @param wptColorMode The new value for wptColorMode.
+     */
+    public void setWptColorMode(int wptColorMode) {
+        this.wptColorMode = wptColorMode;
     }
 
 }

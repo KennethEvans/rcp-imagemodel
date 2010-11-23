@@ -20,6 +20,7 @@ public interface IPreferenceConstants extends IPluginConstants
 
     public static final String P_KML_FILENAME = "kmlFileName";
     public static final String D_KML_FILENAME = "c:/Users/evans/Documents/GPSLink/AAA.kml";
+    
     /** The track color */
     public static final String P_TRK_COLOR = "trkColor";
     public static final String D_TRK_COLOR = "ff0000";
@@ -31,7 +32,20 @@ public interface IPreferenceConstants extends IPluginConstants
     public static final String D_TRK_LINEWIDTH = "2.0";
     /** The track color mode */
     public static final String P_TRK_COLOR_MODE = "trkColorMode";
-    public static final int D_TRK_COLOR_MODE = KML_COLOR_MODE_COLORSET;
+    public static final int D_TRK_COLOR_MODE = KML_COLOR_MODE_RAINBOW;
+
+    /** The route line width. */
+    public static final String P_RTE_LINEWIDTH = "rteLineWidth";
+    public static final String D_RTE_LINEWIDTH = "2.0";
+    /** The route color mode */
+    public static final String P_RTE_COLOR_MODE = "rteColorMode";
+    public static final int D_RTE_COLOR_MODE = KML_COLOR_MODE_COLOR;
+    /** The routepoint icon color, actually a mask to & the image with */
+    public static final String P_RTE_COLOR = "rteIconColor";
+    public static final String D_RTE_COLOR = "0000ff";
+    /** The waypoint alpha */
+    public static final String P_RTE_ALPHA = "rteAlpha";
+    public static final String D_RTE_ALPHA = "ff";
 
     /** The waypoint icon color, actually a mask to & the image with */
     public static final String P_WPT_COLOR = "wptIconColor";
@@ -39,6 +53,9 @@ public interface IPreferenceConstants extends IPluginConstants
     /** The waypoint alpha */
     public static final String P_WPT_ALPHA = "wptAlpha";
     public static final String D_WPT_ALPHA = "ff";
+    /** The track color mode */
+    public static final String P_WPT_COLOR_MODE = "wptColorMode";
+    public static final int D_WPT_COLOR_MODE = KML_COLOR_MODE_COLOR;
 
     /** The icon scale, Use 1 for normal and 0 for label only (no icon) */
     public static final String P_ICON_SCALE = "iconScale";
@@ -46,12 +63,21 @@ public interface IPreferenceConstants extends IPluginConstants
     /** Determines if icons are shown at the start of a track */
     public static final String P_USE_TRK_ICON = "useTrkIcon";
     public static final Boolean D_USE_TRK_ICON = true;
+    /** Determines if icons are shown at the start of a route */
+    public static final String P_USE_RTE_ICON = "useTrkIcon";
+    public static final Boolean D_USE_RTE_ICON = true;
     /**
      * The URL for the home icon. Using white will allow the mask to be more
      * effective. (The default icon is Yellow = #ff00ffff).
      */
     public static final String P_TRK_ICON_URL = "homeIconUrl";
     public static final String D_TRK_ICON_URL = "http://maps.google.com/mapfiles/kml/pushpin/wht-pushpin.png";
+    /**
+     * The URL for the routepoint icon. Using white will allow the mask to be more
+     * effective. (The default icon is Yellow = #ff00ffff).
+     */
+    public static final String P_RTE_ICON_URL = "rteIconUrl";
+    public static final String D_RTE_ICON_URL = "http://maps.google.com/mapfiles/kml/paddle/wht-circle.png";
     /**
      * The URL for the waypoint icon. Using white will allow the mask to be more
      * effective. (The default icon is Yellow = #ff00ffff).

@@ -172,6 +172,16 @@
                label="Save KML..."
                style="push">
          </command>
+         <command
+               commandId="net.kenevans.gpxinspector.save"
+               label="Save Selected GPX Files"
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.saveAs"
+               label="Save Selected GPX Files As..."
+               style="push">
+         </command>
       </menuContribution>
       <menuContribution
             locationURI="popup:net.kenevans.gpxinspector.gpxView?after=additions">
@@ -379,6 +389,16 @@
                commandId="net.kenevans.gpxinspector.saveKml"
                icon="icons/ge16.png"
                label="Save KML..."
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.save"
+               label="Save Selected GPX Files"
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.saveAs"
+               label="Save Selected GPX Files As..."
                style="push">
          </command>
       </menuContribution>

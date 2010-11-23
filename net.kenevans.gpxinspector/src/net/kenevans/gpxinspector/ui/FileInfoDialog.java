@@ -3,8 +3,13 @@ package net.kenevans.gpxinspector.ui;
 import java.io.File;
 import java.util.Date;
 
+import net.kenevans.gpx.BoundsType;
+import net.kenevans.gpx.CopyrightType;
+import net.kenevans.gpx.EmailType;
 import net.kenevans.gpx.GpxType;
-import net.kenevans.gpx.TrkType;
+import net.kenevans.gpx.LinkType;
+import net.kenevans.gpx.MetadataType;
+import net.kenevans.gpx.PersonType;
 import net.kenevans.gpxinspector.model.GpxFileModel;
 
 import org.eclipse.jface.layout.GridDataFactory;
@@ -40,6 +45,23 @@ public class FileInfoDialog extends Dialog
     private Text sizeText;
     private Text creatorText;
     private Text versionText;
+    private Text authorText;
+    private Text descText;
+    private Text keywordsText;
+    private Text metadataNameText;
+    private Text timeText;
+    private Text licenseText;
+    private Text yearText;
+    private Text minLatText;
+    private Text maxLatText;
+    private Text minLonText;
+    private Text maxLonText;
+    private Text authorNameText;
+    private Text domainText;
+    private Text idText;
+    private Text linkHrefText;
+    private Text linkTextText;
+    private Text linkTypeText;
 
     /**
      * Constructor.
@@ -100,7 +122,9 @@ public class FileInfoDialog extends Dialog
         shell.setLayout(gridLayout);
 
         // Create the groups
-        createInfoGroup(shell);
+        createFileGroup(shell);
+        createGpxGroup(shell);
+        createMetadataGroup(shell);
 
         // Create the buttons
         // Make a zero margin composite for the OK and Cancel buttons
@@ -150,12 +174,12 @@ public class FileInfoDialog extends Dialog
     }
 
     /**
-     * Creates the icons group.
+     * Creates the file group.
      * 
-     * @param shell
+     * @param parent
      */
-    private void createInfoGroup(Shell shell) {
-        Group box = new Group(shell, SWT.BORDER);
+    private void createFileGroup(Composite parent) {
+        Group box = new Group(parent, SWT.BORDER);
         box.setText("File");
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 1;
@@ -186,9 +210,35 @@ public class FileInfoDialog extends Dialog
         dateText = labeledText.getText();
         dateText.setToolTipText("Last modified date.");
 
+        // Dirty
+        if(model.isDirty()) {
+            // Really only need a label here
+            labeledText = new LabeledText(box,
+                "* File has been modified but not saved", TEXT_COLS_LARGE);
+            labeledText.getText().setEditable(false);
+            GridDataFactory.fillDefaults().grab(true, false)
+                .applyTo(labeledText.getComposite());
+            labeledText.getText().setToolTipText(
+                "Indicates if the file has been modified.");
+        }
+    }
+
+    /**
+     * Creates the GPX group.
+     * 
+     * @param parent
+     */
+    private void createGpxGroup(Composite parent) {
+        Group box = new Group(parent, SWT.BORDER);
+        box.setText("GPX");
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.numColumns = 1;
+        box.setLayout(gridLayout);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(box);
+
         // Creator
-        labeledText = new LabeledText(box, "Creator:", TEXT_COLS_LARGE);
-        // labeledText.getText().setEditable(false);
+        LabeledText labeledText = new LabeledText(box, "Creator:",
+            TEXT_COLS_LARGE);
         GridDataFactory.fillDefaults().grab(true, false)
             .applyTo(labeledText.getComposite());
         creatorText = labeledText.getText();
@@ -206,20 +256,240 @@ public class FileInfoDialog extends Dialog
             .applyTo(labeledText.getComposite());
         versionText = labeledText.getText();
         versionText
-            .setToolTipText("All GPX files must include the version of the GPX schema\n"
-                + "which the file references.");
+            .setToolTipText("All GPX files must include the version of the "
+                + "GPX schema\n" + "which the file references.");
+    }
 
-        // Dirty
-        if(model.isDirty()) {
-            // Really only need a label here
-            labeledText = new LabeledText(box,
-                "* File has been modified but not saved", TEXT_COLS_LARGE);
-            labeledText.getText().setEditable(false);
-            GridDataFactory.fillDefaults().grab(true, false)
-                .applyTo(labeledText.getComposite());
-            labeledText.getText().setToolTipText(
-                "Indicates if the file has been modified.");
-        }
+    /**
+     * Creates the metadata group.
+     * 
+     * @param parent
+     */
+    private void createMetadataGroup(Composite parent) {
+        Group box = new Group(parent, SWT.BORDER);
+        box.setText("Metadata");
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.numColumns = 1;
+        box.setLayout(gridLayout);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(box);
+
+        // Author
+        createAuthorGroup(box);
+
+        // Bounds
+        createBoundsGroup(box);
+
+        // Copyright
+        createCopyrightGroup(box);
+
+        // Desc
+        LabeledText labeledText = new LabeledText(box, "Desc:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        descText = labeledText.getText();
+        descText.setToolTipText("Holds additional information about the "
+            + "element intended for the user, not the GPS.");
+
+        // Keywords
+        labeledText = new LabeledText(box, "Keywords:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        keywordsText = labeledText.getText();
+        keywordsText.setToolTipText("Keywords for indexing the GPX file with "
+            + "search engines. Comma separated.");
+
+        // Name
+        labeledText = new LabeledText(box, "Name:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        metadataNameText = labeledText.getText();
+        metadataNameText.setToolTipText("Metadata name");
+
+        // Time
+        labeledText = new LabeledText(box, "Time:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        timeText = labeledText.getText();
+        timeText.setToolTipText("Metadata time.");
+    }
+
+    /**
+     * Creates the author group.
+     * 
+     * @param parent
+     */
+    private void createAuthorGroup(Composite parent) {
+        Group box = new Group(parent, SWT.BORDER);
+        box.setText("Author");
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.numColumns = 1;
+        box.setLayout(gridLayout);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(box);
+
+        // Email
+        createEmailGroup(box);
+
+        // Link
+        createLinkGroup(box);
+
+        // Name
+        LabeledText labeledText = new LabeledText(box, "Name:",
+            TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        authorNameText = labeledText.getText();
+        authorNameText.setToolTipText("Author's name.");
+    }
+
+    /**
+     * Creates the email group.
+     * 
+     * @param parent
+     */
+    private void createEmailGroup(Composite parent) {
+        Group box = new Group(parent, SWT.BORDER);
+        box.setText("Email");
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.numColumns = 1;
+        box.setLayout(gridLayout);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(box);
+
+        // Id
+        LabeledText labeledText = new LabeledText(box, "Id:",
+            TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        idText = labeledText.getText();
+        idText.setToolTipText("Id part of author's email (id@domain).");
+
+        // Domain
+        labeledText = new LabeledText(box, "Domain:",
+            TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        domainText = labeledText.getText();
+        domainText.setToolTipText("Domain part of author's email (id@domain).");
+    }
+
+    /**
+     * Creates the link group.
+     * 
+     * @param parent
+     */
+    private void createLinkGroup(Composite parent) {
+        Group box = new Group(parent, SWT.BORDER);
+        box.setText("Link");
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.numColumns = 1;
+        box.setLayout(gridLayout);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(box);
+
+        // Link
+        LabeledText labeledText = new LabeledText(box, "Href:",
+            TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        linkHrefText = labeledText.getText();
+        linkHrefText.setToolTipText("Href.");
+
+        // Text
+        labeledText = new LabeledText(box, "Text:",
+            TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        linkTextText = labeledText.getText();
+        linkTextText.setToolTipText("Author's name.");
+        
+        // Text
+        labeledText = new LabeledText(box, "Type:",
+            TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        linkTypeText = labeledText.getText();
+        linkTypeText.setToolTipText("Type ?");
+    }
+
+    /**
+     * Creates the bounds group.
+     * 
+     * @param parent
+     */
+    private void createBoundsGroup(Composite parent) {
+        Group box = new Group(parent, SWT.BORDER);
+        box.setText("Bounds");
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.numColumns = 1;
+        box.setLayout(gridLayout);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(box);
+
+        // MinLat
+        LabeledText labeledText = new LabeledText(box, "MinLat:",
+            TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        minLatText = labeledText.getText();
+        minLatText.setToolTipText("Minimum latiture.");
+
+        // MaxLat
+        labeledText = new LabeledText(box, "MaxLat:",
+            TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        maxLatText = labeledText.getText();
+        maxLatText.setToolTipText("Minimum latiture.");
+
+        // MinLon
+        labeledText = new LabeledText(box, "MinLon:",
+            TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        minLonText = labeledText.getText();
+        minLonText.setToolTipText("Minimum latiture.");
+
+        // MaxLon
+        labeledText = new LabeledText(box, "MaxLon:",
+            TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        maxLonText = labeledText.getText();
+        maxLonText.setToolTipText("Minimum latiture.");
+    }
+
+   /**
+     * Creates the copyright group.
+     * 
+     * @param parent
+     */
+    private void createCopyrightGroup(Composite parent) {
+        Group box = new Group(parent, SWT.BORDER);
+        box.setText("Copyright");
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.numColumns = 1;
+        box.setLayout(gridLayout);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(box);
+
+        // Author
+        LabeledText labeledText = new LabeledText(box, "Author:",
+            TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        authorText = labeledText.getText();
+        authorText.setToolTipText("The author of the GPX file. "
+            + "The GPX file's owner/creator.");
+
+        // License
+        labeledText = new LabeledText(box, "License:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        licenseText = labeledText.getText();
+        licenseText.setToolTipText("License.");
+
+        // Year
+        labeledText = new LabeledText(box, "Year:", TEXT_COLS_LARGE);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledText.getComposite());
+        yearText = labeledText.getText();
+        yearText.setToolTipText("Year.");
     }
 
     /**
@@ -228,6 +498,12 @@ public class FileInfoDialog extends Dialog
      */
     private void setModelFromWidgets() {
         GpxType gpx = model.getGpx();
+        MetadataType metadataType = null;
+        PersonType personType = null;
+        BoundsType boundsType = null;
+        EmailType emailType = null;
+        LinkType linkType = null;
+        CopyrightType copyrightType = null;
         Text text = creatorText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
             gpx.setCreator(LabeledText.toString(text));
@@ -235,6 +511,203 @@ public class FileInfoDialog extends Dialog
         text = versionText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
             gpx.setVersion(LabeledText.toString(text));
+        }
+        
+        // Author
+        text = authorNameText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getAuthor()== null) {
+                personType = new PersonType();
+            }
+            personType.setName(LabeledText.toString(text));
+        }
+        text = idText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getAuthor()== null) {
+                personType = new PersonType();
+            }
+            if(gpx.getMetadata().getAuthor().getEmail()== null) {
+                emailType = new EmailType();
+            }
+            emailType.setId(LabeledText.toString(text));
+        }
+        text = domainText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getAuthor()== null) {
+                personType = new PersonType();
+            }
+            if(gpx.getMetadata().getAuthor().getEmail()== null) {
+                emailType = new EmailType();
+            }
+            emailType.setDomain(LabeledText.toString(text));
+        }
+        text = linkHrefText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getAuthor()== null) {
+                personType = new PersonType();
+            }
+            if(gpx.getMetadata().getAuthor().getEmail()== null) {
+                linkType = new LinkType();
+            }
+           linkType.setHref(LabeledText.toString(text));
+        }
+        text = linkTextText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getAuthor()== null) {
+                personType = new PersonType();
+            }
+            if(gpx.getMetadata().getAuthor().getEmail()== null) {
+                linkType = new LinkType();
+            }
+           linkType.setText(LabeledText.toString(text));
+        }
+        text = linkTypeText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getAuthor()== null) {
+                personType = new PersonType();
+            }
+            if(gpx.getMetadata().getAuthor().getEmail()== null) {
+                linkType = new LinkType();
+            }
+           linkType.setType(LabeledText.toString(text));
+        }
+        
+        // Bounds
+        text = minLatText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getBounds() == null) {
+                boundsType = new BoundsType();
+            }
+            boundsType.setMinlat(LabeledText.toBigDecimal(text));
+        }
+        text = maxLatText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getBounds() == null) {
+                boundsType = new BoundsType();
+            }
+            boundsType.setMaxlat(LabeledText.toBigDecimal(text));
+        }
+        text = minLonText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getBounds() == null) {
+                boundsType = new BoundsType();
+            }
+            boundsType.setMinlon(LabeledText.toBigDecimal(text));
+        }
+        text = maxLonText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getBounds() == null) {
+                boundsType = new BoundsType();
+            }
+            boundsType.setMaxlon(LabeledText.toBigDecimal(text));
+        }
+
+        // Copyright
+        text = authorText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getCopyright() == null) {
+                copyrightType = new CopyrightType();
+            }
+            copyrightType.setAuthor(LabeledText.toString(text));
+        }
+        text = licenseText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getCopyright() == null) {
+                copyrightType = new CopyrightType();
+            }
+            copyrightType.setLicense(LabeledText.toString(text));
+        }
+        text = yearText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            if(gpx.getMetadata().getCopyright() == null) {
+                copyrightType = new CopyrightType();
+            }
+            copyrightType.setYear(LabeledText.toXMLGregorianCalendar(text));
+        }
+        
+        text = descText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            metadataType.setDesc(LabeledText.toString(text));
+        }
+        text = keywordsText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            metadataType.setKeywords(LabeledText.toString(text));
+        }
+        text = metadataNameText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            metadataType.setName(LabeledText.toString(text));
+        }
+        text = timeText;
+        if(text != null && !text.isDisposed() && text.getEditable()) {
+            if(gpx.getMetadata() == null) {
+                metadataType = new MetadataType();
+                gpx.setMetadata(metadataType);
+            }
+            metadataType.setTime(LabeledText.toXMLGregorianCalendar(text));
         }
     }
 
@@ -253,6 +726,63 @@ public class FileInfoDialog extends Dialog
         GpxType gpx = model.getGpx();
         LabeledText.read(creatorText, gpx.getCreator());
         LabeledText.read(versionText, gpx.getVersion());
+
+        // Metadata
+        MetadataType metadataType = gpx.getMetadata();
+        PersonType personType = null;
+        BoundsType boundsType = null;
+        EmailType emailType = null;
+        LinkType linkType = null;
+        CopyrightType copyrightType = null;
+        if(metadataType != null) {
+            personType = metadataType.getAuthor();
+            if(personType != null) {
+                emailType = personType.getEmail();
+                linkType = personType.getLink();
+            }
+            boundsType = metadataType.getBounds();
+            copyrightType = metadataType.getCopyright();
+            LabeledText.read(descText,
+                metadataType != null ? metadataType.getDesc() : null);
+            LabeledText.read(keywordsText,
+                metadataType != null ? metadataType.getKeywords() : null);
+            LabeledText.read(metadataNameText,
+                metadataType != null ? metadataType.getName() : null);
+            LabeledText.read(timeText,
+                metadataType != null ? metadataType.getTime() : null);
+        }
+        
+        // Author
+        LabeledText.read(idText,
+            emailType != null ? emailType.getId(): null);
+        LabeledText.read(domainText,
+            emailType != null ? emailType.getDomain(): null);
+        LabeledText.read(linkHrefText,
+            linkType != null ? linkType.getHref(): null);
+        LabeledText.read(linkTextText,
+            linkType != null ? linkType.getText(): null);
+        LabeledText.read(linkTypeText,
+            linkType != null ? linkType.getType(): null);
+        LabeledText.read(authorNameText,
+            personType != null ? personType.getName(): null);
+        
+        // Bounds
+        LabeledText.read(minLatText,
+            boundsType != null ? boundsType.getMinlat(): null);
+        LabeledText.read(maxLatText,
+            boundsType != null ? boundsType.getMaxlat(): null);
+        LabeledText.read(minLonText,
+            boundsType != null ? boundsType.getMinlon(): null);
+        LabeledText.read(maxLonText,
+            boundsType != null ? boundsType.getMaxlon(): null);
+        
+        // Copyright
+        LabeledText.read(authorText,
+            copyrightType != null ? copyrightType.getAuthor() : null);
+        LabeledText.read(licenseText,
+            copyrightType != null ? copyrightType.getLicense() : null);
+        LabeledText.read(yearText,
+            copyrightType != null ? copyrightType.getYear() : null);
     }
 
     /**

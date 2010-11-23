@@ -238,7 +238,10 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
     public void saveAs(File file) {
         try {
             synchronizeGpx();
-            GPXParser.save("GPX Inspector", gpx, file);
+            GPXParser.save(
+                "GPX Inspector "
+                    + SWTUtils.getPluginVersion("net.kenevans.gpxinspector"),
+                gpx, file);
             reset(file);
             fireChangedEvent(this);
             // Reset dirty, which was set by fireChangedEvent to true
