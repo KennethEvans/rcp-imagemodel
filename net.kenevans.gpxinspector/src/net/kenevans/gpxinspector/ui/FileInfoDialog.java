@@ -6,11 +6,13 @@ import java.util.Date;
 import net.kenevans.gpx.BoundsType;
 import net.kenevans.gpx.CopyrightType;
 import net.kenevans.gpx.EmailType;
+import net.kenevans.gpx.ExtensionsType;
 import net.kenevans.gpx.GpxType;
 import net.kenevans.gpx.LinkType;
 import net.kenevans.gpx.MetadataType;
 import net.kenevans.gpx.PersonType;
 import net.kenevans.gpxinspector.model.GpxFileModel;
+import net.kenevans.gpxinspector.utils.LabeledText;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
@@ -28,7 +30,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import utils.LabeledText;
 
 /*
  * Created on Aug 23, 2010
@@ -502,12 +503,8 @@ public class FileInfoDialog extends Dialog
      */
     private void setModelFromWidgets() {
         GpxType gpx = model.getGpx();
-        MetadataType metadataType = null;
-        PersonType personType = null;
-        BoundsType boundsType = null;
-        EmailType emailType = null;
-        LinkType linkType = null;
-        CopyrightType copyrightType = null;
+        
+        // GPX
         Text text = creatorText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
             gpx.setCreator(LabeledText.toString(text));
@@ -516,6 +513,14 @@ public class FileInfoDialog extends Dialog
         if(text != null && !text.isDisposed() && text.getEditable()) {
             gpx.setVersion(LabeledText.toString(text));
         }
+        
+        // Metadata
+        MetadataType metadataType = null;
+        PersonType personType = null;
+        BoundsType boundsType = null;
+        EmailType emailType = null;
+        LinkType linkType = null;
+        CopyrightType copyrightType = null;
 
         // Author
         text = authorNameText;
@@ -529,6 +534,7 @@ public class FileInfoDialog extends Dialog
             }
             personType.setName(LabeledText.toString(text));
         }
+        
         text = idText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
             if(gpx.getMetadata() == null) {
@@ -713,6 +719,9 @@ public class FileInfoDialog extends Dialog
             }
             metadataType.setTime(LabeledText.toXMLGregorianCalendar(text));
         }
+        
+        // Write the metadata
+        gpx.setMetadata(metadataType);
     }
 
     /**

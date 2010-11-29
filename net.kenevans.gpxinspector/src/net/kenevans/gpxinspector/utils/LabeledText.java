@@ -1,4 +1,4 @@
-package utils;
+package net.kenevans.gpxinspector.utils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -6,7 +6,6 @@ import java.math.BigInteger;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import net.kenevans.gpxinspector.utils.SWTUtils;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;

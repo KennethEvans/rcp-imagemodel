@@ -2,6 +2,7 @@ package net.kenevans.gpxinspector.kml;
 
 import net.kenevans.gpxinspector.plugin.Activator;
 import net.kenevans.gpxinspector.preferences.IPreferenceConstants;
+import net.kenevans.gpxinspector.utils.LabeledText;
 import net.kenevans.gpxinspector.utils.SWTUtils;
 
 import org.eclipse.jface.layout.GridDataFactory;
@@ -34,7 +35,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import utils.LabeledText;
 
 /*
  * Created on Aug 23, 2010

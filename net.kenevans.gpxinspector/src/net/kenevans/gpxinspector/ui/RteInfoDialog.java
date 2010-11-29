@@ -2,6 +2,7 @@ package net.kenevans.gpxinspector.ui;
 
 import net.kenevans.gpx.RteType;
 import net.kenevans.gpxinspector.model.GpxRouteModel;
+import net.kenevans.gpxinspector.utils.LabeledText;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
@@ -19,7 +20,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import utils.LabeledText;
 
 /*
  * Created on Aug 23, 2010

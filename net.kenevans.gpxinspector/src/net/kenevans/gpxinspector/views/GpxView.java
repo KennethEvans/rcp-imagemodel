@@ -26,6 +26,7 @@ import net.kenevans.gpxinspector.ui.GpxCheckStateProvider;
 import net.kenevans.gpxinspector.ui.GpxContentProvider;
 import net.kenevans.gpxinspector.ui.GpxLabelProvider;
 import net.kenevans.gpxinspector.utils.SWTUtils;
+import net.kenevans.gpxinspector.utils.ScrolledTextDialog;
 import net.kenevans.gpxinspector.utils.find.FindNear;
 import net.kenevans.gpxinspector.utils.find.FindNear.Mode;
 import net.kenevans.gpxinspector.utils.find.FindNearOptions;
@@ -70,7 +71,6 @@ import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.ViewPart;
 import org.osgi.framework.Bundle;
 
-import utils.ScrolledTextDialog;
 
 /**
  * Insert the type's description here.

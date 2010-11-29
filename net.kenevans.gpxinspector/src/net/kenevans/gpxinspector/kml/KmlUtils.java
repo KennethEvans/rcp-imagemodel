@@ -267,7 +267,7 @@ public class KmlUtils implements IPreferenceConstants
                             first = false;
                             folder
                                 .createAndAddPlacemark()
-                                .withName(trackModel.getLabel() + " Placemark")
+                                .withName(trackModel.getLabel())
                                 .withStyleUrl(
                                     "#trk" + trkColors[nTrack % nTrkColors])
                                 .createAndSetPoint().addToCoordinates(lon, lat);
@@ -331,7 +331,7 @@ public class KmlUtils implements IPreferenceConstants
                         first = false;
                         routeFolder
                             .createAndAddPlacemark()
-                            .withName(routeModel.getLabel() + " Placemark")
+                            .withName(routeModel.getLabel())
                             .withStyleUrl(
                                 "#rte" + rteColors[nRoute % nRteColors])
                             .createAndSetPoint().addToCoordinates(lon, lat);
@@ -471,10 +471,10 @@ public class KmlUtils implements IPreferenceConstants
             trkColors[i] = String.format("%s%02x%02x%02x", alpha, blue, green,
                 red);
             // DEBUG
-//            System.out.println(trkColors[i]);
+            // System.out.println(trkColors[i]);
         }
         // DEBUG
-//        System.out.println("nColors=" + nColors);
+        // System.out.println("nColors=" + nColors);
     }
 
     /**

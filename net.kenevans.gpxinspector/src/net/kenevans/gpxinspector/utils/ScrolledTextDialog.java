@@ -4,7 +4,7 @@
  * By Kenneth Evans, Jr.
  */
 
-package utils;
+package net.kenevans.gpxinspector.utils;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
