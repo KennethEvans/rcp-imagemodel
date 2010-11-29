@@ -6,7 +6,6 @@ import java.util.Date;
 import net.kenevans.gpx.BoundsType;
 import net.kenevans.gpx.CopyrightType;
 import net.kenevans.gpx.EmailType;
-import net.kenevans.gpx.ExtensionsType;
 import net.kenevans.gpx.GpxType;
 import net.kenevans.gpx.LinkType;
 import net.kenevans.gpx.MetadataType;

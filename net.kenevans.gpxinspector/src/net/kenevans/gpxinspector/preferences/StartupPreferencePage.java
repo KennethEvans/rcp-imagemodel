@@ -2,8 +2,6 @@ package net.kenevans.gpxinspector.preferences;
 
 import java.io.File;
 
-import javax.swing.JOptionPane;
-
 import net.kenevans.gpxinspector.plugin.Activator;
 import net.kenevans.gpxinspector.utils.SWTUtils;
 import net.kenevans.gpxinspector.utils.TreeWithAddRemoveUpDown;

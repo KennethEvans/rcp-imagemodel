@@ -2,16 +2,9 @@ package net.kenevans.gpxinspector.preferences;
 
 import net.kenevans.gpxinspector.plugin.Activator;
 
-import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.FileFieldEditor;
-import org.eclipse.jface.preference.StringFieldEditor;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
