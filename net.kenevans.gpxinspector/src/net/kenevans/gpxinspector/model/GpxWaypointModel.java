@@ -3,6 +3,7 @@ package net.kenevans.gpxinspector.model;
 import net.kenevans.gpx.WptType;
 import net.kenevans.gpxinspector.ui.WptInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
+import net.kenevans.parser.GPXClone;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -14,6 +15,13 @@ import org.eclipse.swt.widgets.Display;
 public class GpxWaypointModel extends GpxModel implements IGpxElementConstants
 {
     private WptType waypoint;
+
+    /**
+     * GpxWaypointModel constructor which is private with no arguments for use
+     * in clone.
+     */
+    private GpxWaypointModel() {
+    }
 
     public GpxWaypointModel(GpxModel parent, WptType waypoint) {
         this.parent = parent;
@@ -54,6 +62,20 @@ public class GpxWaypointModel extends GpxModel implements IGpxElementConstants
         }
         removeAllGpxModelListeners();
         disposed = true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.kenevans.gpxinspector.model.GpxModel#clone()
+     */
+    @Override
+    public Object clone() {
+        GpxWaypointModel clone = new GpxWaypointModel();
+        clone.parent = this.parent;
+        clone.waypoint = GPXClone.clone(this.waypoint);
+
+        return clone;
     }
 
     /**

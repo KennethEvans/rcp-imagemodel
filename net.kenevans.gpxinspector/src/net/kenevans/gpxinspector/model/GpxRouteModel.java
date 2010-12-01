@@ -3,6 +3,7 @@ package net.kenevans.gpxinspector.model;
 import net.kenevans.gpx.RteType;
 import net.kenevans.gpxinspector.ui.RteInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
+import net.kenevans.parser.GPXClone;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -14,6 +15,13 @@ import org.eclipse.swt.widgets.Display;
 public class GpxRouteModel extends GpxModel implements IGpxElementConstants
 {
     private RteType route;
+
+    /**
+     * GpxRouteModel constructor which is private with no arguments for use in
+     * clone.
+     */
+    private GpxRouteModel() {
+    }
 
     public GpxRouteModel(GpxModel parent, RteType route) {
         this.parent = parent;
@@ -54,6 +62,18 @@ public class GpxRouteModel extends GpxModel implements IGpxElementConstants
         }
         removeAllGpxModelListeners();
         disposed = true;
+    }
+
+    /* (non-Javadoc)
+     * @see net.kenevans.gpxinspector.model.GpxModel#clone()
+     */
+    @Override
+    public Object clone() {
+        GpxRouteModel clone = new GpxRouteModel();
+        clone.parent = this.parent;
+        clone.route = GPXClone.clone(this.route);
+        
+        return clone;
     }
 
     /**

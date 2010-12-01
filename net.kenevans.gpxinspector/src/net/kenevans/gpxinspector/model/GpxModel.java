@@ -55,9 +55,6 @@ public abstract class GpxModel
      */
     public static final String CHANGED = "gpxModel.changed";
 
-    public GpxModel() {
-    }
-
     /**
      * Adds the listener.
      * 
@@ -242,5 +239,32 @@ public abstract class GpxModel
         }
         return null;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    abstract public Object clone();
+    // Was not able to implement this via reflection or serialization
+    // {
+    // // Obtain the clone by reflection.
+    // return ReflectiveClone.clone(this);
+    //
+    // // Obtain the clone by serialization
+    // try {
+    // ByteArrayOutputStream out = new ByteArrayOutputStream();
+    // ObjectOutputStream oout = new ObjectOutputStream(out);
+    // oout.writeObject(this);
+    //
+    // ObjectInputStream in = new ObjectInputStream(
+    // new ByteArrayInputStream(out.toByteArray()));
+    // return in.readObject();
+    // } catch(Exception ex) {
+    // SWTUtils.excMsg("Problem cloning " + this.getClass().getName(), ex);
+    // return null;
+    // }
+    // }
 
 }

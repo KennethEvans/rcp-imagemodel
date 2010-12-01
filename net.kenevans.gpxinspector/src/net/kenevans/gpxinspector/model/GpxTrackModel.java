@@ -3,6 +3,7 @@ package net.kenevans.gpxinspector.model;
 import net.kenevans.gpx.TrkType;
 import net.kenevans.gpxinspector.ui.TrkInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
+import net.kenevans.parser.GPXClone;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -14,6 +15,13 @@ import org.eclipse.swt.widgets.Display;
 public class GpxTrackModel extends GpxModel implements IGpxElementConstants
 {
     private TrkType track;
+
+    /**
+     * GpxTrackModel constructor which is private with no arguments for use in
+     * clone.
+     */
+    private GpxTrackModel() {
+    }
 
     public GpxTrackModel(GpxModel parent, TrkType track) {
         this.parent = parent;
@@ -54,6 +62,18 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
         }
         removeAllGpxModelListeners();
         disposed = true;
+    }
+
+    /* (non-Javadoc)
+     * @see net.kenevans.gpxinspector.model.GpxModel#clone()
+     */
+    @Override
+    public Object clone() {
+        GpxTrackModel clone = new GpxTrackModel();
+        clone.parent = this.parent;
+        clone.track = GPXClone.clone(this.track);
+        
+        return clone;
     }
 
     /**

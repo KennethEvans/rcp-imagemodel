@@ -13,6 +13,7 @@ import net.kenevans.gpx.TrkType;
 import net.kenevans.gpx.WptType;
 import net.kenevans.gpxinspector.ui.FileInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
+import net.kenevans.parser.GPXClone;
 import net.kenevans.parser.GPXParser;
 
 import org.eclipse.swt.widgets.Display;
@@ -32,6 +33,13 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
     private LinkedList<GpxWaypointModel> waypointModels;
     /** Indicates whether the file has changed or not. */
     private boolean dirty = false;
+
+    /**
+     * GpxFileModel constructor which is private with no arguments for use in
+     * clone.
+     */
+    private GpxFileModel() {
+    }
 
     public GpxFileModel(GpxModel parent, String fileName) throws JAXBException {
         this(parent, new File(fileName));
@@ -275,6 +283,33 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
         for(GpxWaypointModel model : waypoints) {
             wptTypes.add(model.getWaypoint());
         }
+    }
+
+    /* (non-Javadoc)
+     * @see net.kenevans.gpxinspector.model.GpxModel#clone()
+     */
+    @Override
+    public Object clone() {
+        GpxFileModel clone = new GpxFileModel();
+        clone.parent = this.parent;
+        clone.file = new File(this.file.getPath());
+        clone.gpx = GPXClone.clone(this.gpx);
+        clone.dirty = this.dirty;
+        
+        clone.trackModels = new LinkedList<GpxTrackModel>();
+        for(GpxTrackModel model : trackModels) {
+            clone.trackModels.add((GpxTrackModel)model.clone()); 
+        }
+        clone.routeModels = new LinkedList<GpxRouteModel>();
+        for(GpxRouteModel model : routeModels) {
+            clone.routeModels.add((GpxRouteModel)model.clone()); 
+        }
+        clone.waypointModels = new LinkedList<GpxWaypointModel>();
+        for(GpxWaypointModel model : waypointModels) {
+            clone.waypointModels.add((GpxWaypointModel)model.clone()); 
+        }
+        
+        return clone;
     }
 
     /**

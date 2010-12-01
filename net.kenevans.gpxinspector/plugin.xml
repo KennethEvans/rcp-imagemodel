@@ -313,6 +313,21 @@
                label="Save Selected GPX Files As..."
                style="push">
          </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator8"
+               visible="true">
+            style="push">
+         </separator>
+         <command
+               commandId="net.kenevans.gpxinspector.copy"
+               label="Copy"
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.paste"
+               label="Paste"
+               style="push">
+         </command>
       </menuContribution>
       <menuContribution
             locationURI="toolbar:net.kenevans.gpxinspector.gpxView?after=additions">
@@ -511,6 +526,16 @@
             categoryId="net.kenevans.gpxinspector.category"
             id="net.kenevans.gpxinspector.refreshTree"
             name="Refresh Tree">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.copy"
+            name="Copy">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.paste"
+            name="Paste">
       </command>
    </extension>
    <extension

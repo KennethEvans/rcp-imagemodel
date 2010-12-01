@@ -20,6 +20,13 @@ public class GpxFileSetModel extends GpxModel
     private LinkedList<GpxFileModel> gpxFileModels;
     private String name = "GPX Files";
 
+    /**
+     * GpxFileSetModel constructor which is private with no arguments for use in
+     * clone.
+     */
+    private GpxFileSetModel() {
+    }
+
     public GpxFileSetModel(String[] fileNames) {
         disposed = false;
         gpxFileModels = new LinkedList<GpxFileModel>();
@@ -176,6 +183,25 @@ public class GpxFileSetModel extends GpxModel
 
     public void sort() {
         Collections.sort(gpxFileModels);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.kenevans.gpxinspector.model.GpxModel#clone()
+     */
+    @Override
+    public Object clone() {
+        GpxFileSetModel clone = new GpxFileSetModel();
+        clone.parent = this.parent;
+        clone.name = this.name;
+
+        clone.gpxFileModels = new LinkedList<GpxFileModel>();
+        for(GpxFileModel model : gpxFileModels) {
+            clone.gpxFileModels.add((GpxFileModel)model.clone()); 
+        }
+        
+        return clone;
     }
 
     /**
