@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAnyElement;
@@ -20,12 +21,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
-import net.kenevans.gpx10.Gpx.Rte;
-import net.kenevans.gpx10.Gpx.Rte.Rtept;
-import net.kenevans.gpx10.Gpx.Trk;
-import net.kenevans.gpx10.Gpx.Trk.Trkseg;
-import net.kenevans.gpx10.Gpx.Trk.Trkseg.Trkpt;
-import net.kenevans.gpx10.Gpx.Wpt;
 
 
 /**
