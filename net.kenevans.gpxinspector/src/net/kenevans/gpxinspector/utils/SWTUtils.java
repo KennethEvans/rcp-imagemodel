@@ -651,18 +651,33 @@ public class SWTUtils
     }
 
     /**
-     * Finds the width for a Text control given the number of columns desired.
+     * Finds the width for a Control given the number of columns desired.
      * 
      * @param selectionText
      * @param cols
      * @return
      */
-    public static int getTextWidth(Text text, int cols) {
+    public static int getTextWidth(Control text, int cols) {
         GC gc = new GC(text);
         FontMetrics fm = gc.getFontMetrics();
         int width = cols * fm.getAverageCharWidth();
         gc.dispose();
         return width;
+    }
+
+    /**
+     * Finds the height for a Control given the number of rows desired.
+     * 
+     * @param selectionText
+     * @param rows
+     * @return
+     */
+    public static int getTextHeight(Control text, int rows) {
+        GC gc = new GC(text);
+        FontMetrics fm = gc.getFontMetrics();
+        int height = rows * fm.getHeight();
+        gc.dispose();
+        return height;
     }
 
     /**
