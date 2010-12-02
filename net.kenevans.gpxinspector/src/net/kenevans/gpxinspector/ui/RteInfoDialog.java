@@ -1,7 +1,9 @@
 package net.kenevans.gpxinspector.ui;
 
+import net.kenevans.gpx.ExtensionsType;
 import net.kenevans.gpx.RteType;
 import net.kenevans.gpxinspector.model.GpxRouteModel;
+import net.kenevans.gpxinspector.utils.LabeledList;
 import net.kenevans.gpxinspector.utils.LabeledText;
 
 import org.eclipse.jface.layout.GridDataFactory;
@@ -17,6 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -29,6 +32,7 @@ import org.eclipse.swt.widgets.Text;
 public class RteInfoDialog extends Dialog
 {
     private static final int TEXT_COLS_LARGE = 50;
+    private static final int LIST_ROWS = 2;
     // private static final int TEXT_COLS_SMALL = 10;
     private boolean success = false;
 
@@ -39,6 +43,7 @@ public class RteInfoDialog extends Dialog
     private Text srcText;
     private Text typeText;
     private Text wptText;
+    private List extensionsList;
 
     /**
      * Constructor.
@@ -78,6 +83,20 @@ public class RteInfoDialog extends Dialog
         getParent().setCursor(null);
         waitCursor.dispose();
         shell.pack();
+        // Resize it to fit the display
+        int width = shell.getSize().x;
+        int height = shell.getSize().y;
+        int displayHeight = shell.getDisplay().getBounds().height;
+        int displayWidth = shell.getDisplay().getBounds().width;
+        if(displayHeight < height) {
+            // Set the height to 2/3 the display height
+            height = (20 * height / 30);
+        }
+        if(displayWidth < width) {
+            // Set the width to 2/3 the display height
+            width = (20 * width / 30);
+        }
+        shell.setSize(width, height);
         shell.open();
         Display display = getParent().getDisplay();
         while(!shell.isDisposed()) {
@@ -222,6 +241,14 @@ public class RteInfoDialog extends Dialog
             .applyTo(labeledText.getComposite());
         wptText = labeledText.getText();
         wptText.setToolTipText("Number of waypoints.");
+
+        // Extensions
+        LabeledList labeledList = new LabeledList(box, "Extensions:",
+            TEXT_COLS_LARGE, LIST_ROWS);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledList.getComposite());
+        extensionsList = labeledList.getList();
+        extensionsList.setToolTipText("Extensions (Read only).");
     }
 
     /**
@@ -262,6 +289,16 @@ public class RteInfoDialog extends Dialog
         LabeledText.read(numberText, rte.getNumber());
         LabeledText.read(srcText, rte.getSrc());
         LabeledText.read(typeText, rte.getType());
+        ExtensionsType extType = rte.getExtensions();
+        if(extType == null) {
+            extensionsList.add("null");
+        } else {
+            java.util.List<Object> objs = extType.getAny();
+            for(Object obj : objs) {
+                extensionsList.add(obj.getClass().getName() + " "
+                    + obj.toString());
+            }
+        }
 
         // Calculated
         int intVal = rte.getRtept().size();

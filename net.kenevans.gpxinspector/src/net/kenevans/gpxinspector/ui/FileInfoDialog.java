@@ -6,11 +6,13 @@ import java.util.Date;
 import net.kenevans.gpx.BoundsType;
 import net.kenevans.gpx.CopyrightType;
 import net.kenevans.gpx.EmailType;
+import net.kenevans.gpx.ExtensionsType;
 import net.kenevans.gpx.GpxType;
 import net.kenevans.gpx.LinkType;
 import net.kenevans.gpx.MetadataType;
 import net.kenevans.gpx.PersonType;
 import net.kenevans.gpxinspector.model.GpxFileModel;
+import net.kenevans.gpxinspector.utils.LabeledList;
 import net.kenevans.gpxinspector.utils.LabeledText;
 
 import org.eclipse.jface.layout.GridDataFactory;
@@ -26,9 +28,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-
 
 /*
  * Created on Aug 23, 2010
@@ -38,6 +40,7 @@ import org.eclipse.swt.widgets.Text;
 public class FileInfoDialog extends Dialog
 {
     private static final int TEXT_COLS_LARGE = 50;
+    private static final int LIST_ROWS = 2;
     // private static final int TEXT_COLS_SMALL = 10;
     private boolean success = false;
 
@@ -64,6 +67,8 @@ public class FileInfoDialog extends Dialog
     private Text linkHrefText;
     private Text linkTextText;
     private Text linkTypeText;
+    private List extensionsList;
+    private List metadataExtensionsList;
 
     /**
      * Constructor.
@@ -103,6 +108,20 @@ public class FileInfoDialog extends Dialog
         getParent().setCursor(null);
         waitCursor.dispose();
         shell.pack();
+        // Resize it to fit the display
+        int width = shell.getSize().x;
+        int height = shell.getSize().y;
+        int displayHeight = shell.getDisplay().getBounds().height;
+        int displayWidth = shell.getDisplay().getBounds().width;
+        if(displayHeight < height) {
+            // Set the height to 2/3 the display height
+            height = (20 * height / 30);
+        }
+        if(displayWidth < width) {
+            // Set the width to 2/3 the display height
+            width = (20 * width / 30);
+        }
+        shell.setSize(width, height);
         shell.open();
         Display display = getParent().getDisplay();
         while(!shell.isDisposed()) {
@@ -180,8 +199,9 @@ public class FileInfoDialog extends Dialog
             }
         });
         shell.setDefaultButton(button);
-        
-        scrolledComposite.setMinSize(parent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+        scrolledComposite.setMinSize(parent.computeSize(SWT.DEFAULT,
+            SWT.DEFAULT));
         scrolledComposite.setExpandHorizontal(true);
         scrolledComposite.setExpandVertical(true);
     }
@@ -271,6 +291,14 @@ public class FileInfoDialog extends Dialog
         versionText
             .setToolTipText("All GPX files must include the version of the "
                 + "GPX schema\n" + "which the file references.");
+
+        // Extensions
+        LabeledList labeledList = new LabeledList(box, "Extensions:",
+            TEXT_COLS_LARGE, LIST_ROWS);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledList.getComposite());
+        extensionsList = labeledList.getList();
+        extensionsList.setToolTipText("Extensions (Read only).");
     }
 
     /**
@@ -324,6 +352,14 @@ public class FileInfoDialog extends Dialog
             .applyTo(labeledText.getComposite());
         timeText = labeledText.getText();
         timeText.setToolTipText("Metadata time.");
+
+        // Extensions
+        LabeledList labeledList = new LabeledList(box, "Extensions:",
+            TEXT_COLS_LARGE, LIST_ROWS);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledList.getComposite());
+        metadataExtensionsList = labeledList.getList();
+        metadataExtensionsList.setToolTipText("Extensions (Read only).");
     }
 
     /**
@@ -502,7 +538,7 @@ public class FileInfoDialog extends Dialog
      */
     private void setModelFromWidgets() {
         GpxType gpx = model.getGpx();
-        
+
         // GPX
         Text text = creatorText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
@@ -512,7 +548,7 @@ public class FileInfoDialog extends Dialog
         if(text != null && !text.isDisposed() && text.getEditable()) {
             gpx.setVersion(LabeledText.toString(text));
         }
-        
+
         // Metadata
         MetadataType metadataType = null;
         PersonType personType = null;
@@ -533,7 +569,7 @@ public class FileInfoDialog extends Dialog
             }
             personType.setName(LabeledText.toString(text));
         }
-        
+
         text = idText;
         if(text != null && !text.isDisposed() && text.getEditable()) {
             if(gpx.getMetadata() == null) {
@@ -718,7 +754,7 @@ public class FileInfoDialog extends Dialog
             }
             metadataType.setTime(LabeledText.toXMLGregorianCalendar(text));
         }
-        
+
         // Write the metadata
         gpx.setMetadata(metadataType);
     }
@@ -738,6 +774,16 @@ public class FileInfoDialog extends Dialog
         GpxType gpx = model.getGpx();
         LabeledText.read(creatorText, gpx.getCreator());
         LabeledText.read(versionText, gpx.getVersion());
+        ExtensionsType extType = gpx.getExtensions();
+        if(extType == null) {
+            extensionsList.add("null");
+        } else {
+            java.util.List<Object> objs = extType.getAny();
+            for(Object obj : objs) {
+                extensionsList.add(obj.getClass().getName() + " "
+                    + obj.toString());
+            }
+        }
 
         // Metadata
         MetadataType metadataType = gpx.getMetadata();
@@ -762,6 +808,16 @@ public class FileInfoDialog extends Dialog
                 metadataType != null ? metadataType.getName() : null);
             LabeledText.read(timeText,
                 metadataType != null ? metadataType.getTime() : null);
+            extType = metadataType.getExtensions();
+            if(extType == null) {
+                metadataExtensionsList.add("null");
+            } else {
+                java.util.List<Object> objs = extType.getAny();
+                for(Object obj : objs) {
+                    metadataExtensionsList.add(obj.getClass().getName() + " "
+                        + obj.toString());
+                }
+            }
         }
 
         // Author

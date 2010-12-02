@@ -1,8 +1,10 @@
 package net.kenevans.gpxinspector.ui;
 
+import net.kenevans.gpx.ExtensionsType;
 import net.kenevans.gpx.TrkType;
 import net.kenevans.gpx.TrksegType;
 import net.kenevans.gpxinspector.model.GpxTrackModel;
+import net.kenevans.gpxinspector.utils.LabeledList;
 import net.kenevans.gpxinspector.utils.LabeledText;
 
 import org.eclipse.jface.layout.GridDataFactory;
@@ -18,9 +20,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-
 
 /*
  * Created on Aug 23, 2010
@@ -30,6 +32,7 @@ import org.eclipse.swt.widgets.Text;
 public class TrkInfoDialog extends Dialog
 {
     private static final int TEXT_COLS_LARGE = 50;
+    private static final int LIST_ROWS = 2;
     // private static final int TEXT_COLS_SMALL = 10;
     private boolean success = false;
 
@@ -41,6 +44,7 @@ public class TrkInfoDialog extends Dialog
     private Text typeText;
     private Text segText;
     private Text trkPointsText;
+    private List extensionsList;
 
     /**
      * Constructor.
@@ -80,6 +84,20 @@ public class TrkInfoDialog extends Dialog
         getParent().setCursor(null);
         waitCursor.dispose();
         shell.pack();
+        // Resize it to fit the display
+        int width = shell.getSize().x;
+        int height = shell.getSize().y;
+        int displayHeight = shell.getDisplay().getBounds().height;
+        int displayWidth = shell.getDisplay().getBounds().width;
+        if(displayHeight < height) {
+            // Set the height to 2/3 the display height
+            height = (20 * height / 30);
+        }
+        if(displayWidth < width) {
+            // Set the width to 2/3 the display height
+            width = (20 * width / 30);
+        }
+        shell.setSize(width, height);
         shell.open();
         Display display = getParent().getDisplay();
         while(!shell.isDisposed()) {
@@ -217,6 +235,14 @@ public class TrkInfoDialog extends Dialog
         typeText = labeledText.getText();
         typeText.setToolTipText("Type (classification) of element.");
 
+        // Extensions
+        LabeledList labeledList = new LabeledList(box, "Extensions:",
+            TEXT_COLS_LARGE, LIST_ROWS);
+        GridDataFactory.fillDefaults().grab(true, false)
+            .applyTo(labeledList.getComposite());
+        extensionsList = labeledList.getList();
+        extensionsList.setToolTipText("Extensions (Read only).");
+
         // Segments
         labeledText = new LabeledText(box, "Segments:", TEXT_COLS_LARGE);
         labeledText.getText().setEditable(false);
@@ -272,6 +298,16 @@ public class TrkInfoDialog extends Dialog
         LabeledText.read(numberText, trk.getNumber());
         LabeledText.read(srcText, trk.getSrc());
         LabeledText.read(typeText, trk.getType());
+        ExtensionsType extType = trk.getExtensions();
+        if(extType == null) {
+            extensionsList.add("null");
+        } else {
+            java.util.List<Object> objs = extType.getAny();
+            for(Object obj : objs) {
+                extensionsList.add(obj.getClass().getName() + " "
+                    + obj.toString());
+            }
+        }
 
         // Calculated
         int intVal = trk.getTrkseg().size();
