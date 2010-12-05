@@ -1,7 +1,6 @@
 package net.kenevans.gpxinspector.model;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,7 +75,7 @@ public class GpxFileSetModel extends GpxModel
     }
 
     /**
-     * Removes an element from the GpxFileModel list.
+     * Removes an element from the gpxFileModel list.
      * 
      * @param model
      * @return true if this list contained the specified element.
@@ -92,93 +91,56 @@ public class GpxFileSetModel extends GpxModel
     }
 
     /**
-     * Adds an element to the GpxFileModel list.
+     * Adds an element to the GpxFileModel list at the end.
      * 
-     * @param model
-     * @return true if the list changed (as specified by {@link Collection#add}
-     *         ).
-     * @see java.util.List#add
+     * @param newModel The model to be added.
+     * @return true if the add appears to be successful.
      */
     public boolean add(GpxFileModel model) {
-        boolean retVal = gpxFileModels.add(model);
-        if(retVal) {
-            boolean origDirty = model.isDirty();
-            model.setParent(this);
-            fireAddedEvent(model);
-            // Reset dirty from the value set by fireAddedEvent.
-            model.setDirty(origDirty);
-        }
-        return retVal;
+        return add(null, model, PasteMode.END);
     }
 
-    public void addFirst(GpxFileModel model) {
-        gpxFileModels.addFirst(model);
-        model.setParent(this);
-        fireAddedEvent(model);
-    }
-
-    public void addLast(GpxFileModel model) {
-        gpxFileModels.addLast(model);
-        model.setParent(this);
-        fireAddedEvent(model);
-    }
-
-    public void addBefore(GpxFileModel newModel, GpxFileModel curModel) {
-        if(gpxFileModels.isEmpty()) {
-            // Could throw an exception
-            gpxFileModels.add(newModel);
-            newModel.setParent(this);
-        } else {
-            int i = gpxFileModels.indexOf(curModel);
+    /**
+     * Adds an element to the GpxFileModel track list at the position specified
+     * by the mode relative to the position of the old model.
+     * 
+     * @param oldModel The old model that specifies the relative location for
+     *            the new one. Ignored if the mode is BEGINNING or END.
+     * @param newModel The model to be added.
+     * @param mode The PasteMode that determines where to place the new model
+     *            relative to the old one.
+     * @return true if the add appears to be successful.
+     */
+    public boolean add(GpxFileModel oldModel, GpxFileModel newModel,
+        PasteMode mode) {
+        boolean retVal = true;
+        int i = -1;
+        switch(mode) {
+        case BEGINNING:
+            gpxFileModels.addFirst(newModel);
+            break;
+        case BEFORE:
+            i = gpxFileModels.indexOf(oldModel);
             if(i == -1) {
-                // Add at the end. Could throw an exception
-                gpxFileModels.add(newModel);
+                retVal = false;
             } else {
                 gpxFileModels.add(i, newModel);
             }
+            break;
+        case REPLACE:
+        case AFTER:
+            i = gpxFileModels.indexOf(oldModel);
+            gpxFileModels.add(i + 1, newModel);
+            break;
+        case END:
+            retVal = gpxFileModels.add(newModel);
+            break;
         }
-        fireAddedEvent(newModel);
-    }
-
-    public void addAfter(GpxFileModel newModel, GpxFileModel curModel) {
-        if(gpxFileModels.isEmpty()) {
-            // Could throw an exception
-            gpxFileModels.add(newModel);
+        if(retVal) {
             newModel.setParent(this);
-        } else {
-            int i = gpxFileModels.indexOf(curModel);
-            if(i == -1) {
-                // Add at the end. Could throw an exception
-                gpxFileModels.add(newModel);
-            } else if(i == gpxFileModels.size() - 1) {
-                // Is the last element, add at the end
-                gpxFileModels.add(newModel);
-            } else {
-                // Add it at the next position
-                gpxFileModels.add(i + 1, newModel);
-            }
+            fireAddedEvent(newModel);
         }
-        fireAddedEvent(newModel);
-    }
-
-    public void replace(GpxFileModel newModel, GpxFileModel curModel) {
-        if(gpxFileModels.isEmpty()) {
-            // Could throw an exception
-            gpxFileModels.add(newModel);
-            newModel.setParent(this);
-        } else {
-            int i = gpxFileModels.indexOf(curModel);
-            if(i == -1) {
-                // Add at the end. Could throw an exception
-                gpxFileModels.add(newModel);
-            } else {
-                // replacedModel should be the curModel
-                GpxModel replacedModel = gpxFileModels.set(i, newModel);
-                replacedModel.dispose();
-                fireRemovedEvent(replacedModel);
-            }
-        }
-        fireAddedEvent(newModel);
+        return retVal;
     }
 
     public void sort() {
@@ -198,10 +160,26 @@ public class GpxFileSetModel extends GpxModel
 
         clone.gpxFileModels = new LinkedList<GpxFileModel>();
         for(GpxFileModel model : gpxFileModels) {
-            clone.gpxFileModels.add((GpxFileModel)model.clone()); 
+            clone.gpxFileModels.add((GpxFileModel)model.clone());
         }
-        
+
         return clone;
+    }
+
+    /**
+     * Overrides GpxModel.isDirty() and returns true if any GpxFileModel is
+     * dirty.
+     * 
+     * @return
+     */
+    @Override
+    public boolean isDirty() {
+        for(GpxFileModel model : getGpxFileModels()) {
+            if(model.isDirty()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -233,6 +211,21 @@ public class GpxFileSetModel extends GpxModel
     @Override
     public String getLabel() {
         return name;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * net.kenevans.gpxinspector.model.GpxModel#setParent(net.kenevans.gpxinspector
+     * .model.GpxModel)
+     */
+    @Override
+    public void setParent(GpxModel parent) {
+        this.parent = parent;
+        for(GpxFileModel model : this.getGpxFileModels()) {
+            model.setParent(this);
+        }
     }
 
 }

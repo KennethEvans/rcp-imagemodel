@@ -1,7 +1,6 @@
 package net.kenevans.gpxinspector.model;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -115,8 +114,12 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
         }
         if(isDirty()) {
             // FIXME
-            SWTUtils.warnMsg(this.getLabel()
-                + " has been modified and not saved");
+            boolean res = SWTUtils.confirmMsg(this.getLabel()
+                + "\nhas been modified and not saved.\n"
+                + "Select OK to save it or Cancel to continue without saving.");
+            if(res) {
+                save();
+            }
         }
         for(GpxModel model : trackModels) {
             model.dispose();
@@ -132,39 +135,6 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
         waypointModels.clear();
         removeAllGpxModelListeners();
         disposed = true;
-    }
-
-    /**
-     * Removes an element from the GpxFileModel list.
-     * 
-     * @param model
-     * @return true if this list contained the specified element.
-     * @see java.util.List#remove
-     */
-    public boolean remove(GpxTrackModel model) {
-        boolean retVal = trackModels.remove(model);
-        if(retVal) {
-            model.dispose();
-            fireRemovedEvent(model);
-        }
-        return retVal;
-    }
-
-    /**
-     * Adds an element to the GpxFileModel track list.
-     * 
-     * @param model
-     * @return true if the list changed (as specified by {@link Collection#add}
-     *         ).
-     * @see java.util.List#add
-     */
-    public boolean add(GpxTrackModel model) {
-        boolean retVal = trackModels.add(model);
-        if(retVal) {
-            model.setParent(this);
-            fireAddedEvent(model);
-        }
-        return retVal;
     }
 
     /**
@@ -184,24 +154,137 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
     }
 
     /**
-     * Adds an element to the GpxFileModel route list.
+     * Adds an element to the GpxFileModel list at the end.
      * 
-     * @param model
-     * @return true if the list changed (as specified by {@link Collection#add}
-     *         ).
-     * @see java.util.List#add
+     * @param newModel The model to be added.
+     * @return true if the add appears to be successful.
      */
     public boolean add(GpxRouteModel model) {
-        boolean retVal = routeModels.add(model);
+        return add(null, model, PasteMode.END);
+    }
+
+    /**
+     * Adds an element to the GpxRouteModel list at the position specified by
+     * the mode relative to the position of the old model.
+     * 
+     * @param oldModel The old model that specifies the relative location for
+     *            the new one. Ignored if the mode is BEGINNING or END.
+     * @param newModel The model to be added.
+     * @param mode The PasteMode that determines where to place the new model
+     *            relative to the old one.
+     * @return true if the add appears to be successful.
+     */
+    public boolean add(GpxRouteModel oldModel, GpxRouteModel newModel,
+        PasteMode mode) {
+        boolean retVal = true;
+        int i = -1;
+        switch(mode) {
+        case BEGINNING:
+            routeModels.addFirst(newModel);
+            break;
+        case BEFORE:
+            i = routeModels.indexOf(oldModel);
+            if(i == -1) {
+                retVal = false;
+            } else {
+                routeModels.add(i, newModel);
+            }
+            break;
+        case REPLACE:
+        case AFTER:
+            i = routeModels.indexOf(oldModel);
+            routeModels.add(i + 1, newModel);
+            break;
+        case END:
+            retVal = routeModels.add(newModel);
+            break;
+        }
         if(retVal) {
-            model.setParent(this);
-            fireAddedEvent(model);
+            newModel.setParent(this);
+            fireAddedEvent(newModel);
         }
         return retVal;
     }
 
     /**
-     * Removes an element from the GpxFileModel waypoint list.
+     * Removes an element from the GpxTrackModel list.
+     * 
+     * @param model
+     * @return true if this list contained the specified element.
+     * @see java.util.List#remove
+     */
+    public boolean remove(GpxTrackModel model) {
+        boolean retVal = trackModels.remove(model);
+        System.out.println("remove " + model + " " + model.getParent());
+        System.out.println("  from " + this + " " + this.getParent());
+        // DEBUG
+        int n = 0;
+        for(GpxTrackModel item : trackModels) {
+            System.out.printf("%d %s %s\n", n++, item.toString(), item
+                .getParent().toString());
+        }
+        if(retVal) {
+            model.dispose();
+            fireRemovedEvent(model);
+        }
+        return retVal;
+    }
+
+    /**
+     * Adds an element to the GpxFileModel list at the end.
+     * 
+     * @param newModel The model to be added.
+     * @return true if the add appears to be successful.
+     */
+    public boolean add(GpxTrackModel model) {
+        return add(null, model, PasteMode.END);
+    }
+
+    /**
+     * Adds an element to the GpxTrackModel list at the position specified by
+     * the mode relative to the position of the old model.
+     * 
+     * @param oldModel The old model that specifies the relative location for
+     *            the new one. Ignored if the mode is BEGINNING or END.
+     * @param newModel The model to be added.
+     * @param mode The PasteMode that determines where to place the new model
+     *            relative to the old one.
+     * @return true if the add appears to be successful.
+     */
+    public boolean add(GpxTrackModel oldModel, GpxTrackModel newModel,
+        PasteMode mode) {
+        boolean retVal = true;
+        int i = -1;
+        switch(mode) {
+        case BEGINNING:
+            trackModels.addFirst(newModel);
+            break;
+        case BEFORE:
+            i = trackModels.indexOf(oldModel);
+            if(i == -1) {
+                retVal = false;
+            } else {
+                trackModels.add(i, newModel);
+            }
+            break;
+        case REPLACE:
+        case AFTER:
+            i = trackModels.indexOf(oldModel);
+            trackModels.add(i + 1, newModel);
+            break;
+        case END:
+            retVal = trackModels.add(newModel);
+            break;
+        }
+        if(retVal) {
+            newModel.setParent(this);
+            fireAddedEvent(newModel);
+        }
+        return retVal;
+    }
+
+    /**
+     * Removes an element from the GpxWaypointModel list.
      * 
      * @param model
      * @return true if this list contained the specified element.
@@ -217,18 +300,54 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
     }
 
     /**
-     * Adds an element to the GpxFileModel waypoint list.
+     * Adds an element to the GpxFileModel list at the end.
      * 
-     * @param model
-     * @return true if the list changed (as specified by {@link Collection#add}
-     *         ).
-     * @see java.util.List#add
+     * @param newModel The model to be added.
+     * @return true if the add appears to be successful.
      */
     public boolean add(GpxWaypointModel model) {
-        boolean retVal = waypointModels.add(model);
+        return add(null, model, PasteMode.END);
+    }
+
+    /**
+     * Adds an element to the GpxWaypointModel list at the position specified by
+     * the mode relative to the position of the old model.
+     * 
+     * @param oldModel The old model that specifies the relative location for
+     *            the new one. Ignored if the mode is BEGINNING or END.
+     * @param newModel The model to be added.
+     * @param mode The PasteMode that determines where to place the new model
+     *            relative to the old one.
+     * @return true if the add appears to be successful.
+     */
+    public boolean add(GpxWaypointModel oldModel, GpxWaypointModel newModel,
+        PasteMode mode) {
+        boolean retVal = true;
+        int i = -1;
+        switch(mode) {
+        case BEGINNING:
+            waypointModels.addFirst(newModel);
+            break;
+        case BEFORE:
+            i = waypointModels.indexOf(oldModel);
+            if(i == -1) {
+                retVal = false;
+            } else {
+                waypointModels.add(i, newModel);
+            }
+            break;
+        case REPLACE:
+        case AFTER:
+            i = waypointModels.indexOf(oldModel);
+            waypointModels.add(i + 1, newModel);
+            break;
+        case END:
+            retVal = waypointModels.add(newModel);
+            break;
+        }
         if(retVal) {
-            model.setParent(this);
-            fireAddedEvent(model);
+            newModel.setParent(this);
+            fireAddedEvent(newModel);
         }
         return retVal;
     }
@@ -285,28 +404,30 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.kenevans.gpxinspector.model.GpxModel#clone()
      */
     @Override
     public Object clone() {
         GpxFileModel clone = new GpxFileModel();
         clone.parent = this.parent;
+        clone.dirty = this.dirty;
         clone.file = new File(this.file.getPath());
         clone.gpx = GPXClone.clone(this.gpx);
-        clone.dirty = this.dirty;
-        
+
         clone.trackModels = new LinkedList<GpxTrackModel>();
         for(GpxTrackModel model : trackModels) {
-            clone.trackModels.add((GpxTrackModel)model.clone()); 
+            clone.trackModels.add((GpxTrackModel)model.clone());
         }
         clone.routeModels = new LinkedList<GpxRouteModel>();
         for(GpxRouteModel model : routeModels) {
-            clone.routeModels.add((GpxRouteModel)model.clone()); 
+            clone.routeModels.add((GpxRouteModel)model.clone());
         }
         clone.waypointModels = new LinkedList<GpxWaypointModel>();
         for(GpxWaypointModel model : waypointModels) {
-            clone.waypointModels.add((GpxWaypointModel)model.clone()); 
+            clone.waypointModels.add((GpxWaypointModel)model.clone());
         }
         
         return clone;
@@ -392,4 +513,54 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
         return "Null File";
     }
 
+    /* (non-Javadoc)
+     * @see net.kenevans.gpxinspector.model.GpxModel#setParent(net.kenevans.gpxinspector.model.GpxModel)
+     */
+    @Override
+    public void setParent(GpxModel parent) {
+        this.parent = parent;
+        for(GpxTrackModel model : this.getTrackModels()) {
+            model.setParent(this);
+        }
+        for(GpxRouteModel model : this.getRouteModels()) {
+            model.setParent(this);
+        }
+        for(GpxWaypointModel model : this.getWaypointModels()) {
+            model.setParent(this);
+        }
+    }
+
+    /**
+     * Prints the hierarchy of the given GpxFileModel.
+     * 
+     * @param fileModel
+     * @return
+     */
+    public static String hierarchyInfo(GpxFileModel fileModel) {
+        if(fileModel == null) {
+            return null;
+        }
+        StringBuffer buf = new StringBuffer();
+        buf.append(String.format("Hierarchy for %s %x\n", fileModel.getFile()
+            .getName(), fileModel.hashCode()));
+        buf.append(String.format("Parent%s %x\n", fileModel.getParent()
+            .getClass().getName(), fileModel.getParent().hashCode()));
+        buf.append(String.format("Tracks:\n"));
+        for(GpxTrackModel model : fileModel.getTrackModels()) {
+            buf.append(String.format("  %s %x parent %x\n", model.getLabel(),
+                model.hashCode(), model.getParent().hashCode()));
+        }
+        buf.append(String.format("Routes:\n"));
+        for(GpxRouteModel model : fileModel.getRouteModels()) {
+            buf.append(String.format("  %s %x parent %x\n", model.getLabel(),
+                model.hashCode(), model.getParent().hashCode()));
+        }
+        buf.append(String.format("Waypoints:\n"));
+        for(GpxWaypointModel model : fileModel.getWaypointModels()) {
+            buf.append(String.format("  %s %x parent %x\n", model.getLabel(),
+                model.hashCode(), model.getParent().hashCode()));
+        }
+
+        return buf.toString();
+    }
 }

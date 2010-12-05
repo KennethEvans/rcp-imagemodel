@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import javax.xml.bind.JAXBException;
 import net.kenevans.gpxinspector.model.GpxFileModel;
 import net.kenevans.gpxinspector.model.GpxFileSetModel;
 import net.kenevans.gpxinspector.model.GpxModel;
+import net.kenevans.gpxinspector.model.GpxModel.PasteMode;
 import net.kenevans.gpxinspector.model.GpxRouteModel;
 import net.kenevans.gpxinspector.model.GpxTrackModel;
 import net.kenevans.gpxinspector.model.GpxWaypointModel;
@@ -29,6 +31,7 @@ import net.kenevans.gpxinspector.ui.GpxCheckStateProvider;
 import net.kenevans.gpxinspector.ui.GpxContentProvider;
 import net.kenevans.gpxinspector.ui.GpxLabelProvider;
 import net.kenevans.gpxinspector.ui.LocalSelection;
+import net.kenevans.gpxinspector.ui.SaveFilesDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
 import net.kenevans.gpxinspector.utils.ScrolledTextDialog;
 import net.kenevans.gpxinspector.utils.find.FindNear;
@@ -71,6 +74,11 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.ViewPart;
 import org.osgi.framework.Bundle;
@@ -82,6 +90,7 @@ import org.osgi.framework.Bundle;
  */
 public class GpxView extends ViewPart implements IPreferenceConstants
 {
+    private static boolean ACTIVATE_DEBUG_HANDLER = false;
     private boolean showSelectionText = false;
     // private static String[] INITIAL_FILES = {
     // // "C:/Users/evans/Documents/GPSLink/AAA.gpx",
@@ -107,6 +116,8 @@ public class GpxView extends ViewPart implements IPreferenceConstants
     private static final int MAX_MESSAGES = 5;
     /** A listener on preferences property change. */
     private IPropertyChangeListener preferencesListener;
+    /** A listener on part changes. */
+    private IPartListener2 partListener;
 
     protected CheckboxTreeViewer treeViewer;
     protected Text selectionText;
@@ -148,6 +159,66 @@ public class GpxView extends ViewPart implements IPreferenceConstants
     public GpxView() {
     }
 
+    @Override
+    public void init(IViewSite site, IMemento memento) throws PartInitException {
+        super.init(site, memento);
+
+        // Create and add a listener for Workspace events
+        partListener = new IPartListener2() {
+            public void partActivated(IWorkbenchPartReference partRef) {
+                // Ignored
+            }
+
+            public void partDeactivated(IWorkbenchPartReference partRef) {
+                // Ignored
+            }
+
+            public void partBroughtToTop(IWorkbenchPartReference partRef) {
+                // Ignored
+            }
+
+            public void partClosed(IWorkbenchPartReference partRef) {
+                if(partRef.getPart(false) == getSite().getPart()) {
+                    // Prompt to save dirty files
+                    if(gpxFileSetModel == null || !gpxFileSetModel.isDirty()) {
+                        return;
+                    }
+                    try {
+                        SaveFilesDialog dialog = new SaveFilesDialog(Display
+                            .getDefault().getActiveShell(), gpxFileSetModel);
+                        // Can either do SaveAs or Save without prompt
+                        dialog.setDoSaveAs(true);
+                        Boolean success = dialog.open();
+                        if(success) {
+                            dialog.saveChecked();
+                        }
+                    } catch(Exception ex) {
+                        SWTUtils.excMsgAsync("Error with SaveFilesDialog", ex);
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            public void partHidden(IWorkbenchPartReference partRef) {
+                // Ignored
+            }
+
+            public void partInputChanged(IWorkbenchPartReference partRef) {
+                // Ignored
+            }
+
+            public void partOpened(IWorkbenchPartReference partRef) {
+                // Ignored
+            }
+
+            public void partVisible(IWorkbenchPartReference partRef) {
+                // Ignored
+            }
+        };
+        // Add the listener
+        getSite().getPage().addPartListener(partListener);
+    }
+
     /*
      * @see IWorkbenchPart#createPartControl(Composite)
      */
@@ -156,6 +227,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         final IPreferenceStore prefs = Activator.getDefault()
             .getPreferenceStore();
         gpxDirectory = prefs.getString(P_GPX_DIR);
+        // Add a property change listener for perferences
         preferencesListener = new IPropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent event) {
                 if(event.getProperty().equals(P_GPX_DIR)) {
@@ -163,7 +235,6 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                 }
             }
         };
-
         prefs.addPropertyChangeListener(preferencesListener);
 
         // DEBUG
@@ -472,7 +543,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         id = "net.kenevans.gpxinspector.addStartupFilesFromPreferences";
         handlerService.activateHandler(id, handler);
 
-        // Save Checked as Startup Preference
+        // Save Checked models as Startup Preference
         handler = new AbstractHandler() {
             public Object execute(ExecutionEvent event)
                 throws ExecutionException {
@@ -518,6 +589,17 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         id = "net.kenevans.gpxinspector.refreshTree";
         handlerService.activateHandler(id, handler);
 
+        // Cut
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                cut();
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.cut";
+        handlerService.activateHandler(id, handler);
+
         // Copy
         handler = new AbstractHandler() {
             public Object execute(ExecutionEvent event)
@@ -533,13 +615,80 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         handler = new AbstractHandler() {
             public Object execute(ExecutionEvent event)
                 throws ExecutionException {
-                paste();
+                paste(PasteMode.END);
                 return null;
             }
         };
         id = "net.kenevans.gpxinspector.paste";
         handlerService.activateHandler(id, handler);
 
+        // Paste First
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                paste(PasteMode.BEGINNING);
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.pasteFirst";
+        handlerService.activateHandler(id, handler);
+
+        // Paste Before
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                paste(PasteMode.BEFORE);
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.pasteBefore";
+        handlerService.activateHandler(id, handler);
+
+        // Paste Replace
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                paste(PasteMode.REPLACE);
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.pasteReplace";
+        handlerService.activateHandler(id, handler);
+
+        // Paste After
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                paste(PasteMode.AFTER);
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.pasteAfter";
+        handlerService.activateHandler(id, handler);
+
+        // Paste Last
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                paste(PasteMode.END);
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.pasteLast";
+        handlerService.activateHandler(id, handler);
+
+        // Debug
+        if(ACTIVATE_DEBUG_HANDLER) {
+            handler = new AbstractHandler() {
+                public Object execute(ExecutionEvent event)
+                    throws ExecutionException {
+                    debug();
+                    return null;
+                }
+            };
+            id = "net.kenevans.gpxinspector.debug";
+            handlerService.activateHandler(id, handler);
+        }
     }
 
     /*
@@ -549,9 +698,15 @@ public class GpxView extends ViewPart implements IPreferenceConstants
      */
     @Override
     public void dispose() {
+        clearClipboard();
+        if(partListener != null) {
+            getSite().getPage().removePartListener(partListener);
+            partListener = null;
+        }
         if(preferencesListener != null) {
             Activator.getDefault().getPreferenceStore()
                 .removePropertyChangeListener(preferencesListener);
+            preferencesListener = null;
         }
         super.dispose();
     }
@@ -1063,7 +1218,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
     }
 
     /**
-     * Save the file in the cuurent GpxFileSetModel as the startup preferences,
+     * Save the file in the current GpxFileSetModel as the startup preferences,
      */
     private void saveCheckedAsStartupPreference() {
         IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
@@ -1100,10 +1255,27 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         }
     }
 
-    private void copy() {
+    /**
+     * Implements cut. Copies items from the selection to the local clipboard
+     * then re moves the selected items.
+     */
+    private void cut() {
+        // First do copy
+        boolean res = copy();
+        if(res) {
+            removeSelected();
+        }
+    }
+
+    /**
+     * Copies items from the selection to the local clipboard.
+     * 
+     * @return If the operation was apparently successful or not.
+     */
+    private boolean copy() {
         if(treeViewer.getSelection().isEmpty()) {
             SWTUtils.errMsg("Nothing selected");
-            return;
+            return false;
         }
         IStructuredSelection selection = (IStructuredSelection)treeViewer
             .getSelection();
@@ -1115,40 +1287,43 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                 list.add((GpxModel)model.clone());
             } catch(Exception ex) {
                 SWTUtils.excMsg("Problem adding to the clipboard", ex);
-                return;
+                return false;
             }
         }
         if(list != null && list.size() > 0) {
             LocalSelection sel = new LocalSelection(list);
+            // Clear it to avoid problems disposing GpxFileModels that are not
+            // saved
+            clearClipboard();
             clipboard.setContents(sel, null);
         }
+        return true;
     }
 
-    private void paste() {
-        if(treeViewer.getSelection().isEmpty()) {
-            SWTUtils.errMsg("Nothing selected");
-            return;
-        }
+    /**
+     * Gets the clipboard contents as a List<GpxModel> or returns null if that
+     * is not possible. The list may be empty.
+     * 
+     * @return The list or null if there is a problem.
+     */
+    private List<GpxModel> getClipboardList() {
         DataFlavor[] flavors = clipboard.getAvailableDataFlavors();
         if(flavors.length == 0) {
-            SWTUtils.errMsg("Clipboard is empty");
-            return;
+            return null;
         }
         Object data = null;
         try {
             DataFlavor flavor = new DataFlavor(
                 "application/x-java-jvm-local-objectref;class=java.util.List");
             if(!clipboard.isDataFlavorAvailable(flavor)) {
-                SWTUtils.errMsg("No compatible items in the clipboard");
-                return;
+                return null;
             }
             data = clipboard.getData(flavor);
         } catch(Exception ex) {
-            SWTUtils.excMsg("Error getting clipboard data", ex);
-            return;
+            return null;
         }
         if(data == null) {
-            return;
+            return null;
         }
         // Avoid unchecked cast warning in the smallest possible scope. To check
         // here you would have to use List<?> since you cannot perform
@@ -1163,55 +1338,224 @@ public class GpxView extends ViewPart implements IPreferenceConstants
             List<GpxModel> tempList = (List<GpxModel>)data;
             clipboardList = tempList;
         } catch(Exception ex) {
-            SWTUtils.excMsg("Error using clipboard data", ex);
-            return;
+            return null;
         }
+        if(clipboardList == null || clipboardList.size() == 0) {
+            return null;
+        }
+        return clipboardList;
+    }
+
+    /**
+     * Clears all items from the clipboard, sets any GpxFileModels to not dirty,
+     * and disposes them.
+     */
+    private void clearClipboard() {
+        List<GpxModel> clipboardList = getClipboardList();
         if(clipboardList == null || clipboardList.size() == 0) {
             return;
         }
-        treeViewer.getTree().setRedraw(false);
+        for(GpxModel model : clipboardList) {
+            if(model instanceof GpxFileModel) {
+                ((GpxFileModel)model).setDirty(false);
+            }
+            model.dispose();
+        }
+        clipboardList.clear();
+        LocalSelection sel = new LocalSelection(clipboardList);
+        clipboard.setContents(sel, null);
+    }
+
+    /**
+     * Pastes the clipboard models into the appropriate target model or its
+     * parent. The target model is the first item in the selection list. Others
+     * are ignored except for replace. If the target model is same class as the
+     * clipboard model, then the clipboard model is added to its list. If the
+     * targetModel is a possible parent of the clipboard model, then the the
+     * clipboard model is added to the appropriate list in the parent. Otherwise
+     * an error is indicated and the user is prompted to continue or not.<br>
+     * <br>
+     * BEGINNING: Items will be inserted at the beginning of the list.<br>
+     * BEFORE: The target model and the clipboard model must be of the same
+     * class. Items will be inserted before the target model in its list.<br>
+     * AFTER: The target model and the clipboard model must be of the same
+     * class. Items will be inserted after the target model in its list.<br>
+     * REPLACE: Same as AFTER except all the selected items are removed after
+     * all adding is done.<br>
+     * END: Items will be inserted at the end of the list.<br>
+     * 
+     * @param mode
+     */
+    private void paste(PasteMode mode) {
+        boolean replaceFlag = (mode == PasteMode.REPLACE);
         IStructuredSelection selection = (IStructuredSelection)treeViewer
             .getSelection();
-        GpxModel model = null;
-        GpxModel parent = null;
-        for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-            model = (GpxModel)iterator.next();
-            parent = model.getParent();
-            if(parent == null) {
-                // FIXME
-                break;
+        if(selection.isEmpty()) {
+            SWTUtils.errMsg("Nothing selected");
+            return;
+        }
+        List<GpxModel> clipboardList = getClipboardList();
+        if(clipboardList == null || clipboardList.size() == 0) {
+            return;
+        }
+        // Reverse the list for BEGINNING, AFTER, and REPLACE
+        if(mode == PasteMode.BEGINNING || mode == PasteMode.AFTER
+            || mode == PasteMode.REPLACE) {
+            Collections.reverse(clipboardList);
+        }
+        // Determine the targetModel to be the first item in the selection list
+        GpxModel targetModel = (GpxModel)selection.getFirstElement();
+        GpxModel targetParent = targetModel.getParent();
+        // Set the treeviewer to not redraw for no
+        treeViewer.getTree().setRedraw(false);
+        // Loop over the clipboard items
+        boolean added = false;
+        int iClipboardItem = 0;
+        for(GpxModel clipboardModel : clipboardList) {
+            iClipboardItem++;
+            added = false;
+            if(targetParent instanceof GpxFileSetModel) {
+                GpxFileSetModel fileSetModel = (GpxFileSetModel)targetParent;
+                GpxFileModel fileModel = (GpxFileModel)targetModel;
+                if(clipboardModel instanceof GpxFileModel) {
+                    added = fileSetModel.add(fileModel,
+                        (GpxFileModel)clipboardModel.clone(), mode);
+                } else if(clipboardModel instanceof GpxTrackModel) {
+                    if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                        added = fileModel.add(null,
+                            (GpxTrackModel)clipboardModel.clone(), mode);
+                    }
+                } else if(clipboardModel instanceof GpxRouteModel) {
+                    if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                        added = fileModel.add(null,
+                            (GpxRouteModel)clipboardModel.clone(), mode);
+                    }
+                } else if(clipboardModel instanceof GpxWaypointModel) {
+                    if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                        added = fileModel.add(null,
+                            (GpxWaypointModel)clipboardModel.clone(), mode);
+                    }
+                }
+            } else if(targetParent instanceof GpxFileModel) {
+                GpxFileModel fileModel = (GpxFileModel)targetParent;
+                if(clipboardModel instanceof GpxTrackModel) {
+                    if(targetModel instanceof GpxTrackModel) {
+                        added = fileModel.add((GpxTrackModel)targetModel,
+                            (GpxTrackModel)clipboardModel.clone(), mode);
+                    } else {
+                        if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                            added = fileModel.add(null,
+                                (GpxTrackModel)clipboardModel.clone(), mode);
+                        }
+                    }
+                } else if(clipboardModel instanceof GpxRouteModel) {
+                    if(targetModel instanceof GpxRouteModel) {
+                        added = fileModel.add((GpxRouteModel)targetModel,
+                            (GpxRouteModel)clipboardModel.clone(), mode);
+                    } else {
+                        if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                            added = fileModel.add(null,
+                                (GpxTrackModel)clipboardModel.clone(), mode);
+                        }
+                    }
+                } else if(clipboardModel instanceof GpxWaypointModel) {
+                    if(targetModel instanceof GpxWaypointModel) {
+                        added = fileModel.add((GpxWaypointModel)targetModel,
+                            (GpxWaypointModel)clipboardModel.clone(), mode);
+                    } else {
+                        if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                            added = fileModel.add(null,
+                                (GpxWaypointModel)clipboardModel.clone(), mode);
+                        }
+                    }
+                }
             }
-            if(parent instanceof GpxFileSetModel) {
-                GpxFileSetModel fileSetModel = (GpxFileSetModel)parent;
-                GpxFileModel fileModel = (GpxFileModel)model;
-                for(GpxModel clipboardModel : clipboardList) {
-                    if(clipboardModel instanceof GpxFileModel) {
-                        fileSetModel.add((GpxFileModel)clipboardModel);
-                    } else if(clipboardModel instanceof GpxTrackModel) {
-                        fileModel.add((GpxTrackModel)clipboardModel);
-                    } else if(clipboardModel instanceof GpxRouteModel) {
-                        fileModel.add((GpxRouteModel)clipboardModel);
-                    } else if(clipboardModel instanceof GpxWaypointModel) {
-                        fileModel.add((GpxWaypointModel)clipboardModel);
-                    }
+            if(!added) {
+                // Set it to not replace since there were problems
+                replaceFlag = false;
+                String from = clipboardModel.getClass().toString();
+                int index = from.lastIndexOf("Gpx");
+                if(index != -1) {
+                    from = from.substring(index);
                 }
-            } else if(parent instanceof GpxFileModel) {
-                GpxFileModel fileModel = (GpxFileModel)parent;
-                for(GpxModel clipboardModel : clipboardList) {
-                    if(clipboardModel instanceof GpxTrackModel) {
-                        fileModel.add((GpxTrackModel)clipboardModel);
-                    } else if(clipboardModel instanceof GpxRouteModel) {
-                        fileModel.add((GpxRouteModel)clipboardModel);
-                    } else if(clipboardModel instanceof GpxWaypointModel) {
-                        fileModel.add((GpxWaypointModel)clipboardModel);
-                    }
+                String to = targetModel.getClass().toString();
+                index = to.lastIndexOf("Gpx");
+                if(index != -1) {
+                    to = to.substring(index);
                 }
-                // Only do one item for now
-                // FIXME
-                break;
+                if(iClipboardItem < clipboardList.size()) {
+                    boolean res = SWTUtils.confirmMsg("Failed to add " + from
+                        + " to " + to + " for add at " + mode
+                        + ".\nPress OK to continue with remaining "
+                        + "Clipboard items or Cancel to abort.");
+                    if(!res) {
+                        break;
+                    }
+
+                } else {
+                    SWTUtils.errMsg("Failed to add " + from + " to " + to
+                        + " for add at " + mode);
+                }
             }
         }
+        // If the mode is REPLACE, then delete all the items in the selection
+        if(mode == PasteMode.REPLACE) {
+            if(!replaceFlag) {
+                SWTUtils
+                    .infoMsg("Asking for REPLACE.  However, since there were\n"
+                        + "problems, nothing will be removed.");
+
+            } else {
+                removeSelected();
+            }
+        }
+        // Let the treeviewer redraw again
         treeViewer.getTree().setRedraw(true);
+    }
+
+    /**
+     * Generic debug routine. The implementation may change as needed.
+     */
+    private void debug() {
+        if(false) {
+            for(GpxFileModel fileModel : gpxFileSetModel.getGpxFileModels()) {
+                System.out.println(GpxFileModel.hierarchyInfo(fileModel));
+            }
+        }
+        if(true) {
+            try {
+                SaveFilesDialog dialog = new SaveFilesDialog(Display
+                    .getDefault().getActiveShell(), gpxFileSetModel);
+                Boolean success = dialog.open();
+                if(success) {
+                    // This is not necessary as there is nothing to do
+                    // TODO
+                }
+            } catch(Exception ex) {
+                SWTUtils.excMsgAsync("Error with SaveFilesDialog", ex);
+                ex.printStackTrace();
+            }
+        }
+        if(true) {
+            System.out.println("GpxFileSetModel");
+            for(GpxFileModel fileModel : gpxFileSetModel.getGpxFileModels()) {
+                boolean dirty = fileModel.isDirty();
+                System.out.println(dirty + " " + fileModel.getFile().getName());
+            }
+            System.out.println("ClipboardList");
+            List<GpxModel> clipboardList = getClipboardList();
+            if(clipboardList == null || clipboardList.size() == 0) {
+                return;
+            }
+            for(GpxModel model : clipboardList) {
+                if(model instanceof GpxFileModel) {
+                    GpxFileModel fileModel = (GpxFileModel)model;
+                    boolean dirty = fileModel.isDirty();
+                    System.out.println(dirty + " "
+                        + fileModel.getFile().getName());
+                }
+            }
+        }
     }
 
     /**

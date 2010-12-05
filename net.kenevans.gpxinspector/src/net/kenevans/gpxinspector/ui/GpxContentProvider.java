@@ -14,6 +14,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 public class GpxContentProvider implements ITreeContentProvider
 {
+    private static boolean DEBUG_LISTENER = true;
     private static Object[] EMPTY_ARRAY = new Object[0];
     protected CheckboxTreeViewer viewer;
     protected GpxModelListener gpxModelListener;
@@ -167,9 +168,15 @@ public class GpxContentProvider implements ITreeContentProvider
                         // Refresh the tree starting with the parent model
                         GpxModel model = (GpxModel)ev.getNewValue();
                         GpxModel parent = model.getParent();
-                        model.addGpxModelListener(gpxModelListener);
+                        // Add listeners to the model and its children
+                        addListenersTo(new Object[] {model});
+                        // model.addGpxModelListener(gpxModelListener);
                         if(parent != null) {
                             viewer.refresh(parent, false);
+                        }
+                        if(DEBUG_LISTENER) {
+                            System.out.format("ADDED %s %s \n", model
+                                .getClass().getSimpleName(), model.toString());
                         }
                     } else if(ev.getPropertyName().equals(GpxModel.REMOVED)) {
                         // Refresh the tree starting with the parent model
@@ -179,6 +186,10 @@ public class GpxContentProvider implements ITreeContentProvider
                         if(parent != null) {
                             viewer.refresh(parent, false);
                         }
+                        if(DEBUG_LISTENER) {
+                            System.out.format("REMOVED %s %s \n", model
+                                .getClass().getSimpleName(), model.toString());
+                        }
                     } else if(ev.getPropertyName().equals(GpxModel.CHANGED)) {
                         // Refresh the tree starting with the parent model
                         GpxModel model = (GpxModel)ev.getOldValue();
@@ -187,6 +198,10 @@ public class GpxContentProvider implements ITreeContentProvider
                         // viewer.refresh(parent, false);
                         // }
                         viewer.refresh(model, true);
+                        if(DEBUG_LISTENER) {
+                            System.out.format("CHANGED %s %s \n", model
+                                .getClass().getSimpleName(), model.toString());
+                        }
                     }
                 }
             };

@@ -98,4 +98,16 @@ public class GpxWaypointModel extends GpxModel implements IGpxElementConstants
         return "Null Waypoint";
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * net.kenevans.gpxinspector.model.GpxModel#setParent(net.kenevans.gpxinspector
+     * .model.GpxModel)
+     */
+    @Override
+    public void setParent(GpxModel parent) {
+        this.parent = parent;
+    }
+
 }

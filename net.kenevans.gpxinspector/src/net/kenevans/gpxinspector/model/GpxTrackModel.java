@@ -96,4 +96,12 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
         return "Null Track";
     }
 
+    /* (non-Javadoc)
+     * @see net.kenevans.gpxinspector.model.GpxModel#setParent(net.kenevans.gpxinspector.model.GpxModel)
+     */
+    @Override
+    public void setParent(GpxModel parent) {
+        this.parent = parent;
+    }
+
 }

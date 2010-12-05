@@ -182,6 +182,15 @@
                label="Save Selected GPX Files As..."
                style="push">
          </command>
+         <separator
+               name="net.kenevans.gpxinspector.separator8"
+               visible="true">
+         </separator>
+         <command
+               commandId="net.kenevans.gpxinspector.debug"
+               label="Debug"
+               style="push">
+         </command>
       </menuContribution>
       <menuContribution
             locationURI="popup:net.kenevans.gpxinspector.gpxView?after=additions">
@@ -227,24 +236,6 @@
                visible="true">
          </separator>
          <command
-               icon="icons/expandall.gif"
-               label="Expand Level"
-               commandId="net.kenevans.gpxinspector.expand">
-               style="push">
-         </command>
-         <command
-               icon="icons/collapseall.gif"
-               label="Collapse Level"
-               commandId="net.kenevans.gpxinspector.collapse">
-               style="push">
-         </command>
-         <command
-               icon="icons/collapseall.gif"
-               label="Collapse All"
-               commandId="net.kenevans.gpxinspector.collapse">
-               style="push">
-         </command>
-         <command
                commandId="net.kenevans.gpxinspector.refreshTree"
                label="Refresh Tree"
                style="push">
@@ -280,20 +271,6 @@
                style="push">
          </command>
          <separator
-               name="net.kenevans.gpxinspector.separator6"
-               visible="true">
-         </separator>
-         <command
-               commandId="net.kenevans.gpxinspector.findNear"
-               label="Find Near..."
-               style="push">
-         </command>
-         <command
-               commandId="net.kenevans.gpxinspector.findFilesNear"
-               label="Find Files Near..."
-               style="push">
-         </command>
-         <separator
                name="net.kenevans.gpxinspector.separator7"
                visible="true">
          </separator>
@@ -319,15 +296,56 @@
             style="push">
          </separator>
          <command
+               commandId="net.kenevans.gpxinspector.cut"
+               icon="icons/cut_edit.gif"
+               label="Cut"
+               style="push">
+         </command>
+         <command
                commandId="net.kenevans.gpxinspector.copy"
+               icon="icons/copy_edit.gif"
                label="Copy"
                style="push">
          </command>
          <command
                commandId="net.kenevans.gpxinspector.paste"
+               icon="icons/paste_edit.gif"
                label="Paste"
                style="push">
          </command>
+         <menu
+               label="Paste Special">
+            <command
+                  commandId="net.kenevans.gpxinspector.pasteFirst"
+                  icon="icons/paste_edit.gif"
+                  label="Paste at Beginning"
+                  style="push">
+            </command>
+            <command
+                  commandId="net.kenevans.gpxinspector.pasteBefore"
+                  icon="icons/paste_edit.gif"
+                  label="Paste Before"
+                  style="push">
+            </command>
+            <command
+                  commandId="net.kenevans.gpxinspector.pasteReplace"
+                  icon="icons/paste_edit.gif"
+                  label="Paste Replace"
+                  style="push">
+            </command>
+            <command
+                  commandId="net.kenevans.gpxinspector.pasteAfter"
+                  icon="icons/paste_edit.gif"
+                  label="Paste After"
+                  style="push">
+            </command>
+            <command
+                  commandId="net.kenevans.gpxinspector.pasteLast"
+                  icon="icons/paste_edit.gif"
+                  label="Paste at End"
+                  style="push">
+            </command>
+         </menu>
       </menuContribution>
       <menuContribution
             locationURI="toolbar:net.kenevans.gpxinspector.gpxView?after=additions">
@@ -529,6 +547,11 @@
       </command>
       <command
             categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.cut"
+            name="Cut">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
             id="net.kenevans.gpxinspector.copy"
             name="Copy">
       </command>
@@ -536,6 +559,36 @@
             categoryId="net.kenevans.gpxinspector.category"
             id="net.kenevans.gpxinspector.paste"
             name="Paste">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.pasteFirst"
+            name="Paste at Beginning">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.pasteBefore"
+            name="Paste Before">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.pasteReplace"
+            name="Paste Replace">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.pasteAfter"
+            name="Paste After">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.pasteLast"
+            name="Paste at End">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.debug"
+            name="Debug">
       </command>
    </extension>
    <extension
@@ -570,6 +623,27 @@
             file="toc.xml"
             primary="true">
       </toc>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="net.kenevans.gpxinspector.cut"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="CTRL+X">
+      </key>
+      <key
+            commandId="net.kenevans.gpxinspector.copy"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="CTRL+C">
+      </key>
+      <key
+            commandId="net.kenevans.gpxinspector.paste"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="CTRL+V">
+      </key>
    </extension>
 
 </plugin>

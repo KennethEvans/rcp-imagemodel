@@ -18,6 +18,11 @@ import net.kenevans.gpxinspector.utils.SWTUtils;
  */
 public abstract class GpxModel
 {
+    /** Specifies how a paste special is to be done. */
+    public static enum PasteMode {
+        BEGINNING, BEFORE, REPLACE, AFTER, END,
+    };
+
     protected EventListenerList listenerList = new EventListenerList();
     /** The parent of this model. */
     protected GpxModel parent;
@@ -112,7 +117,12 @@ public abstract class GpxModel
      * @param model The model added.
      */
     protected void fireAddedEvent(GpxModel model) {
-        model.setDirty(true);
+        // If the model is a GpxFileModel, we leave its dirty setting as is, but
+        // if a child has been added, then the GpxFileModel parent should be set
+        // to dirty.
+        if(!(model instanceof GpxFileModel)) {
+            model.setDirty(true);
+        }
         fireGpxModelEvent(ADDED, null, model);
     }
 
@@ -177,11 +187,18 @@ public abstract class GpxModel
     }
 
     /**
+     * 
+     * Sets the parent for this model and recursively for all children of all
+     * sub levels. Typically it will set the parent field for itself and call
+     * setParent(this) for all models in its Lists.
+     * 
      * @param parent The new value for parent.
      */
-    public void setParent(GpxModel parent) {
-        this.parent = parent;
-    }
+    abstract public void setParent(GpxModel parent);
+
+    // {
+    // this.parent = parent;
+    // }
 
     public abstract String getLabel();
 
