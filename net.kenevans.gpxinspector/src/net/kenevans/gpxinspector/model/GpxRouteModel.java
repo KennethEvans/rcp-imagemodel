@@ -1,6 +1,10 @@
 package net.kenevans.gpxinspector.model;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.kenevans.gpx.RteType;
+import net.kenevans.gpx.WptType;
 import net.kenevans.gpxinspector.ui.RteInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
 import net.kenevans.parser.GPXClone;
@@ -15,6 +19,7 @@ import org.eclipse.swt.widgets.Display;
 public class GpxRouteModel extends GpxModel implements IGpxElementConstants
 {
     private RteType route;
+    private LinkedList<GpxWaypointModel> waypointModels;
 
     /**
      * GpxRouteModel constructor which is private with no arguments for use in
@@ -30,6 +35,11 @@ public class GpxRouteModel extends GpxModel implements IGpxElementConstants
             this.route.setName("New Route");
         } else {
             this.route = route;
+        }
+        waypointModels = new LinkedList<GpxWaypointModel>();
+        List<WptType> waypoints = this.route.getRtept();
+        for(WptType waypoint : waypoints) {
+            waypointModels.add(new GpxWaypointModel(this, waypoint));
         }
     }
 
@@ -69,7 +79,78 @@ public class GpxRouteModel extends GpxModel implements IGpxElementConstants
         disposed = true;
     }
 
-    /* (non-Javadoc)
+    /**
+     * Removes an element from the GpxWaypointModel list.
+     * 
+     * @param model
+     * @return true if this list contained the specified element.
+     * @see java.util.List#remove
+     */
+    public boolean remove(GpxWaypointModel model) {
+        boolean retVal = waypointModels.remove(model);
+        if(retVal) {
+            model.dispose();
+            fireRemovedEvent(model);
+        }
+        return retVal;
+    }
+
+    /**
+     * Adds an element to the GpxFileModel list at the end.
+     * 
+     * @param newModel The model to be added.
+     * @return true if the add appears to be successful.
+     */
+    public boolean add(GpxWaypointModel model) {
+        return add(null, model, PasteMode.END);
+    }
+
+    /**
+     * Adds an element to the GpxWaypointModel list at the position specified by
+     * the mode relative to the position of the old model.
+     * 
+     * @param oldModel The old model that specifies the relative location for
+     *            the new one. Ignored if the mode is BEGINNING or END.
+     * @param newModel The model to be added.
+     * @param mode The PasteMode that determines where to place the new model
+     *            relative to the old one.
+     * @return true if the add appears to be successful.
+     */
+    public boolean add(GpxWaypointModel oldModel, GpxWaypointModel newModel,
+        PasteMode mode) {
+        boolean retVal = true;
+        int i = -1;
+        switch(mode) {
+        case BEGINNING:
+            waypointModels.addFirst(newModel);
+            break;
+        case BEFORE:
+            i = waypointModels.indexOf(oldModel);
+            if(i == -1) {
+                retVal = false;
+            } else {
+                waypointModels.add(i, newModel);
+            }
+            break;
+        case REPLACE:
+        case AFTER:
+            i = waypointModels.indexOf(oldModel);
+            waypointModels.add(i + 1, newModel);
+            break;
+        case END:
+            retVal = waypointModels.add(newModel);
+            break;
+        }
+        if(retVal) {
+            newModel.setParent(this);
+            fireAddedEvent(newModel);
+        }
+        return retVal;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.kenevans.gpxinspector.model.GpxModel#clone()
      */
     @Override
@@ -77,7 +158,11 @@ public class GpxRouteModel extends GpxModel implements IGpxElementConstants
         GpxRouteModel clone = new GpxRouteModel();
         clone.parent = this.parent;
         clone.route = GPXClone.clone(this.route);
-        
+        clone.waypointModels = new LinkedList<GpxWaypointModel>();
+        for(GpxWaypointModel model : waypointModels) {
+            clone.waypointModels.add((GpxWaypointModel)model.clone());
+        }
+
         return clone;
     }
 
@@ -86,6 +171,13 @@ public class GpxRouteModel extends GpxModel implements IGpxElementConstants
      */
     public RteType getRoute() {
         return route;
+    }
+
+    /**
+     * @return The value of waypointModels.
+     */
+    public List<GpxWaypointModel> getWaypointModels() {
+        return waypointModels;
     }
 
     /*
@@ -101,8 +193,12 @@ public class GpxRouteModel extends GpxModel implements IGpxElementConstants
         return "Null Route";
     }
 
-    /* (non-Javadoc)
-     * @see net.kenevans.gpxinspector.model.GpxModel#setParent(net.kenevans.gpxinspector.model.GpxModel)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * net.kenevans.gpxinspector.model.GpxModel#setParent(net.kenevans.gpxinspector
+     * .model.GpxModel)
      */
     @Override
     public void setParent(GpxModel parent) {

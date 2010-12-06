@@ -152,7 +152,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
      * be the maximum level it is possible to expand it. treeLevel is restricted
      * to be less than or equal to this value.
      */
-    public static final int MAX_TREE_LEVEL = 3;
+    public static final int MAX_TREE_LEVEL = 4;
     /** The initial tree level */
     public static final int INITIAL_TREE_LEVEL = 1;
     /** The current level to which the tree is expanded. Should be non-negative. */
@@ -834,6 +834,10 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                     ((GpxFileModel)parent).remove((GpxRouteModel)model);
                 } else if(model instanceof GpxWaypointModel) {
                     ((GpxFileModel)parent).remove((GpxWaypointModel)model);
+                }
+            } else if(parent instanceof GpxRouteModel) {
+                if(model instanceof GpxWaypointModel) {
+                    ((GpxRouteModel)parent).remove((GpxWaypointModel)model);
                 }
             } else {
                 if(count < MAX_MESSAGES) {
@@ -1540,7 +1544,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                     } else {
                         if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
                             added = fileModel.add(null,
-                                (GpxTrackModel)clipboardModel.clone(), mode);
+                                (GpxRouteModel)clipboardModel.clone(), mode);
                         }
                     }
                 } else if(clipboardModel instanceof GpxWaypointModel) {
@@ -1549,7 +1553,34 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                             (GpxWaypointModel)clipboardModel.clone(), mode);
                     } else {
                         if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
-                            added = fileModel.add(null,
+                            if(targetModel instanceof GpxFileModel) {
+                                added = fileModel.add(null,
+                                    (GpxWaypointModel)clipboardModel.clone(),
+                                    mode);
+                            } else {
+                                if(targetModel instanceof GpxRouteModel) {
+                                    added = ((GpxRouteModel)targetModel).add(
+                                        null, (GpxWaypointModel)clipboardModel
+                                            .clone(), mode);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                        added = fileModel.add(null,
+                            (GpxWaypointModel)clipboardModel.clone(), mode);
+                    }
+                }
+            } else if(targetParent instanceof GpxRouteModel) {
+                GpxRouteModel routeModel = (GpxRouteModel)targetParent;
+                if(clipboardModel instanceof GpxWaypointModel) {
+                    if(targetModel instanceof GpxWaypointModel) {
+                        added = routeModel.add((GpxWaypointModel)targetModel,
+                            (GpxWaypointModel)clipboardModel.clone(), mode);
+                    } else {
+                        if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                            added = routeModel.add(null,
                                 (GpxWaypointModel)clipboardModel.clone(), mode);
                         }
                     }
@@ -1599,51 +1630,6 @@ public class GpxView extends ViewPart implements IPreferenceConstants
     }
 
     /**
-     * Generic debug routine. The implementation may change as needed.
-     */
-    private void debug() {
-        if(false) {
-            for(GpxFileModel fileModel : gpxFileSetModel.getGpxFileModels()) {
-                System.out.println(GpxFileModel.hierarchyInfo(fileModel));
-            }
-        }
-        if(true) {
-            try {
-                SaveFilesDialog dialog = new SaveFilesDialog(Display
-                    .getDefault().getActiveShell(), gpxFileSetModel);
-                Boolean success = dialog.open();
-                if(success) {
-                    // This is not necessary as there is nothing to do
-                    // TODO
-                }
-            } catch(Exception ex) {
-                SWTUtils.excMsgAsync("Error with SaveFilesDialog", ex);
-                ex.printStackTrace();
-            }
-        }
-        if(true) {
-            System.out.println("GpxFileSetModel");
-            for(GpxFileModel fileModel : gpxFileSetModel.getGpxFileModels()) {
-                boolean dirty = fileModel.isDirty();
-                System.out.println(dirty + " " + fileModel.getFile().getName());
-            }
-            System.out.println("ClipboardList");
-            List<GpxModel> clipboardList = getClipboardList();
-            if(clipboardList == null || clipboardList.size() == 0) {
-                return;
-            }
-            for(GpxModel model : clipboardList) {
-                if(model instanceof GpxFileModel) {
-                    GpxFileModel fileModel = (GpxFileModel)model;
-                    boolean dirty = fileModel.isDirty();
-                    System.out.println(dirty + " "
-                        + fileModel.getFile().getName());
-                }
-            }
-        }
-    }
-
-    /**
      * Does the specified task for the currently selected element.
      * 
      * @param task
@@ -1687,6 +1673,13 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                     parent.fireChangedEvent(parent);
                     implemented = true;
                 }
+            } else if(parent instanceof GpxRouteModel) {
+                if(model instanceof GpxWaypointModel) {
+                    Collections.sort(((GpxRouteModel)parent)
+                        .getWaypointModels());
+                    parent.fireChangedEvent(parent);
+                    implemented = true;
+                }
             }
             break;
         case REVERSE:
@@ -1708,6 +1701,13 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                     implemented = true;
                 } else if(model instanceof GpxWaypointModel) {
                     Collections.reverse(((GpxFileModel)parent)
+                        .getWaypointModels());
+                    parent.fireChangedEvent(parent);
+                    implemented = true;
+                }
+            } else if(parent instanceof GpxRouteModel) {
+                if(model instanceof GpxWaypointModel) {
+                    Collections.reverse(((GpxRouteModel)parent)
                         .getWaypointModels());
                     parent.fireChangedEvent(parent);
                     implemented = true;
@@ -1752,11 +1752,22 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                 GpxWaypointModel newModel = new GpxWaypointModel(model, null);
                 ((GpxFileModel)model).add(newModel);
                 implemented = true;
+            } else if((model instanceof GpxRouteModel)) {
+                GpxWaypointModel newModel = new GpxWaypointModel(model, null);
+                ((GpxRouteModel)model).add(newModel);
+                implemented = true;
+
             } else if((model instanceof GpxWaypointModel)) {
                 GpxWaypointModel newModel = new GpxWaypointModel(parent, null);
-                ((GpxFileModel)parent).add((GpxWaypointModel)model, newModel,
-                    PasteMode.AFTER);
-                implemented = true;
+                if(parent instanceof GpxFileModel) {
+                    ((GpxFileModel)parent).add((GpxWaypointModel)model,
+                        newModel, PasteMode.AFTER);
+                    implemented = true;
+                } else if(parent instanceof GpxRouteModel) {
+                    ((GpxRouteModel)parent).add((GpxWaypointModel)model,
+                        newModel, PasteMode.AFTER);
+                    implemented = true;
+                }
             }
             break;
         }
@@ -1848,6 +1859,51 @@ public class GpxView extends ViewPart implements IPreferenceConstants
      */
     public void setGpxDirectory(String gpxDirectory) {
         this.gpxDirectory = gpxDirectory;
+    }
+
+    /**
+     * Generic debug routine. The implementation may change as needed.
+     */
+    private void debug() {
+        if(false) {
+            for(GpxFileModel fileModel : gpxFileSetModel.getGpxFileModels()) {
+                System.out.println(GpxFileModel.hierarchyInfo(fileModel));
+            }
+        }
+        if(true) {
+            try {
+                SaveFilesDialog dialog = new SaveFilesDialog(Display
+                    .getDefault().getActiveShell(), gpxFileSetModel);
+                Boolean success = dialog.open();
+                if(success) {
+                    // This is not necessary as there is nothing to do
+                    // TODO
+                }
+            } catch(Exception ex) {
+                SWTUtils.excMsgAsync("Error with SaveFilesDialog", ex);
+                ex.printStackTrace();
+            }
+        }
+        if(true) {
+            System.out.println("GpxFileSetModel");
+            for(GpxFileModel fileModel : gpxFileSetModel.getGpxFileModels()) {
+                boolean dirty = fileModel.isDirty();
+                System.out.println(dirty + " " + fileModel.getFile().getName());
+            }
+            System.out.println("ClipboardList");
+            List<GpxModel> clipboardList = getClipboardList();
+            if(clipboardList == null || clipboardList.size() == 0) {
+                return;
+            }
+            for(GpxModel model : clipboardList) {
+                if(model instanceof GpxFileModel) {
+                    GpxFileModel fileModel = (GpxFileModel)model;
+                    boolean dirty = fileModel.isDirty();
+                    System.out.println(dirty + " "
+                        + fileModel.getFile().getName());
+                }
+            }
+        }
     }
 
 }

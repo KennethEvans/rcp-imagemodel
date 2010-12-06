@@ -6,6 +6,7 @@ import net.kenevans.gpxinspector.model.GpxFileModel;
 import net.kenevans.gpxinspector.model.GpxFileSetModel;
 import net.kenevans.gpxinspector.model.GpxModel;
 import net.kenevans.gpxinspector.model.GpxModelListener;
+import net.kenevans.gpxinspector.model.GpxRouteModel;
 import net.kenevans.gpxinspector.model.GpxTrackModel;
 
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
@@ -114,6 +115,9 @@ public class GpxContentProvider implements ITreeContentProvider
             // TODO Implement properties
             // GpxTrackModel model = (GpxTrackModel)parentElement;
             // return model.getPropertyModels().toArray();
+        } else if(parentElement instanceof GpxRouteModel) {
+            GpxRouteModel model = (GpxRouteModel)parentElement;
+            return model.getWaypointModels().toArray();
         }
         return EMPTY_ARRAY;
     }

@@ -283,6 +283,9 @@
                                  value="net.kenevans.gpxinspector.model.GpxFileModel">
                            </instanceof>
                            <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxRouteModel">
+                           </instanceof>
+                           <instanceof
                                  value="net.kenevans.gpxinspector.model.GpxWaypointModel">
                            </instanceof>
                         </or>
