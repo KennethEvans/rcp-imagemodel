@@ -25,7 +25,12 @@ public class GpxRouteModel extends GpxModel implements IGpxElementConstants
 
     public GpxRouteModel(GpxModel parent, RteType route) {
         this.parent = parent;
-        this.route = route;
+        if(route == null) {
+            this.route = new RteType();
+            this.route.setName("New Route");
+        } else {
+            this.route = route;
+        }
     }
 
     /*

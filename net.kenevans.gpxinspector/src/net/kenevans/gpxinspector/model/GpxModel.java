@@ -12,11 +12,15 @@ import net.kenevans.gpxinspector.utils.SWTUtils;
  */
 
 /**
- * This is the abstract super class of the GPX models.
+ * This is the abstract super class of the GPX models.<br>
+ * <br>
+ * Note that it could implement Cloneable since it has a clone method. By not
+ * doing so, it prevents super.clone() from being called, not particularly
+ * important since super.clone() is not currently used.
  * 
  * @author Kenneth Evans, Jr.
  */
-public abstract class GpxModel
+public abstract class GpxModel implements Comparable<GpxModel>
 {
     /** Specifies how a paste special is to be done. */
     public static enum PasteMode {
@@ -99,8 +103,7 @@ public abstract class GpxModel
      * @param oldValue
      * @param newValue
      */
-    protected void fireGpxModelEvent(String name, Object oldValue,
-        Object newValue) {
+    public void fireGpxModelEvent(String name, Object oldValue, Object newValue) {
         EventListener[] listeners = listenerList
             .getListeners(GpxModelListener.class);
         for(EventListener listener : listeners) {
@@ -116,7 +119,7 @@ public abstract class GpxModel
      * 
      * @param model The model added.
      */
-    protected void fireAddedEvent(GpxModel model) {
+    public void fireAddedEvent(GpxModel model) {
         // If the model is a GpxFileModel, we leave its dirty setting as is, but
         // if a child has been added, then the GpxFileModel parent should be set
         // to dirty.
@@ -132,7 +135,7 @@ public abstract class GpxModel
      * 
      * @param model The model changed.
      */
-    protected void fireChangedEvent(GpxModel model) {
+    public void fireChangedEvent(GpxModel model) {
         model.setDirty(true);
         fireGpxModelEvent(CHANGED, model, model);
     }
@@ -143,7 +146,7 @@ public abstract class GpxModel
      * 
      * @param model The model removed.
      */
-    protected void fireRemovedEvent(GpxModel model) {
+    public void fireRemovedEvent(GpxModel model) {
         model.setDirty(true);
         fireGpxModelEvent(REMOVED, model, null);
     }
@@ -154,7 +157,7 @@ public abstract class GpxModel
      * 
      * @param model The model checked.
      */
-    protected void fireCheckStateChangedEvent(GpxModel model) {
+    public void fireCheckStateChangedEvent(GpxModel model) {
         fireGpxModelEvent(CHECKSTATE_CHANGED, null, model.getChecked());
     }
 
@@ -255,6 +258,20 @@ public abstract class GpxModel
             parent = parent.getParent();
         }
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    @Override
+    public int compareTo(GpxModel model) {
+        String label = getLabel();
+        if(label == null) {
+            return 1;
+        }
+        return label.compareTo(model.getLabel());
     }
 
     /*

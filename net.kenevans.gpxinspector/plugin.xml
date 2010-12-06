@@ -65,15 +65,9 @@
       <menuContribution
             locationURI="menu:net.kenevans.gpxinspector.gpxView?after=additions">
          <separator
-               name="net.kenevans.gpxinspector.separator1"
+               name="separator1"
                visible="true">
          </separator>
-         <command
-               icon="icons/add.gif"
-               label="Add"
-               commandId="net.kenevans.gpxinspector.add">
-                style="push">
-         </command>
          <command
                icon="icons/remove.gif"
                label="Remove"
@@ -87,7 +81,7 @@
                style="push">
          </command>
          <separator
-               name="net.kenevans.gpxinspector.separator2"
+               name="separator2"
                visible="true">
                style="push">
          </separator>
@@ -102,7 +96,7 @@
                style="push">
          </command>
          <separator
-               name="net.kenevans.gpxinspector.separator3"
+               name="separator3"
                visible="true">
          </separator>
          <command
@@ -124,17 +118,7 @@
                style="push">
          </command>
          <separator
-               name="net.kenevans.gpxinspector.separator4"
-               visible="true">
-         </separator>
-         <command
-               commandId="net.kenevans.gpxinspector.openGpxFile"
-               icon="icons/GPXInspector16.png"
-               label="Open GPX File..."
-               style="push">
-         </command>
-         <separator
-               name="net.kenevans.gpxinspector.separator5"
+               name="separator4"
                visible="true">
          </separator>
          <command
@@ -149,7 +133,7 @@
                style="push">
          </command>
          <separator
-               name="net.kenevans.gpxinspector.separator6"
+               name="separator5"
                visible="true">
          </separator>
          <command
@@ -163,13 +147,13 @@
                style="push">
          </command>
          <separator
-               name="net.kenevans.gpxinspector.separator7"
+               name="separator6"
                visible="true">
          </separator>
          <command
-               commandId="net.kenevans.gpxinspector.saveKml"
-               icon="icons/ge16.png"
-               label="Save KML..."
+               commandId="net.kenevans.gpxinspector.openGpxFile"
+               icon="icons/GPXInspector16.png"
+               label="Open GPX File..."
                style="push">
          </command>
          <command
@@ -183,27 +167,133 @@
                style="push">
          </command>
          <separator
-               name="net.kenevans.gpxinspector.separator8"
+               name="separator7"
+               visible="true">
+         </separator>
+         <command
+               commandId="net.kenevans.gpxinspector.saveKml"
+               icon="icons/ge16.png"
+               label="Save KML..."
+               style="push">
+         </command>
+         <separator
+               name="separator8"
                visible="true">
          </separator>
          <command
                commandId="net.kenevans.gpxinspector.debug"
+               icon="icons/debug_exc.gif"
                label="Debug"
                style="push">
          </command>
+         <separator
+               name="additions"
+               visible="true">
+         </separator>
       </menuContribution>
       <menuContribution
             locationURI="popup:net.kenevans.gpxinspector.gpxView?after=additions">
          <separator
-               name="net.kenevans.gpxinspector.separator1"
+               name="separator1"
                visible="true">
          </separator>
-         <command
+         <menu
                icon="icons/add.gif"
-               label="Add"
-               commandId="net.kenevans.gpxinspector.add">
-                style="push">
-         </command>
+               label="Add">
+            <command
+                  commandId="net.kenevans.gpxinspector.newFile"
+                  label="File"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeMenuSelection">
+                     <iterate>
+                        <or>
+                           <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxFileModel">
+                           </instanceof>
+                        </or>
+                     </iterate>
+                     <count
+                           value="?">
+                     </count>
+                  </with>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="net.kenevans.gpxinspector.newTrack"
+                  label="Track"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeMenuSelection">
+                     <iterate>
+                        <or>
+                           <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxFileModel">
+                           </instanceof>
+                           <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxTrackModel">
+                           </instanceof>
+                        </or>
+                     </iterate>
+                     <count
+                           value="1">
+                     </count>
+                  </with>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="net.kenevans.gpxinspector.newRoute"
+                  label="Route"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeMenuSelection">
+                     <iterate>
+                        <or>
+                           <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxFileModel">
+                           </instanceof>
+                           <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxRouteModel">
+                           </instanceof>
+                        </or>
+                     </iterate>
+                     <count
+                           value="1">
+                     </count>
+                  </with>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="net.kenevans.gpxinspector.newWaypoint"
+                  label="Waypoint"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeMenuSelection">
+                     <iterate>
+                        <or>
+                           <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxFileModel">
+                           </instanceof>
+                           <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxWaypointModel">
+                           </instanceof>
+                        </or>
+                     </iterate>
+                     <count
+                           value="1">
+                     </count>
+                  </with>
+               </visibleWhen>
+            </command>
+         </menu>
          <command
                icon="icons/remove.gif"
                label="Remove"
@@ -217,7 +307,7 @@
                style="push">
          </command>
          <separator
-               name="net.kenevans.gpxinspector.separator2"
+               name="separator2"
                visible="true">
                style="push">
          </separator>
@@ -231,17 +321,13 @@
                commandId="net.kenevans.gpxinspector.uncheckAll">
                style="push">
          </command>
-         <separator
-               name="net.kenevans.gpxinspector.separator3"
-               visible="true">
-         </separator>
          <command
                commandId="net.kenevans.gpxinspector.refreshTree"
                label="Refresh Tree"
                style="push">
          </command>
          <separator
-               name="net.kenevans.gpxinspector.separator4"
+               name="separator3"
                visible="true">
          </separator>
          <command
@@ -249,14 +335,28 @@
                label="Info..."
                style="push">
          </command>
+         <separator
+               name="separator4"
+               visible="true">
+         </separator>
          <command
-               commandId="net.kenevans.gpxinspector.openGpxFile"
-               icon="icons/GPXInspector16.png"
-               label="Open GPX File..."
+               commandId="net.kenevans.gpxinspector.debug"
+               icon="icons/debug_exc.gif"
+               label="Debug"
                style="push">
          </command>
+         <command
+               commandId="net.kenevans.gpxinspector.sort"
+               label="Sort">
+            style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.reverse"
+               label="Reverse">
+            style="push">
+         </command>
          <separator
-               name="net.kenevans.gpxinspector.separator5"
+               name="separator5"
                visible="true">
          </separator>
          <command
@@ -271,13 +371,13 @@
                style="push">
          </command>
          <separator
-               name="net.kenevans.gpxinspector.separator7"
+               name="separator6"
                visible="true">
          </separator>
          <command
-               commandId="net.kenevans.gpxinspector.saveKml"
-               icon="icons/ge16.png"
-               label="Save KML..."
+               commandId="net.kenevans.gpxinspector.openGpxFile"
+               icon="icons/GPXInspector16.png"
+               label="Open GPX File..."
                style="push">
          </command>
          <command
@@ -291,9 +391,19 @@
                style="push">
          </command>
          <separator
-               name="net.kenevans.gpxinspector.separator8"
+               name="separator7"
                visible="true">
             style="push">
+         </separator>
+         <command
+               commandId="net.kenevans.gpxinspector.saveKml"
+               icon="icons/ge16.png"
+               label="Save KML..."
+               style="push">
+         </command>
+         <separator
+               name="separator8"
+               visible="true">
          </separator>
          <command
                commandId="net.kenevans.gpxinspector.cut"
@@ -346,14 +456,18 @@
                   style="push">
             </command>
          </menu>
+         <separator
+               name="additions"
+               visible="true">
+         </separator>
       </menuContribution>
       <menuContribution
             locationURI="toolbar:net.kenevans.gpxinspector.gpxView?after=additions">
          <command
-               icon="icons/add.gif"
-               label="Add"
-               commandId="net.kenevans.gpxinspector.add">
-                style="push">
+               commandId="net.kenevans.gpxinspector.openGpxFile"
+               icon="icons/GPXInspector16.png"
+               label="Open GPX File..."
+               style="push">
          </command>
          <command
                icon="icons/remove.gif"
@@ -380,17 +494,15 @@
                style="push">
          </command>
          <command
-               commandId="net.kenevans.gpxinspector.openGpxFile"
-               icon="icons/GPXInspector16.png"
-               label="Open GPX File..."
-               style="push">
-         </command>
-         <command
                commandId="net.kenevans.gpxinspector.saveKml"
                icon="icons/ge16.png"
                label="Save KML..."
                style="push">
          </command>
+         <separator
+               name="additions"
+               visible="true">
+         </separator>
       </menuContribution>
       <menuContribution
             locationURI="menu:file?after=additions">
@@ -400,8 +512,28 @@
                label="Open GPX File..."
                style="push">
          </command>
+         <command
+               commandId="net.kenevans.gpxinspector.save"
+               label="Save Selected GPX Files"
+               style="push">
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.saveAs"
+               label="Save Selected GPX Files As..."
+               style="push">
+         </command>
          <separator
-               name="net.kenevans.gpxinspector.separator1"
+               name="separator1"
+               visible="true">
+         </separator>
+         <command
+               commandId="net.kenevans.gpxinspector.saveKml"
+               icon="icons/ge16.png"
+               label="Save KML..."
+               style="push">
+         </command>
+         <separator
+               name="separator2"
                visible="true">
          </separator>
          <command
@@ -415,43 +547,32 @@
                style="push">
          </command>
          <separator
-               name="net.kenevans.gpxinspector.separator2"
+               name="additions"
                visible="true">
          </separator>
-         <command
-               commandId="net.kenevans.gpxinspector.saveKml"
-               icon="icons/ge16.png"
-               label="Save KML..."
-               style="push">
-         </command>
-         <command
-               commandId="net.kenevans.gpxinspector.save"
-               label="Save Selected GPX Files"
-               style="push">
-         </command>
-         <command
-               commandId="net.kenevans.gpxinspector.saveAs"
-               label="Save Selected GPX Files As..."
-               style="push">
-         </command>
       </menuContribution>
       <menuContribution
             locationURI="toolbar:org.eclipse.ui.main.toolbar">
          <command
+               commandId="net.kenevans.gpxinspector.openGpxFile"
+               icon="icons/GPXInspector16.png"
+               label="Open GPX File..."
+               style="push">
+         </command>
+         <command
                commandId="net.kenevans.gpxinspector.saveKml"
                icon="icons/ge16.png"
                label="Save KML..."
                style="push">
          </command>
+         <separator
+               name="additions"
+               visible="true">
+         </separator>
       </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
-      <command
-            categoryId="net.kenevans.gpxinspector.category"
-            id="net.kenevans.gpxinspector.add"
-            name="Add">
-      </command>
       <command
             categoryId="net.kenevans.gpxinspector.category"
             id="net.kenevans.gpxinspector.saveAsStartupPreference"
@@ -589,6 +710,36 @@
             categoryId="net.kenevans.gpxinspector.category"
             id="net.kenevans.gpxinspector.debug"
             name="Debug">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.sort"
+            name="Sort">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.reverse"
+            name="Reverse">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.newFile"
+            name="File">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.newTrack"
+            name="Track">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.newWaypoint"
+            name="Waypoint">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.newRoute"
+            name="Route">
       </command>
    </extension>
    <extension

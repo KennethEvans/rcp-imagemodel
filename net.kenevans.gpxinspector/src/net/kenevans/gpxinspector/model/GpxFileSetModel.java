@@ -143,10 +143,6 @@ public class GpxFileSetModel extends GpxModel
         return retVal;
     }
 
-    public void sort() {
-        Collections.sort(gpxFileModels);
-    }
-
     /*
      * (non-Javadoc)
      * 

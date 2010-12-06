@@ -1,5 +1,6 @@
 package net.kenevans.gpxinspector.model;
 
+import net.kenevans.gpx.TrkType;
 import net.kenevans.gpx.WptType;
 import net.kenevans.gpxinspector.ui.WptInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
@@ -25,7 +26,12 @@ public class GpxWaypointModel extends GpxModel implements IGpxElementConstants
 
     public GpxWaypointModel(GpxModel parent, WptType waypoint) {
         this.parent = parent;
-        this.waypoint = waypoint;
+        if(waypoint == null) {
+            this.waypoint = new WptType();
+            this.waypoint.setName("New Waypoint");
+        } else {
+            this.waypoint = waypoint;
+        }
     }
 
     /*

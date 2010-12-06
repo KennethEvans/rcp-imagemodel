@@ -22,8 +22,7 @@ import org.eclipse.swt.widgets.Display;
  * By Kenneth Evans, Jr.
  */
 
-public class GpxFileModel extends GpxModel implements IGpxElementConstants,
-    Comparable<GpxFileModel>
+public class GpxFileModel extends GpxModel implements IGpxElementConstants
 {
     private File file;
     private GpxType gpx;
@@ -429,7 +428,7 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
         for(GpxWaypointModel model : waypointModels) {
             clone.waypointModels.add((GpxWaypointModel)model.clone());
         }
-        
+
         return clone;
     }
 
@@ -492,17 +491,6 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
     /*
      * (non-Javadoc)
      * 
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
-    @Override
-    public int compareTo(GpxFileModel o) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see net.kenevans.gpxinspector.model.GpxModel#getLabel()
      */
     @Override
@@ -513,8 +501,12 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
         return "Null File";
     }
 
-    /* (non-Javadoc)
-     * @see net.kenevans.gpxinspector.model.GpxModel#setParent(net.kenevans.gpxinspector.model.GpxModel)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * net.kenevans.gpxinspector.model.GpxModel#setParent(net.kenevans.gpxinspector
+     * .model.GpxModel)
      */
     @Override
     public void setParent(GpxModel parent) {
@@ -563,4 +555,5 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants,
 
         return buf.toString();
     }
+
 }

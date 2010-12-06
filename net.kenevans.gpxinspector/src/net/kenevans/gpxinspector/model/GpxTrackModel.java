@@ -25,7 +25,12 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
 
     public GpxTrackModel(GpxModel parent, TrkType track) {
         this.parent = parent;
-        this.track = track;
+        if(track == null) {
+            this.track = new TrkType();
+            this.track.setName("New Track");
+       } else {
+            this.track = track;
+        }
     }
 
     /*
@@ -64,7 +69,9 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
         disposed = true;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see net.kenevans.gpxinspector.model.GpxModel#clone()
      */
     @Override
@@ -72,7 +79,7 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
         GpxTrackModel clone = new GpxTrackModel();
         clone.parent = this.parent;
         clone.track = GPXClone.clone(this.track);
-        
+
         return clone;
     }
 
@@ -96,8 +103,12 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
         return "Null Track";
     }
 
-    /* (non-Javadoc)
-     * @see net.kenevans.gpxinspector.model.GpxModel#setParent(net.kenevans.gpxinspector.model.GpxModel)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * net.kenevans.gpxinspector.model.GpxModel#setParent(net.kenevans.gpxinspector
+     * .model.GpxModel)
      */
     @Override
     public void setParent(GpxModel parent) {
