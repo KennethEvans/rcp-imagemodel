@@ -324,7 +324,11 @@ public class TrkInfoDialog extends Dialog
         if(nPointsString.length() > 0) {
             nPointsString = nPointsString.substring(1);
         }
-        nPointsString = nPointsTotal + "=" + nPointsString;
+        if(nPointsString.length() == 0) {
+            nPointsString = Integer.toString(nPointsTotal);
+        } else {
+            nPointsString = nPointsTotal + "=" + nPointsString;
+        }
         trkPointsText.setText(nPointsString);
     }
 
