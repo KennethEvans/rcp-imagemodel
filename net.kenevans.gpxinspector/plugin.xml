@@ -158,12 +158,7 @@
          </command>
          <command
                commandId="net.kenevans.gpxinspector.save"
-               label="Save Selected GPX Files"
-               style="push">
-         </command>
-         <command
-               commandId="net.kenevans.gpxinspector.saveAs"
-               label="Save Selected GPX Files As..."
+               label="Save Selected GPX Files..."
                style="push">
          </command>
          <separator
@@ -385,12 +380,7 @@
          </command>
          <command
                commandId="net.kenevans.gpxinspector.save"
-               label="Save Selected GPX Files"
-               style="push">
-         </command>
-         <command
-               commandId="net.kenevans.gpxinspector.saveAs"
-               label="Save Selected GPX Files As..."
+               label="Save Selected GPX Files..."
                style="push">
          </command>
          <separator
@@ -517,12 +507,7 @@
          </command>
          <command
                commandId="net.kenevans.gpxinspector.save"
-               label="Save Selected GPX Files"
-               style="push">
-         </command>
-         <command
-               commandId="net.kenevans.gpxinspector.saveAs"
-               label="Save Selected GPX Files As..."
+               label="Save Selected GPX Files..."
                style="push">
          </command>
          <separator
@@ -657,12 +642,7 @@
       <command
             categoryId="net.kenevans.gpxinspector.category"
             id="net.kenevans.gpxinspector.save"
-            name="Save Selected GPX Files">
-      </command>
-      <command
-            categoryId="net.kenevans.gpxinspector.category"
-            id="net.kenevans.gpxinspector.saveAs"
-            name="Save Selected GPX Files As...">
+            name="Save Selected GPX Files...">
       </command>
       <command
             categoryId="net.kenevans.gpxinspector.category"

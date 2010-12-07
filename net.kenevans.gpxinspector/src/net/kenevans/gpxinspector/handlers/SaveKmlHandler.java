@@ -8,6 +8,7 @@ package net.kenevans.gpxinspector.handlers;
 import net.kenevans.gpxinspector.kml.KmlOptions;
 import net.kenevans.gpxinspector.kml.KmlUtils;
 import net.kenevans.gpxinspector.kml.SaveKmlDialog;
+import net.kenevans.gpxinspector.model.GpxFileModel;
 import net.kenevans.gpxinspector.model.GpxFileSetModel;
 import net.kenevans.gpxinspector.utils.SWTUtils;
 import net.kenevans.gpxinspector.utils.Utils;
@@ -75,17 +76,22 @@ public class SaveKmlHandler extends AbstractHandler
             return null;
         }
 
-        // Create the KML file
+        // Get the KML options
         options = dialog.getKmlOptions();
         if(options == null) {
             SWTUtils.errMsgAsync("KML Options is null");
             return null;
         }
+        // Get the file models and synchronize them
         GpxFileSetModel fileSetModel = view.getGpxFileSetModel();
         if(fileSetModel == null) {
             SWTUtils.errMsgAsync("The KmlFileSetModel is null");
             return null;
         }
+        for(GpxFileModel model : fileSetModel.getGpxFileModels()) {
+            model.synchronizeGpx();
+        }
+        // Create the KML file
         try {
             KmlUtils.createKml(fileSetModel, options);
         } catch(Exception ex) {

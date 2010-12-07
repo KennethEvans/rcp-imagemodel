@@ -452,17 +452,6 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         String id = "net.kenevans.gpxinspector.save";
         handlerService.activateHandler(id, handler);
 
-        // SaveAs
-        handler = new AbstractHandler() {
-            public Object execute(ExecutionEvent event)
-                throws ExecutionException {
-                saveGpxFilesAs();
-                return null;
-            }
-        };
-        id = "net.kenevans.gpxinspector.saveAs";
-        handlerService.activateHandler(id, handler);
-
         // Remove
         handler = new AbstractHandler() {
             public Object execute(ExecutionEvent event)
@@ -985,88 +974,22 @@ public class GpxView extends ViewPart implements IPreferenceConstants
      * Saves the selected GPX files.
      */
     public void saveGpxFiles() {
-        if(treeViewer.getSelection().isEmpty()) {
-            SWTUtils.errMsg("Nothing selected");
-            return;
-        }
-        IStructuredSelection selection = (IStructuredSelection)treeViewer
-            .getSelection();
-        int count = 0;
-        for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-            GpxModel model = (GpxModel)iterator.next();
-            if(model instanceof GpxFileModel) {
-                ((GpxFileModel)model).save();
-                treeViewer.refresh();
-                count++;
-            }
-        }
-        if(count == 0) {
-            SWTUtils.errMsg("No files selected");
-        } else {
-            // Reset the input to cause the listeners to change
-            Object oldInput = treeViewer.getInput();
-            treeViewer.setInput(oldInput);
-            treeViewer.expandToLevel(treeLevel);
-        }
-    }
-
-    /**
-     * Saves the selected GPX files with new names.
-     */
-    public void saveGpxFilesAs() {
-        if(treeViewer.getSelection().isEmpty()) {
-            SWTUtils.errMsg("Nothing selected");
-            return;
-        }
-        IStructuredSelection selection = (IStructuredSelection)treeViewer
-            .getSelection();
-        int count = 0;
-        for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-            GpxModel model = (GpxModel)iterator.next();
-            if(model instanceof GpxFileModel) {
-                GpxFileModel fileModel = (GpxFileModel)model;
-                // Open a FileDialog
-                FileDialog dlg = new FileDialog(Display.getDefault()
-                    .getActiveShell(), SWT.NONE);
-
-                dlg.setFilterPath(fileModel.getFile().getPath());
-                dlg.setFilterExtensions(new String[] {"*.gpx"});
-                dlg.setFileName(fileModel.getFile().getName());
-                String selectedPath = dlg.open();
-                if(selectedPath != null) {
-                    // Extract the directory part of the selectedPath
-                    String initialDirectory = initialPath;
-                    int index = selectedPath.lastIndexOf(File.separator);
-                    if(index > 0) {
-                        initialDirectory = selectedPath.substring(0, index);
-                    }
-                    initialPath = selectedPath;
-                    // Loop over the selected file
-                    String fileName = dlg.getFileName();
-                    String filePath = initialDirectory + File.separator
-                        + fileName;
-                    File file = new File(filePath);
-                    boolean doIt = true;
-                    if(file.exists()) {
-                        Boolean res = SWTUtils.confirmMsg("File exists: "
-                            + file.getPath() + "\nOK to overwrite?");
-                        if(!res) {
-                            doIt = false;
-                        }
-                    }
-                    if(doIt) {
-                        fileModel.saveAs(file);
-                        // Reset the input to cause the listeners to change
-                        Object oldInput = treeViewer.getInput();
-                        treeViewer.setInput(oldInput);
-                        treeViewer.expandToLevel(treeLevel);
-                    }
+        if(true) {
+            try {
+                SaveFilesDialog dialog = new SaveFilesDialog(Display
+                    .getDefault().getActiveShell(), gpxFileSetModel);
+                Boolean success = dialog.open();
+                if(success) {
+                    // The saving is done by the dialog
+                    // Reset the input to cause the listeners to change
+                    Object oldInput = treeViewer.getInput();
+                    treeViewer.setInput(oldInput);
+                    treeViewer.expandToLevel(treeLevel);
                 }
-                count++;
+            } catch(Exception ex) {
+                SWTUtils.excMsgAsync("Error with SaveFilesDialog", ex);
+                ex.printStackTrace();
             }
-        }
-        if(count == 0) {
-            SWTUtils.errMsg("No files selected");
         }
     }
 
@@ -1868,20 +1791,6 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         if(false) {
             for(GpxFileModel fileModel : gpxFileSetModel.getGpxFileModels()) {
                 System.out.println(GpxFileModel.hierarchyInfo(fileModel));
-            }
-        }
-        if(true) {
-            try {
-                SaveFilesDialog dialog = new SaveFilesDialog(Display
-                    .getDefault().getActiveShell(), gpxFileSetModel);
-                Boolean success = dialog.open();
-                if(success) {
-                    // This is not necessary as there is nothing to do
-                    // TODO
-                }
-            } catch(Exception ex) {
-                SWTUtils.excMsgAsync("Error with SaveFilesDialog", ex);
-                ex.printStackTrace();
             }
         }
         if(true) {

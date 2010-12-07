@@ -240,6 +240,11 @@ public abstract class GpxModel implements Comparable<GpxModel>
         GpxFileModel fileModel = getGpxFileModel();
         if(fileModel != null) {
             fileModel.setDirty(dirty);
+            // Set it to be unsynchronized if it is dirty. Do not set it to be
+            // synchronized. It will do that itself.
+            if(dirty) {
+                fileModel.setUnsynchronized(dirty);
+            }
         }
     }
 

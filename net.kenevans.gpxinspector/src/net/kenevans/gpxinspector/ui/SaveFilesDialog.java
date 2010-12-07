@@ -189,8 +189,8 @@ public class SaveFilesDialog extends Dialog
         });
 
         button = new Button(composite, SWT.PUSH);
-        button.setToolTipText("Save the checked files.");
-        button.setText("Close All");
+        button.setToolTipText("Do nothing about saving.");
+        button.setText("Cancel");
         GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL)
             .grab(true, true).applyTo(button);
         button.addSelectionListener(new SelectionAdapter() {

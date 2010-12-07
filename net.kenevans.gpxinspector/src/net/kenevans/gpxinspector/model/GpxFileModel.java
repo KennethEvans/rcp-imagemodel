@@ -31,6 +31,11 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants
     private LinkedList<GpxWaypointModel> waypointModels;
     /** Indicates whether the file has changed or not. */
     private boolean dirty = false;
+    /**
+     * Indicates whether the GpxType is unsynchronized or not or not. Note that
+     * synchronized is a keyword so unsynchronized is used.
+     */
+    private boolean unsynchronized = false;
 
     /**
      * GpxFileModel constructor which is private with no arguments for use in
@@ -378,9 +383,47 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants
     }
 
     /**
-     * Synchronizes the GpxType to the current model.
+     * Prints the hierarchy of the given GpxFileModel.
+     * 
+     * @param fileModel
+     * @return
+     */
+    public static String hierarchyInfo(GpxFileModel fileModel) {
+        if(fileModel == null) {
+            return null;
+        }
+        StringBuffer buf = new StringBuffer();
+        buf.append(String.format("Hierarchy for %s %x\n", fileModel.getFile()
+            .getName(), fileModel.hashCode()));
+        buf.append(String.format("Parent%s %x\n", fileModel.getParent()
+            .getClass().getName(), fileModel.getParent().hashCode()));
+        buf.append(String.format("Tracks:\n"));
+        for(GpxTrackModel model : fileModel.getTrackModels()) {
+            buf.append(String.format("  %s %x parent %x\n", model.getLabel(),
+                model.hashCode(), model.getParent().hashCode()));
+        }
+        buf.append(String.format("Routes:\n"));
+        for(GpxRouteModel model : fileModel.getRouteModels()) {
+            buf.append(String.format("  %s %x parent %x\n", model.getLabel(),
+                model.hashCode(), model.getParent().hashCode()));
+        }
+        buf.append(String.format("Waypoints:\n"));
+        for(GpxWaypointModel model : fileModel.getWaypointModels()) {
+            buf.append(String.format("  %s %x parent %x\n", model.getLabel(),
+                model.hashCode(), model.getParent().hashCode()));
+        }
+
+        return buf.toString();
+    }
+
+    /**
+     * Synchronizes the GpxType to the current model. Clears any lists and
+     * re-adds them from the model.
      */
     public void synchronizeGpx() {
+        if(!unsynchronized) {
+            return;
+        }
         List<GpxTrackModel> tracks = getTrackModels();
         List<TrkType> trkTypes = gpx.getTrk();
         trkTypes.clear();
@@ -390,17 +433,26 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants
 
         List<GpxRouteModel> routes = getRouteModels();
         List<RteType> rteTypes = gpx.getRte();
+        List<GpxWaypointModel> waypoints = null;
+        List<WptType> wptTypes = null;
         rteTypes.clear();
         for(GpxRouteModel model : routes) {
+            waypoints = model.getWaypointModels();
+            wptTypes = model.getRoute().getRtept();
+            wptTypes.clear();
+            for(GpxWaypointModel waypointModel : waypoints) {
+                wptTypes.add(waypointModel.getWaypoint());
+            }
             rteTypes.add(model.getRoute());
         }
 
-        List<GpxWaypointModel> waypoints = getWaypointModels();
-        List<WptType> wptTypes = gpx.getWpt();
+        waypoints = getWaypointModels();
+        wptTypes = gpx.getWpt();
         wptTypes.clear();
         for(GpxWaypointModel model : waypoints) {
             wptTypes.add(model.getWaypoint());
         }
+        unsynchronized = false;
     }
 
     /*
@@ -523,37 +575,17 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants
     }
 
     /**
-     * Prints the hierarchy of the given GpxFileModel.
-     * 
-     * @param fileModel
-     * @return
+     * @return The value of unsynchronized.
      */
-    public static String hierarchyInfo(GpxFileModel fileModel) {
-        if(fileModel == null) {
-            return null;
-        }
-        StringBuffer buf = new StringBuffer();
-        buf.append(String.format("Hierarchy for %s %x\n", fileModel.getFile()
-            .getName(), fileModel.hashCode()));
-        buf.append(String.format("Parent%s %x\n", fileModel.getParent()
-            .getClass().getName(), fileModel.getParent().hashCode()));
-        buf.append(String.format("Tracks:\n"));
-        for(GpxTrackModel model : fileModel.getTrackModels()) {
-            buf.append(String.format("  %s %x parent %x\n", model.getLabel(),
-                model.hashCode(), model.getParent().hashCode()));
-        }
-        buf.append(String.format("Routes:\n"));
-        for(GpxRouteModel model : fileModel.getRouteModels()) {
-            buf.append(String.format("  %s %x parent %x\n", model.getLabel(),
-                model.hashCode(), model.getParent().hashCode()));
-        }
-        buf.append(String.format("Waypoints:\n"));
-        for(GpxWaypointModel model : fileModel.getWaypointModels()) {
-            buf.append(String.format("  %s %x parent %x\n", model.getLabel(),
-                model.hashCode(), model.getParent().hashCode()));
-        }
+    public boolean isUnsynchronized() {
+        return unsynchronized;
+    }
 
-        return buf.toString();
+    /**
+     * @param unsynchronized The new value for unsynchronized.
+     */
+    public void setUnsynchronized(boolean unsynchronized) {
+        this.unsynchronized = unsynchronized;
     }
 
 }
