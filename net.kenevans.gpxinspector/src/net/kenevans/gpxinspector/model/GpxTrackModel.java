@@ -1,6 +1,10 @@
 package net.kenevans.gpxinspector.model;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.kenevans.gpx.TrkType;
+import net.kenevans.gpx.TrksegType;
 import net.kenevans.gpxinspector.ui.TrkInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
 import net.kenevans.parser.GPXClone;
@@ -15,6 +19,7 @@ import org.eclipse.swt.widgets.Display;
 public class GpxTrackModel extends GpxModel implements IGpxElementConstants
 {
     private TrkType track;
+    private LinkedList<GpxTrackSegmentModel> trackSegmentModels;
 
     /**
      * GpxTrackModel constructor which is private with no arguments for use in
@@ -28,8 +33,14 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
         if(track == null) {
             this.track = new TrkType();
             this.track.setName("New Track");
-       } else {
+        } else {
             this.track = track;
+        }
+        trackSegmentModels = new LinkedList<GpxTrackSegmentModel>();
+        List<TrksegType> trackSegments = this.track.getTrkseg();
+        for(TrksegType trackSegment : trackSegments) {
+            trackSegmentModels
+                .add(new GpxTrackSegmentModel(this, trackSegment));
         }
     }
 
@@ -69,6 +80,75 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
         disposed = true;
     }
 
+    /**
+     * Removes an element from the GpxTrackSegmentModel list.
+     * 
+     * @param model
+     * @return true if this list contained the specified element.
+     * @see java.util.List#remove
+     */
+    public boolean remove(GpxTrackSegmentModel model) {
+        boolean retVal = trackSegmentModels.remove(model);
+        if(retVal) {
+            model.dispose();
+            fireRemovedEvent(model);
+        }
+        return retVal;
+    }
+
+    /**
+     * Adds an element to the GpxFileModel list at the end.
+     * 
+     * @param newModel The model to be added.
+     * @return true if the add appears to be successful.
+     */
+    public boolean add(GpxTrackSegmentModel model) {
+        return add(null, model, PasteMode.END);
+    }
+
+    /**
+     * Adds an element to the GpxTrackSegmentModel list at the position
+     * specified by the mode relative to the position of the old model.
+     * 
+     * @param oldModel The old model that specifies the relative location for
+     *            the new one. Ignored if the mode is BEGINNING or END.
+     * @param newModel The model to be added.
+     * @param mode The PasteMode that determines where to place the new model
+     *            relative to the old one.
+     * @return true if the add appears to be successful.
+     */
+    public boolean add(GpxTrackSegmentModel oldModel,
+        GpxTrackSegmentModel newModel, PasteMode mode) {
+        boolean retVal = true;
+        int i = -1;
+        switch(mode) {
+        case BEGINNING:
+            trackSegmentModels.addFirst(newModel);
+            break;
+        case BEFORE:
+            i = trackSegmentModels.indexOf(oldModel);
+            if(i == -1) {
+                retVal = false;
+            } else {
+                trackSegmentModels.add(i, newModel);
+            }
+            break;
+        case REPLACE:
+        case AFTER:
+            i = trackSegmentModels.indexOf(oldModel);
+            trackSegmentModels.add(i + 1, newModel);
+            break;
+        case END:
+            retVal = trackSegmentModels.add(newModel);
+            break;
+        }
+        if(retVal) {
+            newModel.setParent(this);
+            fireAddedEvent(newModel);
+        }
+        return retVal;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -79,6 +159,9 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
         GpxTrackModel clone = new GpxTrackModel();
         clone.parent = this.parent;
         clone.track = GPXClone.clone(this.track);
+        for(GpxTrackSegmentModel model : trackSegmentModels) {
+            clone.trackSegmentModels.add((GpxTrackSegmentModel)model.clone());
+        }
 
         return clone;
     }
@@ -113,6 +196,13 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
     @Override
     public void setParent(GpxModel parent) {
         this.parent = parent;
+    }
+
+    /**
+     * @return The value of trackSegmentModels.
+     */
+    public LinkedList<GpxTrackSegmentModel> getTrackSegmentModels() {
+        return trackSegmentModels;
     }
 
 }

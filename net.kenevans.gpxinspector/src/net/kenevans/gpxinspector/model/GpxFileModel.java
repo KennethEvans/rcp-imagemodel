@@ -465,6 +465,7 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants
         GpxFileModel clone = new GpxFileModel();
         clone.parent = this.parent;
         clone.dirty = this.dirty;
+        clone.unsynchronized = this.unsynchronized;
         clone.file = new File(this.file.getPath());
         clone.gpx = GPXClone.clone(this.gpx);
 

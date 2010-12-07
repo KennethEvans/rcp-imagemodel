@@ -25,6 +25,7 @@ import net.kenevans.gpxinspector.model.GpxModel;
 import net.kenevans.gpxinspector.model.GpxModel.PasteMode;
 import net.kenevans.gpxinspector.model.GpxRouteModel;
 import net.kenevans.gpxinspector.model.GpxTrackModel;
+import net.kenevans.gpxinspector.model.GpxTrackSegmentModel;
 import net.kenevans.gpxinspector.model.GpxWaypointModel;
 import net.kenevans.gpxinspector.plugin.Activator;
 import net.kenevans.gpxinspector.preferences.IPreferenceConstants;
@@ -152,7 +153,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
      * be the maximum level it is possible to expand it. treeLevel is restricted
      * to be less than or equal to this value.
      */
-    public static final int MAX_TREE_LEVEL = 4;
+    public static final int MAX_TREE_LEVEL = 5;
     /** The initial tree level */
     public static final int INITIAL_TREE_LEVEL = 1;
     /** The current level to which the tree is expanded. Should be non-negative. */
@@ -824,6 +825,10 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                 } else if(model instanceof GpxWaypointModel) {
                     ((GpxFileModel)parent).remove((GpxWaypointModel)model);
                 }
+            } else if(parent instanceof GpxTrackModel) {
+                if(model instanceof GpxTrackSegmentModel) {
+                    ((GpxTrackModel)parent).remove((GpxTrackSegmentModel)model);
+                }
             } else if(parent instanceof GpxRouteModel) {
                 if(model instanceof GpxWaypointModel) {
                     ((GpxRouteModel)parent).remove((GpxWaypointModel)model);
@@ -912,6 +917,8 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                 check(wptModel, checked);
             }
         } else if(model instanceof GpxTrackModel) {
+            model.setChecked(checked);
+        } else if(model instanceof GpxTrackSegmentModel) {
             model.setChecked(checked);
         } else if(model instanceof GpxRouteModel) {
             model.setChecked(checked);

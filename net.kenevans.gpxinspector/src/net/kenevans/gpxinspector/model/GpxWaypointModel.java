@@ -1,5 +1,7 @@
 package net.kenevans.gpxinspector.model;
 
+import java.util.List;
+
 import net.kenevans.gpx.TrkType;
 import net.kenevans.gpx.WptType;
 import net.kenevans.gpxinspector.ui.WptInfoDialog;
@@ -98,10 +100,33 @@ public class GpxWaypointModel extends GpxModel implements IGpxElementConstants
      */
     @Override
     public String getLabel() {
-        if(waypoint != null) {
-            return waypoint.getName();
+        if(waypoint == null) {
+            return "Null Waypoint";
         }
-        return "Null Waypoint";
+        String name = waypoint.getName();
+        // Make a label for trackpoints without a name
+        if((parent instanceof GpxTrackSegmentModel) && name == null) {
+            String latlon = "";
+            try {
+                latlon = String.format(": %.6f, %6f", waypoint.getLat(),
+                    waypoint.getLon());
+            } catch(Exception ex) {
+                // Do nothing
+            }
+            List<GpxWaypointModel> waypointModels = ((GpxTrackSegmentModel)parent)
+                .getWaypointModels();
+            if(waypointModels != null) {
+                int index = waypointModels.indexOf(this);
+                if(index == -1) {
+                    return "[Point ?" + latlon + "]";
+                } else {
+                    return "[Point " + (index + 1) + latlon + "]";
+                }
+            } else {
+                return "[Point ??" + latlon + "]";
+            }
+        }
+        return name;
     }
 
     /*

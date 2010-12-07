@@ -8,6 +8,7 @@ import net.kenevans.gpxinspector.model.GpxFileModel;
 import net.kenevans.gpxinspector.model.GpxModel;
 import net.kenevans.gpxinspector.model.GpxRouteModel;
 import net.kenevans.gpxinspector.model.GpxTrackModel;
+import net.kenevans.gpxinspector.model.GpxTrackSegmentModel;
 import net.kenevans.gpxinspector.model.GpxWaypointModel;
 import net.kenevans.gpxinspector.plugin.Activator;
 
@@ -29,6 +30,8 @@ public class GpxLabelProvider extends LabelProvider
             descriptor = Activator.getImageDescriptor("icons/file_obj.gif");
         } else if(element instanceof GpxTrackModel) {
             descriptor = Activator.getImageDescriptor("icons/track.png");
+        } else if(element instanceof GpxTrackSegmentModel) {
+            descriptor = Activator.getImageDescriptor("icons/trackSegment.png");
         } else if(element instanceof GpxRouteModel) {
             descriptor = Activator.getImageDescriptor("icons/route.png");
         } else if(element instanceof GpxWaypointModel) {

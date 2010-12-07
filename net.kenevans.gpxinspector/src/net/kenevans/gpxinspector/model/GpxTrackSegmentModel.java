@@ -3,41 +3,41 @@ package net.kenevans.gpxinspector.model;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.kenevans.gpx.RteType;
+import net.kenevans.gpx.TrksegType;
 import net.kenevans.gpx.WptType;
-import net.kenevans.gpxinspector.ui.RteInfoDialog;
+import net.kenevans.gpxinspector.ui.TrksegInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
 import net.kenevans.parser.GPXClone;
 
 import org.eclipse.swt.widgets.Display;
 
 /*
- * Created on Dec 06, 2010
+ * Created on Dec 07, 2010
  * By Kenneth Evans, Jr.
  */
 
-public class GpxRouteModel extends GpxModel implements IGpxElementConstants
+public class GpxTrackSegmentModel extends GpxModel implements
+    IGpxElementConstants
 {
-    private RteType route;
+    private TrksegType trackseg;
     private LinkedList<GpxWaypointModel> waypointModels;
 
     /**
      * GpxRouteModel constructor which is private with no arguments for use in
      * clone.
      */
-    private GpxRouteModel() {
+    private GpxTrackSegmentModel() {
     }
 
-    public GpxRouteModel(GpxModel parent, RteType route) {
+    public GpxTrackSegmentModel(GpxModel parent, TrksegType trkseg) {
         this.parent = parent;
-        if(route == null) {
-            this.route = new RteType();
-            this.route.setName("New Route");
+        if(trkseg == null) {
+            this.trackseg = new TrksegType();
         } else {
-            this.route = route;
+            this.trackseg = trkseg;
         }
         waypointModels = new LinkedList<GpxWaypointModel>();
-        List<WptType> waypoints = this.route.getRtept();
+        List<WptType> waypoints = this.trackseg.getTrkpt();
         for(WptType waypoint : waypoints) {
             waypointModels.add(new GpxWaypointModel(this, waypoint));
         }
@@ -50,19 +50,19 @@ public class GpxRouteModel extends GpxModel implements IGpxElementConstants
      */
     @Override
     public void showInfo() {
-        RteInfoDialog dialog = null;
+        TrksegInfoDialog dialog = null;
         boolean success = false;
         // Without this try/catch, the application hangs on error
         try {
-            dialog = new RteInfoDialog(Display.getDefault().getActiveShell(),
-                this);
+            dialog = new TrksegInfoDialog(
+                Display.getDefault().getActiveShell(), this);
             success = dialog.open();
             if(success) {
                 // This also sets dirty
                 fireChangedEvent(this);
             }
         } catch(Exception ex) {
-            SWTUtils.excMsgAsync("Error with RteInfoDialog", ex);
+            SWTUtils.excMsgAsync("Error with TrksegInfoDialog", ex);
         }
     }
 
@@ -155,9 +155,9 @@ public class GpxRouteModel extends GpxModel implements IGpxElementConstants
      */
     @Override
     public Object clone() {
-        GpxRouteModel clone = new GpxRouteModel();
+        GpxTrackSegmentModel clone = new GpxTrackSegmentModel();
         clone.parent = this.parent;
-        clone.route = GPXClone.clone(this.route);
+        clone.trackseg = GPXClone.clone(this.trackseg);
         clone.waypointModels = new LinkedList<GpxWaypointModel>();
         for(GpxWaypointModel model : waypointModels) {
             clone.waypointModels.add((GpxWaypointModel)model.clone());
@@ -167,10 +167,10 @@ public class GpxRouteModel extends GpxModel implements IGpxElementConstants
     }
 
     /**
-     * @return The value of route.
+     * @return The value of trackseg.
      */
-    public RteType getRoute() {
-        return route;
+    public TrksegType getTrackseg() {
+        return trackseg;
     }
 
     /**
@@ -187,10 +187,18 @@ public class GpxRouteModel extends GpxModel implements IGpxElementConstants
      */
     @Override
     public String getLabel() {
-        if(route != null) {
-            return route.getName();
+        if(trackseg != null) {
+            if(parent == null) {
+                return "[Segment ??]";
+            }
+            int index = ((GpxTrackModel)parent).getTrackSegmentModels()
+                .indexOf(this);
+            if(index == -1) {
+                return "[Segment ?]";
+            }
+            return "[Segment " + (index + 1) + "]";
         }
-        return "Null Route";
+        return "Segment Null";
     }
 
     /*
