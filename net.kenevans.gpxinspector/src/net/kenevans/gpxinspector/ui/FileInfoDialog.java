@@ -17,16 +17,8 @@ import net.kenevans.gpxinspector.utils.LabeledText;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Dialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
@@ -37,13 +29,8 @@ import org.eclipse.swt.widgets.Text;
  * By Kenneth Evans, Jr.
  */
 
-public class FileInfoDialog extends Dialog
+public class FileInfoDialog extends InfoDialog
 {
-    private static final int TEXT_COLS_LARGE = 50;
-    private static final int LIST_ROWS = 2;
-    // private static final int TEXT_COLS_SMALL = 10;
-    private boolean success = false;
-
     private GpxFileModel model;
     private Text nameText;
     private Text dateText;
@@ -89,121 +76,27 @@ public class FileInfoDialog extends Dialog
     public FileInfoDialog(Shell parent, int style, GpxFileModel model) {
         super(parent, style);
         this.model = model;
+        if(model != null && model.getFile() != null
+            && model.getFile().getName() != null) {
+            setTitle(model.getFile().getName());
+        } else {
+            setTitle("File Info");
+        }
     }
 
-    /**
-     * Convenience method to open the dialog.
+    /*
+     * (non-Javadoc)
      * 
-     * @return Whether OK was selected or not.
+     * @see
+     * net.kenevans.gpxinspector.ui.InfoDialog#createControls(org.eclipse.swt
+     * .widgets.Composite)
      */
-    public boolean open() {
-        Shell shell = new Shell(getParent(), getStyle() | SWT.RESIZE);
-        shell.setText("File");
-        // It can take a long time to do this so use a wait cursor
-        // Probably not, though
-        Cursor waitCursor = new Cursor(shell.getDisplay(), SWT.CURSOR_WAIT);
-        if(waitCursor != null) getParent().setCursor(waitCursor);
-        createContents(shell);
-        setWidgetsFromModel();
-        getParent().setCursor(null);
-        waitCursor.dispose();
-        shell.pack();
-        // Resize it to fit the display
-        int width = shell.getSize().x;
-        int height = shell.getSize().y;
-        int displayHeight = shell.getDisplay().getBounds().height;
-        int displayWidth = shell.getDisplay().getBounds().width;
-        if(displayHeight < height) {
-            // Set the height to 2/3 the display height
-            height = (20 * height / 30);
-        }
-        if(displayWidth < width) {
-            // Set the width to 2/3 the display height
-            width = (20 * width / 30);
-        }
-        shell.setSize(width, height);
-        shell.open();
-        Display display = getParent().getDisplay();
-        while(!shell.isDisposed()) {
-            if(!display.readAndDispatch()) {
-                display.sleep();
-            }
-        }
-        return success;
-    }
-
-    /**
-     * Creates the contents of the dialog.
-     * 
-     * @param shell
-     */
-    private void createContents(final Shell shell) {
-        shell.setLayout(new FillLayout());
-
-        // Make it scroll
-        ScrolledComposite scrolledComposite = new ScrolledComposite(shell,
-            SWT.H_SCROLL | SWT.V_SCROLL);
-        Composite parent = new Composite(scrolledComposite, SWT.NONE);
-        scrolledComposite.setContent(parent);
-        GridLayout gridLayout = new GridLayout();
-        gridLayout.numColumns = 1;
-        parent.setLayout(gridLayout);
-
+    @Override
+    protected void createControls(Composite parent) {
         // Create the groups
         createFileGroup(parent);
         createGpxGroup(parent);
         createMetadataGroup(parent);
-
-        // Create the buttons
-        // Make a zero margin composite for the OK and Cancel buttons
-        Composite composite = new Composite(parent, SWT.NONE);
-        // Change END to FILL to center the buttons
-        GridDataFactory.fillDefaults().align(SWT.END, SWT.FILL)
-            .grab(true, false).applyTo(composite);
-        gridLayout = new GridLayout();
-        gridLayout.marginHeight = 0;
-        gridLayout.marginWidth = 0;
-        gridLayout.numColumns = 3;
-        composite.setLayout(gridLayout);
-
-        Button button = new Button(composite, SWT.PUSH);
-        button.setText("Reset");
-        GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL)
-            .grab(true, true).applyTo(button);
-        button.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent event) {
-                setWidgetsFromModel();
-            }
-        });
-
-        button = new Button(composite, SWT.PUSH);
-        button.setText("Save");
-        GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL)
-            .grab(true, true).applyTo(button);
-        button.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent event) {
-                setModelFromWidgets();
-                success = true;
-                shell.close();
-            }
-        });
-
-        button = new Button(composite, SWT.PUSH);
-        button.setText("Cancel");
-        GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL)
-            .grab(true, true).applyTo(button);
-        button.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent event) {
-                success = false;
-                shell.close();
-            }
-        });
-        shell.setDefaultButton(button);
-
-        scrolledComposite.setMinSize(parent.computeSize(SWT.DEFAULT,
-            SWT.DEFAULT));
-        scrolledComposite.setExpandHorizontal(true);
-        scrolledComposite.setExpandVertical(true);
     }
 
     /**
@@ -532,11 +425,13 @@ public class FileInfoDialog extends Dialog
         yearText.setToolTipText("Year.");
     }
 
-    /**
-     * Sets the values from the Text's to the model. Only does this if the Text
-     * is editable.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.kenevans.gpxinspector.ui.InfoDialog#setModelFromWidgets()
      */
-    private void setModelFromWidgets() {
+    @Override
+    protected void setModelFromWidgets() {
         GpxType gpx = model.getGpx();
 
         // GPX
@@ -759,10 +654,13 @@ public class FileInfoDialog extends Dialog
         gpx.setMetadata(metadataType);
     }
 
-    /**
-     * Sets the values form the model to the Text's.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.kenevans.gpxinspector.ui.InfoDialog#setWidgetsFromModel()
      */
-    private void setWidgetsFromModel() {
+    @Override
+    protected void setWidgetsFromModel() {
         File file = model.getFile();
         nameText.setText(file.getPath());
         long longVal = file.length();
