@@ -54,6 +54,11 @@ public class GpxTrackSegmentModel extends GpxModel implements
         boolean success = false;
         // Without this try/catch, the application hangs on error
         try {
+            // Synchronize first
+            GpxFileModel fileModel = getGpxFileModel();
+            if(fileModel != null) {
+                fileModel.synchronizeGpx();
+            }
             dialog = new TrksegInfoDialog(
                 Display.getDefault().getActiveShell(), this);
             success = dialog.open();

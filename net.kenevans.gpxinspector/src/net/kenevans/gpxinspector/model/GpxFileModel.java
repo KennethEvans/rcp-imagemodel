@@ -9,6 +9,7 @@ import javax.xml.bind.JAXBException;
 import net.kenevans.gpx.GpxType;
 import net.kenevans.gpx.RteType;
 import net.kenevans.gpx.TrkType;
+import net.kenevans.gpx.TrksegType;
 import net.kenevans.gpx.WptType;
 import net.kenevans.gpxinspector.ui.FileInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
@@ -95,6 +96,11 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants
         boolean success = false;
         // Without this try/catch, the application hangs on error
         try {
+            // Synchronize first
+            GpxFileModel fileModel = getGpxFileModel();
+            if(fileModel != null) {
+                fileModel.synchronizeGpx();
+            }
             dialog = new FileInfoDialog(Display.getDefault().getActiveShell(),
                 this);
             success = dialog.open();
@@ -426,15 +432,31 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants
         }
         List<GpxTrackModel> tracks = getTrackModels();
         List<TrkType> trkTypes = gpx.getTrk();
+        List<GpxTrackSegmentModel> segments = null;
+        List<TrksegType> tracksegTypes = null;
+        List<GpxWaypointModel> waypoints = null;
+        List<WptType> wptTypes = null;
         trkTypes.clear();
         for(GpxTrackModel model : tracks) {
+            segments = model.getTrackSegmentModels();
+            tracksegTypes = model.getTrack().getTrkseg();
+            tracksegTypes.clear();
+            for(GpxTrackSegmentModel trackSegmentModel : segments) {
+                waypoints = trackSegmentModel.getWaypointModels();
+                wptTypes = trackSegmentModel.getTrackseg().getTrkpt();
+                wptTypes.clear();
+                for(GpxWaypointModel waypointModel : waypoints) {
+                    wptTypes.add(waypointModel.getWaypoint());
+                }
+                tracksegTypes.add(trackSegmentModel.getTrackseg());
+            }
             trkTypes.add(model.getTrack());
         }
 
         List<GpxRouteModel> routes = getRouteModels();
         List<RteType> rteTypes = gpx.getRte();
-        List<GpxWaypointModel> waypoints = null;
-        List<WptType> wptTypes = null;
+        waypoints = null;
+        wptTypes = null;
         rteTypes.clear();
         for(GpxRouteModel model : routes) {
             waypoints = model.getWaypointModels();
