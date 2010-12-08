@@ -401,12 +401,32 @@ public class GpxFileModel extends GpxModel implements IGpxElementConstants
         StringBuffer buf = new StringBuffer();
         buf.append(String.format("Hierarchy for %s %x\n", fileModel.getFile()
             .getName(), fileModel.hashCode()));
-        buf.append(String.format("Parent%s %x\n", fileModel.getParent()
+        buf.append(String.format("Parent %s %x\n", fileModel.getParent()
             .getClass().getName(), fileModel.getParent().hashCode()));
         buf.append(String.format("Tracks:\n"));
         for(GpxTrackModel model : fileModel.getTrackModels()) {
             buf.append(String.format("  %s %x parent %x\n", model.getLabel(),
                 model.hashCode(), model.getParent().hashCode()));
+            if(true) {
+                buf.append(String.format("  Track Segments:\n"));
+                for(GpxTrackSegmentModel trackSegmentModel : model
+                    .getTrackSegmentModels()) {
+                    buf.append(String.format("    %s %x parent %x\n",
+                        trackSegmentModel.getLabel(), trackSegmentModel
+                            .hashCode(), trackSegmentModel.getParent()
+                            .hashCode()));
+                    if(true) {
+                        buf.append(String.format("    Track Points:\n"));
+                        for(GpxWaypointModel waypointModel : trackSegmentModel
+                            .getWaypointModels()) {
+                            buf.append(String.format("      %s %x parent %x\n",
+                                waypointModel.getLabel(), trackSegmentModel
+                                    .hashCode(), waypointModel.getParent()
+                                    .hashCode()));
+                        }
+                    }
+                }
+            }
         }
         buf.append(String.format("Routes:\n"));
         for(GpxRouteModel model : fileModel.getRouteModels()) {

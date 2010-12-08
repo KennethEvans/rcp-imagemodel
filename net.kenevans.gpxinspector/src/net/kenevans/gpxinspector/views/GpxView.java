@@ -121,7 +121,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
 
     /** Used to specify the task to do for a selection location */
     public static enum Task {
-        SORT, REVERSE, NEWFILE, NEWTRK, NEWRTE, NEWWPT
+        SORT, REVERSE, NEWFILE, NEWTRK, NEWSEG, NEWRTE, NEWWPT
     };
 
     /** The separator used for the initial files preference */
@@ -709,6 +709,17 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         id = "net.kenevans.gpxinspector.newTrack";
         handlerService.activateHandler(id, handler);
 
+        // New track segment
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                doTask(Task.NEWSEG);
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.newTrackSegment";
+        handlerService.activateHandler(id, handler);
+
         // New route
         handler = new AbstractHandler() {
             public Object execute(ExecutionEvent event)
@@ -736,14 +747,18 @@ public class GpxView extends ViewPart implements IPreferenceConstants
             handler = new AbstractHandler() {
                 public Object execute(ExecutionEvent event)
                     throws ExecutionException {
-                    ISelection sel = HandlerUtil.getCurrentSelection(event);
-                    System.out.println("getCurrentSelection: " + sel);
-                    sel = HandlerUtil.getActiveMenuSelection(event);
-                    System.out.println("getActiveMenuSelection: " + sel);
-                    Collection<?> collection = HandlerUtil
-                        .getActiveMenus(event);
-                    System.out.println("getActiveMenus: " + collection);
-                    // debug();
+                    if(false) {
+                        ISelection sel = HandlerUtil.getCurrentSelection(event);
+                        System.out.println("getCurrentSelection: " + sel);
+                        sel = HandlerUtil.getActiveMenuSelection(event);
+                        System.out.println("getActiveMenuSelection: " + sel);
+                        Collection<?> collection = HandlerUtil
+                            .getActiveMenus(event);
+                        System.out.println("getActiveMenus: " + collection);
+                    }
+                    if(true) {
+                        debug();
+                    }
                     return null;
                 }
             };
@@ -801,10 +816,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
             SWTUtils.errMsg("Nothing selected");
             return;
         }
-        /*
-         * Tell the tree to not redraw until we finish removing all the selected
-         * children.
-         */
+        // Tell the tree to not redraw
         treeViewer.getTree().setRedraw(false);
         int count = 0;
         for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
@@ -825,6 +837,13 @@ public class GpxView extends ViewPart implements IPreferenceConstants
             } else if(parent instanceof GpxTrackModel) {
                 if(model instanceof GpxTrackSegmentModel) {
                     ((GpxTrackModel)parent).remove((GpxTrackSegmentModel)model);
+                } else if(model instanceof GpxTrackSegmentModel) {
+                    ((GpxTrackModel)parent).remove((GpxTrackSegmentModel)model);
+                }
+            } else if(parent instanceof GpxTrackSegmentModel) {
+                if(model instanceof GpxWaypointModel) {
+                    ((GpxTrackSegmentModel)parent)
+                        .remove((GpxWaypointModel)model);
                 }
             } else if(parent instanceof GpxRouteModel) {
                 if(model instanceof GpxWaypointModel) {
@@ -1293,7 +1312,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         IStructuredSelection selection = (IStructuredSelection)treeViewer
             .getSelection();
         if(selection.isEmpty()) {
-            SWTUtils.errMsg("Nothing selected");
+            SWTUtils.errMsg("Nothing selected to copy");
             return false;
         }
         List<GpxModel> list = new ArrayList<GpxModel>();
@@ -1304,6 +1323,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                 list.add((GpxModel)model.clone());
             } catch(Exception ex) {
                 SWTUtils.excMsg("Problem adding to the clipboard", ex);
+                ex.printStackTrace();
                 return false;
             }
         }
@@ -1408,8 +1428,11 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         IStructuredSelection selection = (IStructuredSelection)treeViewer
             .getSelection();
         if(selection.isEmpty()) {
-            SWTUtils.errMsg("Nothing selected");
-            return;
+            // Do nothing
+            // Can paste a GpxFileModel at the end of the GPxFileSet
+            // If this is not desired, implement the following:
+            // SWTUtils.errMsg("Nothing selected for the target");
+            // return;
         }
         List<GpxModel> clipboardList = getClipboardList();
         if(clipboardList == null || clipboardList.size() == 0) {
@@ -1422,7 +1445,10 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         }
         // Determine the targetModel to be the first item in the selection list
         GpxModel targetModel = (GpxModel)selection.getFirstElement();
-        GpxModel targetParent = targetModel.getParent();
+        GpxModel targetParent = null;
+        if(targetModel != null) {
+            targetParent = targetModel.getParent();
+        }
         // Set the treeviewer to not redraw for now
         treeViewer.getTree().setRedraw(false);
         // Loop over the clipboard items
@@ -1431,86 +1457,81 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         for(GpxModel clipboardModel : clipboardList) {
             iClipboardItem++;
             added = false;
-            if(targetParent instanceof GpxFileSetModel) {
-                GpxFileSetModel fileSetModel = (GpxFileSetModel)targetParent;
-                GpxFileModel fileModel = (GpxFileModel)targetModel;
+            if(targetModel == null) {
                 if(clipboardModel instanceof GpxFileModel) {
-                    added = fileSetModel.add(fileModel,
+                    added = gpxFileSetModel.add((GpxFileModel)targetModel,
                         (GpxFileModel)clipboardModel.clone(), mode);
-                } else if(clipboardModel instanceof GpxTrackModel) {
-                    if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                }
+            } else if(targetModel instanceof GpxFileModel) {
+                if(clipboardModel instanceof GpxFileModel) {
+                    added = ((GpxFileSetModel)targetParent).add(
+                        (GpxFileModel)targetModel,
+                        (GpxFileModel)clipboardModel.clone(), mode);
+                } else if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                    if(clipboardModel instanceof GpxTrackModel) {
+                        GpxFileModel fileModel = (GpxFileModel)targetModel;
                         added = fileModel.add(null,
                             (GpxTrackModel)clipboardModel.clone(), mode);
-                    }
-                } else if(clipboardModel instanceof GpxRouteModel) {
-                    if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                    } else if(clipboardModel instanceof GpxRouteModel) {
+                        GpxFileModel fileModel = (GpxFileModel)targetModel;
                         added = fileModel.add(null,
                             (GpxRouteModel)clipboardModel.clone(), mode);
-                    }
-                } else if(clipboardModel instanceof GpxWaypointModel) {
-                    if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                    } else if(clipboardModel instanceof GpxWaypointModel) {
+                        GpxFileModel fileModel = (GpxFileModel)targetModel;
                         added = fileModel.add(null,
                             (GpxWaypointModel)clipboardModel.clone(), mode);
                     }
                 }
-            } else if(targetParent instanceof GpxFileModel) {
-                GpxFileModel fileModel = (GpxFileModel)targetParent;
+            } else if(targetModel instanceof GpxTrackModel) {
                 if(clipboardModel instanceof GpxTrackModel) {
-                    if(targetModel instanceof GpxTrackModel) {
-                        added = fileModel.add((GpxTrackModel)targetModel,
-                            (GpxTrackModel)clipboardModel.clone(), mode);
-                    } else {
-                        if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
-                            added = fileModel.add(null,
-                                (GpxTrackModel)clipboardModel.clone(), mode);
-                        }
+                    added = ((GpxFileModel)targetParent).add(
+                        (GpxTrackModel)targetModel,
+                        (GpxTrackModel)clipboardModel.clone(), mode);
+                } else if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                    if(clipboardModel instanceof GpxTrackSegmentModel) {
+                        GpxTrackModel trackModel = (GpxTrackModel)targetModel;
+                        added = trackModel.add(null,
+                            (GpxTrackSegmentModel)clipboardModel.clone(), mode);
                     }
-                } else if(clipboardModel instanceof GpxRouteModel) {
-                    if(targetModel instanceof GpxRouteModel) {
-                        added = fileModel.add((GpxRouteModel)targetModel,
-                            (GpxRouteModel)clipboardModel.clone(), mode);
-                    } else {
-                        if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
-                            added = fileModel.add(null,
-                                (GpxRouteModel)clipboardModel.clone(), mode);
-                        }
-                    }
-                } else if(clipboardModel instanceof GpxWaypointModel) {
-                    if(targetModel instanceof GpxWaypointModel) {
-                        added = fileModel.add((GpxWaypointModel)targetModel,
-                            (GpxWaypointModel)clipboardModel.clone(), mode);
-                    } else {
-                        if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
-                            if(targetModel instanceof GpxFileModel) {
-                                added = fileModel.add(null,
-                                    (GpxWaypointModel)clipboardModel.clone(),
-                                    mode);
-                            } else {
-                                if(targetModel instanceof GpxRouteModel) {
-                                    added = ((GpxRouteModel)targetModel).add(
-                                        null, (GpxWaypointModel)clipboardModel
-                                            .clone(), mode);
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
-                        added = fileModel.add(null,
+                }
+            } else if(targetModel instanceof GpxTrackSegmentModel) {
+                if(clipboardModel instanceof GpxTrackSegmentModel) {
+                    added = ((GpxTrackModel)targetParent).add(
+                        (GpxTrackSegmentModel)targetModel,
+                        (GpxTrackSegmentModel)clipboardModel.clone(), mode);
+                } else if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                    if(clipboardModel instanceof GpxWaypointModel) {
+                        GpxTrackSegmentModel trackSegmentModel = (GpxTrackSegmentModel)targetModel;
+                        added = trackSegmentModel.add(null,
                             (GpxWaypointModel)clipboardModel.clone(), mode);
                     }
                 }
-            } else if(targetParent instanceof GpxRouteModel) {
-                GpxRouteModel routeModel = (GpxRouteModel)targetParent;
-                if(clipboardModel instanceof GpxWaypointModel) {
-                    if(targetModel instanceof GpxWaypointModel) {
-                        added = routeModel.add((GpxWaypointModel)targetModel,
+            } else if(targetModel instanceof GpxRouteModel) {
+                if(clipboardModel instanceof GpxRouteModel) {
+                    added = ((GpxFileModel)targetParent).add(
+                        (GpxRouteModel)targetModel,
+                        (GpxRouteModel)clipboardModel.clone(), mode);
+                } else if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
+                    if(clipboardModel instanceof GpxWaypointModel) {
+                        GpxRouteModel routeModel = (GpxRouteModel)targetModel;
+                        added = routeModel.add(null,
                             (GpxWaypointModel)clipboardModel.clone(), mode);
-                    } else {
-                        if(mode == PasteMode.BEGINNING || mode == PasteMode.END) {
-                            added = routeModel.add(null,
-                                (GpxWaypointModel)clipboardModel.clone(), mode);
-                        }
+                    }
+                }
+            } else if(targetModel instanceof GpxWaypointModel) {
+                if(clipboardModel instanceof GpxWaypointModel) {
+                    if(targetParent instanceof GpxFileModel) {
+                        added = ((GpxFileModel)targetParent).add(
+                            (GpxWaypointModel)targetModel,
+                            (GpxWaypointModel)clipboardModel.clone(), mode);
+                    } else if(targetParent instanceof GpxTrackSegmentModel) {
+                        added = ((GpxTrackSegmentModel)targetParent).add(
+                            (GpxWaypointModel)targetModel,
+                            (GpxWaypointModel)clipboardModel.clone(), mode);
+                    } else if(targetParent instanceof GpxRouteModel) {
+                        added = ((GpxRouteModel)targetParent).add(
+                            (GpxWaypointModel)targetModel,
+                            (GpxWaypointModel)clipboardModel.clone(), mode);
                     }
                 }
             }
@@ -1601,6 +1622,20 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                     parent.fireChangedEvent(parent);
                     implemented = true;
                 }
+            } else if(parent instanceof GpxTrackModel) {
+                if(model instanceof GpxTrackSegmentModel) {
+                    Collections.sort(((GpxTrackModel)parent)
+                        .getTrackSegmentModels());
+                    parent.fireChangedEvent(parent);
+                    implemented = true;
+                }
+            } else if(parent instanceof GpxTrackSegmentModel) {
+                if(model instanceof GpxWaypointModel) {
+                    Collections.sort(((GpxRouteModel)parent)
+                        .getWaypointModels());
+                    parent.fireChangedEvent(parent);
+                    implemented = true;
+                }
             } else if(parent instanceof GpxRouteModel) {
                 if(model instanceof GpxWaypointModel) {
                     Collections.sort(((GpxRouteModel)parent)
@@ -1629,6 +1664,20 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                     implemented = true;
                 } else if(model instanceof GpxWaypointModel) {
                     Collections.reverse(((GpxFileModel)parent)
+                        .getWaypointModels());
+                    parent.fireChangedEvent(parent);
+                    implemented = true;
+                }
+            } else if(parent instanceof GpxTrackModel) {
+                if(model instanceof GpxTrackSegmentModel) {
+                    Collections.reverse(((GpxTrackModel)parent)
+                        .getTrackSegmentModels());
+                    parent.fireChangedEvent(parent);
+                    implemented = true;
+                }
+            } else if(parent instanceof GpxTrackSegmentModel) {
+                if(model instanceof GpxWaypointModel) {
+                    Collections.reverse(((GpxRouteModel)parent)
                         .getWaypointModels());
                     parent.fireChangedEvent(parent);
                     implemented = true;
@@ -1663,6 +1712,20 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                 implemented = true;
             }
             break;
+        case NEWSEG:
+            if((model instanceof GpxTrackModel)) {
+                GpxTrackSegmentModel newModel = new GpxTrackSegmentModel(model,
+                    null);
+                ((GpxTrackModel)model).add(newModel);
+                implemented = true;
+            } else if((model instanceof GpxTrackSegmentModel)) {
+                GpxTrackSegmentModel newModel = new GpxTrackSegmentModel(
+                    parent, null);
+                ((GpxTrackModel)parent).add((GpxTrackSegmentModel)model,
+                    newModel, PasteMode.AFTER);
+                implemented = true;
+            }
+            break;
         case NEWRTE:
             if((model instanceof GpxFileModel)) {
                 GpxRouteModel newModel = new GpxRouteModel(model, null);
@@ -1684,11 +1747,18 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                 GpxWaypointModel newModel = new GpxWaypointModel(model, null);
                 ((GpxRouteModel)model).add(newModel);
                 implemented = true;
-
+            } else if((model instanceof GpxTrackSegmentModel)) {
+                GpxWaypointModel newModel = new GpxWaypointModel(model, null);
+                ((GpxTrackSegmentModel)model).add(newModel);
+                implemented = true;
             } else if((model instanceof GpxWaypointModel)) {
                 GpxWaypointModel newModel = new GpxWaypointModel(parent, null);
                 if(parent instanceof GpxFileModel) {
                     ((GpxFileModel)parent).add((GpxWaypointModel)model,
+                        newModel, PasteMode.AFTER);
+                    implemented = true;
+                } else if(parent instanceof GpxTrackSegmentModel) {
+                    ((GpxTrackSegmentModel)parent).add((GpxWaypointModel)model,
                         newModel, PasteMode.AFTER);
                     implemented = true;
                 } else if(parent instanceof GpxRouteModel) {
@@ -1793,12 +1863,12 @@ public class GpxView extends ViewPart implements IPreferenceConstants
      * Generic debug routine. The implementation may change as needed.
      */
     private void debug() {
-        if(false) {
+        if(true) {
             for(GpxFileModel fileModel : gpxFileSetModel.getGpxFileModels()) {
                 System.out.println(GpxFileModel.hierarchyInfo(fileModel));
             }
         }
-        if(true) {
+        if(false) {
             System.out.println("GpxFileSetModel");
             for(GpxFileModel fileModel : gpxFileSetModel.getGpxFileModels()) {
                 boolean dirty = fileModel.isDirty();

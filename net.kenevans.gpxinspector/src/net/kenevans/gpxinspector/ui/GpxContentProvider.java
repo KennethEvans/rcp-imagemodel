@@ -177,7 +177,6 @@ public class GpxContentProvider implements ITreeContentProvider
                         GpxModel parent = model.getParent();
                         // Add listeners to the model and its children
                         addListenersTo(new Object[] {model});
-                        // model.addGpxModelListener(gpxModelListener);
                         if(parent != null) {
                             viewer.refresh(parent, false);
                         }

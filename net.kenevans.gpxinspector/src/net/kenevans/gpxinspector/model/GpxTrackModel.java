@@ -1,10 +1,12 @@
 package net.kenevans.gpxinspector.model;
 
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.kenevans.gpx.TrkType;
 import net.kenevans.gpx.TrksegType;
+import net.kenevans.gpx.WptType;
 import net.kenevans.gpxinspector.ui.TrkInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
 import net.kenevans.parser.GPXClone;
@@ -164,6 +166,7 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
         GpxTrackModel clone = new GpxTrackModel();
         clone.parent = this.parent;
         clone.track = GPXClone.clone(this.track);
+        clone.trackSegmentModels = new LinkedList<GpxTrackSegmentModel>();
         for(GpxTrackSegmentModel model : trackSegmentModels) {
             clone.trackSegmentModels.add((GpxTrackSegmentModel)model.clone());
         }
@@ -201,6 +204,9 @@ public class GpxTrackModel extends GpxModel implements IGpxElementConstants
     @Override
     public void setParent(GpxModel parent) {
         this.parent = parent;
+        for(GpxTrackSegmentModel model : this.getTrackSegmentModels()) {
+            model.setParent(this);
+        }
     }
 
     /**

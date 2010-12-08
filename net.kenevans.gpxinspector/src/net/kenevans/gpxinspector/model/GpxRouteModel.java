@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.kenevans.gpx.RteType;
+import net.kenevans.gpx.TrksegType;
 import net.kenevans.gpx.WptType;
 import net.kenevans.gpxinspector.ui.RteInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
@@ -208,6 +209,9 @@ public class GpxRouteModel extends GpxModel implements IGpxElementConstants
     @Override
     public void setParent(GpxModel parent) {
         this.parent = parent;
+        for(GpxWaypointModel model : this.getWaypointModels()) {
+            model.setParent(this);
+        }
     }
 
 }

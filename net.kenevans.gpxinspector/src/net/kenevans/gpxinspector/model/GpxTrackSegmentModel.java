@@ -3,6 +3,7 @@ package net.kenevans.gpxinspector.model;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.kenevans.gpx.TrkType;
 import net.kenevans.gpx.TrksegType;
 import net.kenevans.gpx.WptType;
 import net.kenevans.gpxinspector.ui.TrksegInfoDialog;
@@ -216,6 +217,9 @@ public class GpxTrackSegmentModel extends GpxModel implements
     @Override
     public void setParent(GpxModel parent) {
         this.parent = parent;
+        for(GpxWaypointModel model : this.getWaypointModels()) {
+            model.setParent(this);
+        }
     }
 
 }

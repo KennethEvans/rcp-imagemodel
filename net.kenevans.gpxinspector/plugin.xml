@@ -241,6 +241,30 @@
                </visibleWhen>
             </command>
             <command
+                  commandId="net.kenevans.gpxinspector.newTrackSegment"
+                  label="Track Segment"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeMenuSelection">
+                     <iterate>
+                        <or>
+                           <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxTrackModel">
+                           </instanceof>
+                           <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxTrackSegmentModel">
+                           </instanceof>
+                        </or>
+                     </iterate>
+                     <count
+                           value="1">
+                     </count>
+                  </with>
+               </visibleWhen>
+            </command>
+            <command
                   commandId="net.kenevans.gpxinspector.newRoute"
                   label="Route"
                   style="push">
@@ -276,6 +300,9 @@
                         <or>
                            <instanceof
                                  value="net.kenevans.gpxinspector.model.GpxFileModel">
+                           </instanceof>
+                           <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxTrackSegmentModel">
                            </instanceof>
                            <instanceof
                                  value="net.kenevans.gpxinspector.model.GpxRouteModel">
@@ -722,6 +749,11 @@
             categoryId="net.kenevans.gpxinspector.category"
             id="net.kenevans.gpxinspector.newTrack"
             name="Track">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.newTrackSegment"
+            name="Track Segment">
       </command>
       <command
             categoryId="net.kenevans.gpxinspector.category"

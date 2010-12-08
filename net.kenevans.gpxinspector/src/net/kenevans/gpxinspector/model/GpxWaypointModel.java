@@ -1,5 +1,6 @@
 package net.kenevans.gpxinspector.model;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import net.kenevans.gpx.WptType;
@@ -30,6 +31,9 @@ public class GpxWaypointModel extends GpxModel implements IGpxElementConstants
         if(waypoint == null) {
             this.waypoint = new WptType();
             this.waypoint.setName("New Waypoint");
+            // Required fields
+            this.waypoint.setLat(new BigDecimal(0.0));
+            this.waypoint.setLon(new BigDecimal(0.0));
         } else {
             this.waypoint = waypoint;
         }
