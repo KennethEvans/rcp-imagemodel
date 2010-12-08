@@ -777,18 +777,15 @@ public class GpxView extends ViewPart implements IPreferenceConstants
      * nothing.
      */
     protected void showInfo() {
-        if(treeViewer.getSelection().isEmpty()) {
+        IStructuredSelection selection = (IStructuredSelection)treeViewer
+            .getSelection();
+        if(selection.isEmpty()) {
             SWTUtils.errMsg("Nothing selected");
             return;
         }
-        IStructuredSelection selection = (IStructuredSelection)treeViewer
-            .getSelection();
-        for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-            GpxModel model = (GpxModel)iterator.next();
-            model.showInfo();
-            // Only do the first one
-            break;
-        }
+        // Only do the first one
+        GpxModel model = (GpxModel)selection.getFirstElement();
+        model.showInfo();
     }
 
     /**
@@ -798,12 +795,12 @@ public class GpxView extends ViewPart implements IPreferenceConstants
      * If nothing is selected do nothing.
      */
     protected void removeSelected() {
-        if(treeViewer.getSelection().isEmpty()) {
+        IStructuredSelection selection = (IStructuredSelection)treeViewer
+            .getSelection();
+        if(selection.isEmpty()) {
             SWTUtils.errMsg("Nothing selected");
             return;
         }
-        IStructuredSelection selection = (IStructuredSelection)treeViewer
-            .getSelection();
         /*
          * Tell the tree to not redraw until we finish removing all the selected
          * children.
@@ -875,18 +872,19 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         // Note that we cannot use treeviewer.setSubtreeChecked, etc. as they
         // do not notify listeners so the underlying model is not changed. And
         // they tend to only apply to visible children.
+        IStructuredSelection selection = (IStructuredSelection)treeViewer
+            .getSelection();
         treeViewer.getTree().setRedraw(false);
-        if(treeViewer.getSelection().isEmpty()) {
+        if(selection.isEmpty()) {
             check(gpxFileSetModel, checked);
         } else {
-            IStructuredSelection selection = (IStructuredSelection)treeViewer
-                .getSelection();
             for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
                 GpxModel model = (GpxModel)iterator.next();
                 check(model, checked);
             }
         }
         treeViewer.getTree().setRedraw(true);
+        // TODI Is this necessary?
         treeViewer.refresh();
     }
 
@@ -1292,12 +1290,12 @@ public class GpxView extends ViewPart implements IPreferenceConstants
      * @return If the operation was apparently successful or not.
      */
     private boolean copy() {
-        if(treeViewer.getSelection().isEmpty()) {
+        IStructuredSelection selection = (IStructuredSelection)treeViewer
+            .getSelection();
+        if(selection.isEmpty()) {
             SWTUtils.errMsg("Nothing selected");
             return false;
         }
-        IStructuredSelection selection = (IStructuredSelection)treeViewer
-            .getSelection();
         List<GpxModel> list = new ArrayList<GpxModel>();
         GpxModel model = null;
         for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
@@ -1565,13 +1563,13 @@ public class GpxView extends ViewPart implements IPreferenceConstants
      * @param task
      */
     public void doTask(Task task) {
-        // We can open a new file even if there os no selection
-        if(task != Task.NEWFILE && treeViewer.getSelection().isEmpty()) {
+        IStructuredSelection selection = (IStructuredSelection)treeViewer
+            .getSelection();
+        // We can open a new file even if there is no selection
+        if(task != Task.NEWFILE && selection.isEmpty()) {
             SWTUtils.errMsg("Nothing selected");
             return;
         }
-        IStructuredSelection selection = (IStructuredSelection)treeViewer
-            .getSelection();
         // Determine the targetModel to be the first item in the selection list
         GpxModel model = (GpxModel)selection.getFirstElement();
         GpxModel parent = null;

@@ -332,6 +332,15 @@
                commandId="net.kenevans.gpxinspector.showInfo"
                label="Info..."
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                  <count
+                        value="1">
+                  </count>
+               </with>
+            </visibleWhen>
          </command>
          <separator
                name="separator4"
