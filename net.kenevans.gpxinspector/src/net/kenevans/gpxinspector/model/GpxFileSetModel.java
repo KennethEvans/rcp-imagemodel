@@ -1,7 +1,6 @@
 package net.kenevans.gpxinspector.model;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 

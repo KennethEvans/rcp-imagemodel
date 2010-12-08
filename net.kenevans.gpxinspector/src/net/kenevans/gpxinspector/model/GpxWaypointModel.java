@@ -2,7 +2,6 @@ package net.kenevans.gpxinspector.model;
 
 import java.util.List;
 
-import net.kenevans.gpx.TrkType;
 import net.kenevans.gpx.WptType;
 import net.kenevans.gpxinspector.ui.WptInfoDialog;
 import net.kenevans.gpxinspector.utils.SWTUtils;
