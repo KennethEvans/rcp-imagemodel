@@ -361,12 +361,9 @@
                style="push">
             <visibleWhen
                   checkEnabled="false">
-               <with
-                     variable="activeMenuSelection">
-                  <count
-                        value="1">
-                  </count>
-               </with>
+               <reference
+                     definitionId="net.kenevans.gpxinspector.activeMenuSelection1">
+               </reference>
             </visibleWhen>
          </command>
          <separator
@@ -382,11 +379,23 @@
          <command
                commandId="net.kenevans.gpxinspector.sort"
                label="Sort">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="net.kenevans.gpxinspector.activeMenuSelection1">
+               </reference>
+            </visibleWhen>
             style="push">
          </command>
          <command
                commandId="net.kenevans.gpxinspector.reverse"
                label="Reverse">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="net.kenevans.gpxinspector.activeMenuSelection1">
+               </reference>
+            </visibleWhen>
             style="push">
          </command>
          <separator
@@ -451,9 +460,21 @@
                icon="icons/paste_edit.gif"
                label="Paste"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="net.kenevans.gpxinspector.activeMenuSelection1">
+               </reference>
+            </visibleWhen>
          </command>
          <menu
                label="Paste Special">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="net.kenevans.gpxinspector.activeMenuSelection1">
+               </reference>
+            </visibleWhen>
             <command
                   commandId="net.kenevans.gpxinspector.pasteFirst"
                   icon="icons/paste_edit.gif"
@@ -819,6 +840,18 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="CTRL+V">
       </key>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.definitions">
+      <definition
+            id="net.kenevans.gpxinspector.activeMenuSelection1">
+               <with
+                     variable="activeMenuSelection">
+                  <count
+                        value="1">
+                  </count>
+               </with>
+      </definition>
    </extension>
 
 </plugin>

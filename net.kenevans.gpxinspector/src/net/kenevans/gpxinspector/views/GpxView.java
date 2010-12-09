@@ -569,7 +569,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
                 throws ExecutionException {
                 if(treeViewer != null) {
                     treeViewer.setSelection(null);
-                    treeViewer.refresh();
+                    treeViewer.refresh(true);
                 }
                 return null;
             }
@@ -788,8 +788,8 @@ public class GpxView extends ViewPart implements IPreferenceConstants
     }
 
     /**
-     * Show information for the selected item. If nothing is selected do
-     * nothing.
+     * Show information for the selected item. Only uses the first element in
+     * the selection. If nothing is selected do nothing.
      */
     protected void showInfo() {
         IStructuredSelection selection = (IStructuredSelection)treeViewer
@@ -877,7 +877,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         List<GpxFileModel> fileSetModels = gpxFileSetModel.getGpxFileModels();
         fileSetModels.clear();
         treeViewer.getTree().setRedraw(true);
-        treeViewer.refresh();
+        treeViewer.refresh(true);
         treeLevel = 1;
     }
 
@@ -904,7 +904,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         }
         treeViewer.getTree().setRedraw(true);
         // TODI Is this necessary?
-        treeViewer.refresh();
+        treeViewer.refresh(true);
     }
 
     /**
@@ -1042,7 +1042,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
             fn.processGpxFileModel(model, Mode.CHECK, options);
         }
         treeViewer.getTree().setRedraw(true);
-        treeViewer.refresh();
+        treeViewer.refresh(true);
         shell.setCursor(null);
         waitCursor.dispose();
     }
@@ -1076,7 +1076,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         String errors = fn.findAndAddToFileSetModel(gpxFileSetModel, options);
         // All, done, restore things
         treeViewer.getTree().setRedraw(true);
-        treeViewer.refresh();
+        treeViewer.refresh(true);
         shell.setCursor(null);
         waitCursor.dispose();
 
@@ -1135,7 +1135,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
 
         // Restore things
         treeViewer.getTree().setRedraw(true);
-        treeViewer.refresh();
+        treeViewer.refresh(true);
         treeViewer.expandToLevel(treeLevel);
         shell.setCursor(null);
         waitCursor.dispose();
@@ -1405,12 +1405,13 @@ public class GpxView extends ViewPart implements IPreferenceConstants
 
     /**
      * Pastes the clipboard models into the appropriate target model or its
-     * parent. The target model is the first item in the selection list. Others
-     * are ignored except for replace. If the target model is same class as the
-     * clipboard model, then the clipboard model is added to its list. If the
-     * targetModel is a possible parent of the clipboard model, then the the
-     * clipboard model is added to the appropriate list in the parent. Otherwise
-     * an error is indicated and the user is prompted to continue or not.<br>
+     * parent. Only uses the first element in the selection. The target model is
+     * the first item. Others are ignored except for replace. If the target
+     * model is same class as the clipboard model, then the clipboard model is
+     * added to its list. If the targetModel is a possible parent of the
+     * clipboard model, then the the clipboard model is added to the appropriate
+     * list in the parent. Otherwise an error is indicated and the user is
+     * prompted to continue or not.<br>
      * <br>
      * BEGINNING: Items will be inserted at the beginning of the list.<br>
      * BEFORE: The target model and the clipboard model must be of the same
@@ -1579,7 +1580,8 @@ public class GpxView extends ViewPart implements IPreferenceConstants
     }
 
     /**
-     * Does the specified task for the currently selected element.
+     * Does the specified task for the currently selected element. Only uses the
+     * first element in the selection.
      * 
      * @param task
      */
@@ -1771,7 +1773,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         }
         // Let the treeviewer redraw again
         treeViewer.getTree().setRedraw(true);
-        // treeViewer.refresh();
+        // treeViewer.refresh(true);
         if(!implemented) {
             String modelName = (model == null) ? "Unknown" : model.getClass()
                 .getSimpleName();
