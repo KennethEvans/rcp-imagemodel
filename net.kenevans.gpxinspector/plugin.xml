@@ -180,6 +180,9 @@
                icon="icons/debug_exc.gif"
                label="Debug"
                style="push">
+            <visibleWhen
+                  checkEnabled="true">
+            </visibleWhen>
          </command>
          <separator
                name="additions"
@@ -375,6 +378,9 @@
                icon="icons/debug_exc.gif"
                label="Debug"
                style="push">
+            <visibleWhen
+                  checkEnabled="true">
+            </visibleWhen>
          </command>
          <command
                commandId="net.kenevans.gpxinspector.sort"

@@ -44,6 +44,7 @@ import net.kenevans.gpxinspector.utils.find.FindNearOptions.Units;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.expressions.IEvaluationContext;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -94,7 +95,13 @@ import org.osgi.framework.Bundle;
  */
 public class GpxView extends ViewPart implements IPreferenceConstants
 {
-    private static boolean ACTIVATE_DEBUG_HANDLER = true;
+    /**
+     * Currently the debug handler is implemented in plugin.xml and in this
+     * view. Setting this to false will insure it is not enabled even though it
+     * is implemented. If the menu that uses it checks for enabled (in
+     * plugin.xml), then it should not appear.
+     */
+    private static boolean ACTIVATE_DEBUG_HANDLER = false;
     /**
      * Whether to implement a Text with the contents of the current selection or
      * not. Used for learning.
@@ -369,6 +376,8 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         // Create menu, toolbars, filters, sorters.
         createFiltersAndSorters();
         createHandlers();
+        // Debug
+        createDebugHandler();
         hookListeners();
         hookContextMenu(treeViewer.getControl());
 
@@ -438,6 +447,21 @@ public class GpxView extends ViewPart implements IPreferenceConstants
      * Creates handlers.
      */
     protected void createHandlers() {
+        // IHandlerService from the workbench is the global handler service. it
+        // provides no special activation scoping or lifecycle.
+
+        // IHandlerService from the workbench window is the window handler
+        // service. Any handlers activated through the window handler service
+        // will be active when that window is active. Any listeners added to the
+        // window handler service will be removed when the window is disposed,
+        // and any active handlers will be deactivated (but not disposed).
+
+        // IHandlerService from the workbench part site is the part handler
+        // service. Any handlers activated through the part handlers service
+        // will only be active when that part is active. Any listeners added to
+        // the part handler service will be removed when the part is disposed,
+        // and any active handlers will be deactivated (but not disposed).
+
         // Get the handler service from the view site
         IHandlerService handlerService = (IHandlerService)getSite().getService(
             IHandlerService.class);
@@ -741,30 +765,134 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         };
         id = "net.kenevans.gpxinspector.newWaypoint";
         handlerService.activateHandler(id, handler);
+    }
 
-        // Debug
-        if(ACTIVATE_DEBUG_HANDLER) {
-            handler = new AbstractHandler() {
-                public Object execute(ExecutionEvent event)
-                    throws ExecutionException {
-                    if(false) {
-                        ISelection sel = HandlerUtil.getCurrentSelection(event);
-                        System.out.println("getCurrentSelection: " + sel);
-                        sel = HandlerUtil.getActiveMenuSelection(event);
-                        System.out.println("getActiveMenuSelection: " + sel);
-                        Collection<?> collection = HandlerUtil
-                            .getActiveMenus(event);
-                        System.out.println("getActiveMenus: " + collection);
-                    }
-                    if(true) {
-                        debug();
-                    }
-                    return null;
+    /**
+     * Sets up the debug handler. This is a separate method since it has messy,
+     * experimental code.
+     */
+    void createDebugHandler() {
+        // Set this to get printout
+        final boolean verbose = false;
+        // Set this to use a selection listener to do setBaseEnabled
+        final boolean useSelectionListener = true;
+
+        // Get the handler service from the view site
+        IHandlerService handlerService = (IHandlerService)getSite().getService(
+            IHandlerService.class);
+
+        AbstractHandler handler = new AbstractHandler() {
+            ISelectionChangedListener selectionChangedListener = null;
+
+            @Override
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                if(false) {
+                    ISelection sel = HandlerUtil.getCurrentSelection(event);
+                    System.out.println("getCurrentSelection: " + sel);
+                    sel = HandlerUtil.getActiveMenuSelection(event);
+                    System.out.println("getActiveMenuSelection: " + sel);
+                    Collection<?> collection = HandlerUtil
+                        .getActiveMenus(event);
+                    System.out.println("getActiveMenus: " + collection);
                 }
-            };
-            id = "net.kenevans.gpxinspector.debug";
-            handlerService.activateHandler(id, handler);
-        }
+                if(true) {
+                    debug();
+                }
+                return null;
+            }
+
+            @Override
+            public void dispose() {
+                if(selectionChangedListener != null && treeViewer != null) {
+                    treeViewer
+                        .removeSelectionChangedListener(selectionChangedListener);
+                    selectionChangedListener = null;
+                }
+
+            }
+
+            @Override
+            public void setBaseEnabled(boolean enabled) {
+                // Override is to make it public
+                super.setBaseEnabled(enabled);
+            }
+
+            @Override
+            public boolean isEnabled() {
+                boolean enabled = super.isEnabled();
+                boolean handled = super.isHandled();
+                if(verbose) {
+                    System.out.println("isEnabled(debug):super.enabled="
+                        + enabled + " super.handled=" + handled);
+                }
+                // This will insure it is not enabled. The menu can do
+                // setVisible with checked set to make it not appear.
+                if(!ACTIVATE_DEBUG_HANDLER) {
+                    enabled = false;
+                } else if(useSelectionListener) {
+                    // This doesn't work. isEnabled is not called enough.
+                    enabled = true;
+                    IStructuredSelection selection = (IStructuredSelection)treeViewer
+                        .getSelection();
+                    // if the selection is empty clear the label
+                    if(selection.size() > 1) {
+                        enabled = false;
+                    }
+                }
+                if(verbose) {
+                    System.out.println("  return " + enabled);
+                }
+                return enabled;
+            }
+
+            @Override
+            public void setEnabled(Object obj) {
+                if(!(obj instanceof IEvaluationContext)) {
+                    return;
+                }
+                // IEvaluationContext context = (IEvaluationContext)obj;
+                // ISources sources;
+                if(verbose) {
+                    System.out.println("setEnabled(debug): enabled="
+                        + isEnabled() + " handled=" + isHandled());
+                }
+                if(!ACTIVATE_DEBUG_HANDLER) {
+                    return;
+                }
+                if(true && selectionChangedListener == null) {
+                    selectionChangedListener = new ISelectionChangedListener() {
+                        public void selectionChanged(SelectionChangedEvent event) {
+                            boolean enabled = true;
+                            IStructuredSelection selection = (IStructuredSelection)event
+                                .getSelection();
+                            // if the selection is empty clear the label
+                            if(selection.size() > 1) {
+                                enabled = false;
+                            }
+                            if(verbose) {
+                                System.out
+                                    .println("  Selection about to change"
+                                        + enabled);
+                            }
+                            setBaseEnabled(enabled);
+                            if(verbose) {
+                                System.out
+                                    .println("  Selection changed: enabled="
+                                        + enabled);
+                            }
+                        }
+                    };
+                    treeViewer
+                        .addSelectionChangedListener(selectionChangedListener);
+                    if(verbose) {
+                        System.out.println("  SelectionChangedListener added");
+                    }
+                }
+            }
+        };
+        String id = "net.kenevans.gpxinspector.debug";
+        handlerService.activateHandler(id, handler);
     }
 
     /*

@@ -222,7 +222,7 @@ public class TrkInfoDialog extends InfoDialog
         if(nPointsString.length() > 0) {
             nPointsString = nPointsString.substring(1);
         }
-        if(nPointsString.length() == 0) {
+        if(nPointsString.length() == 0 || intVal < 2) {
             nPointsString = Integer.toString(nPointsTotal);
         } else {
             nPointsString = nPointsTotal + "=" + nPointsString;
