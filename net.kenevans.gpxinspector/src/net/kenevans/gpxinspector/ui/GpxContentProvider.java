@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 public class GpxContentProvider implements ITreeContentProvider
 {
-    private static boolean DEBUG_LISTENER = true;
+    private static boolean DEBUG_LISTENER = false;
     private static Object[] EMPTY_ARRAY = new Object[0];
     protected CheckboxTreeViewer viewer;
     protected GpxModelListener gpxModelListener;

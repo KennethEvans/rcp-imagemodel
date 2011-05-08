@@ -56,7 +56,7 @@
          </property>
          <property
                name="aboutText"
-               value="GPX Inspector&#x0A;&#x0A;If this application works, it was written by&#x0A;Kenneth Evans&#x0A;&#x0A;kenevans.net">
+               value="%aboutText">
          </property>
       </product>
    </extension>
@@ -513,6 +513,52 @@
             </command>
          </menu>
          <separator
+               name="separator9"
+               visible="true">
+         </separator>
+         <command
+               commandId="net.kenevans.gpxinspector.mergeAllSegments"
+               label="Merge All Segments"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+                  <with
+                        variable="activeMenuSelection">
+                     <iterate>
+                        <or>
+                           <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxTrackModel">
+                           </instanceof>
+                        </or>
+                     </iterate>
+                     <count
+                           value="+">
+                     </count>
+                  </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="net.kenevans.gpxinspector.mergeSegments"
+               label="Merge Segments"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+                  <with
+                        variable="activeMenuSelection">
+                     <iterate>
+                        <or>
+                           <instanceof
+                                 value="net.kenevans.gpxinspector.model.GpxTrackSegmentModel">
+                           </instanceof>
+                        </or>
+                     </iterate>
+                     <count
+                           value="(1-">
+                     </count>
+                  </with>
+            </visibleWhen>
+         </command>
+         <separator
                name="additions"
                visible="true">
          </separator>
@@ -791,6 +837,16 @@
             categoryId="net.kenevans.gpxinspector.category"
             id="net.kenevans.gpxinspector.newRoute"
             name="Route">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.mergeAllSegments"
+            name="Merge All Segments">
+      </command>
+      <command
+            categoryId="net.kenevans.gpxinspector.category"
+            id="net.kenevans.gpxinspector.mergeSegments"
+            name="Merge Segments">
       </command>
    </extension>
    <extension

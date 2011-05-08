@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: GPX Inspector
 Bundle-SymbolicName: net.kenevans.gpxinspector;singleton:=true
-Bundle-Version: 1.0.0.Beta1
+Bundle-Version: 1.0.0.Beta2
 Bundle-Activator: net.kenevans.gpxinspector.plugin.Activator
 Bundle-Vendor: kenevans.net
 Require-Bundle: org.eclipse.ui,
@@ -16,3 +16,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.help.webapp;bundle-version="3.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin

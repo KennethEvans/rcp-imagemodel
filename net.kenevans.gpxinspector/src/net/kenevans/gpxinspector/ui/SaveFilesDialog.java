@@ -276,7 +276,7 @@ public class SaveFilesDialog extends Dialog
      * Saves the selected files.
      */
     public void saveChecked() {
-        if(table == null) {
+        if(table == null || table.isDisposed()) {
             return;
         }
         TableItem[] items = table.getItems();

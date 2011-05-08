@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.xml.bind.JAXBException;
 
@@ -765,6 +767,29 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         };
         id = "net.kenevans.gpxinspector.newWaypoint";
         handlerService.activateHandler(id, handler);
+
+        // Merge all segments
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                mergeTracks();
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.mergeAllSegments";
+        handlerService.activateHandler(id, handler);
+
+        // Merge segments
+        handler = new AbstractHandler() {
+            public Object execute(ExecutionEvent event)
+                throws ExecutionException {
+                mergeTracks();
+                return null;
+            }
+        };
+        id = "net.kenevans.gpxinspector.mergeSegments";
+        handlerService.activateHandler(id, handler);
+
     }
 
     /**
@@ -1031,7 +1056,7 @@ public class GpxView extends ViewPart implements IPreferenceConstants
             }
         }
         treeViewer.getTree().setRedraw(true);
-        // TODI Is this necessary?
+        // TODO Is this necessary?
         treeViewer.refresh(true);
     }
 
@@ -1705,6 +1730,161 @@ public class GpxView extends ViewPart implements IPreferenceConstants
         }
         // Let the treeviewer redraw again
         treeViewer.getTree().setRedraw(true);
+    }
+
+    /**
+     * Pastes the clipboard models into the appropriate target model or its
+     * parent. Only uses the first element in the selection. The target model is
+     * the first item. Others are ignored except for replace. If the target
+     * model is same class as the clipboard model, then the clipboard model is
+     * added to its list. If the targetModel is a possible parent of the
+     * clipboard model, then the the clipboard model is added to the appropriate
+     * list in the parent. Otherwise an error is indicated and the user is
+     * prompted to continue or not.<br>
+     * <br>
+     * BEGINNING: Items will be inserted at the beginning of the list.<br>
+     * BEFORE: The target model and the clipboard model must be of the same
+     * class. Items will be inserted before the target model in its list.<br>
+     * AFTER: The target model and the clipboard model must be of the same
+     * class. Items will be inserted after the target model in its list.<br>
+     * REPLACE: Same as AFTER except all the selected items are removed after
+     * all adding is done.<br>
+     * END: Items will be inserted at the end of the list.<br>
+     * 
+     * @param mode
+     */
+    private void mergeTracks() {
+        IStructuredSelection selection = (IStructuredSelection)treeViewer
+            .getSelection();
+        if(selection.isEmpty()) {
+            return;
+        }
+        // Determine the targetModel to be the first item in the selection list
+        GpxModel targetModel = (GpxModel)selection.getFirstElement();
+        GpxModel targetParent = null;
+        if(targetModel != null) {
+            targetParent = targetModel.getParent();
+        }
+        // Set the treeviewer to not redraw for now
+        treeViewer.getTree().setRedraw(false);
+        if(targetModel instanceof GpxTrackModel) {
+            // Merge all the segments in all the selected tracks
+            for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+                GpxTrackModel trackModel = (GpxTrackModel)iterator.next();
+                LinkedList<GpxTrackSegmentModel> trackSegmentModels = trackModel
+                    .getTrackSegmentModels();
+                if(trackSegmentModels.size() < 2) {
+                    // Either no models or 1, which doesn't need anything done
+                    continue;
+                }
+                // Get the first segment
+                GpxTrackSegmentModel firstSegment = (GpxTrackSegmentModel)trackSegmentModels
+                    .getFirst();
+                // Keep a list to use for removing segments
+                List<GpxTrackSegmentModel> removedList = new ArrayList<GpxTrackSegmentModel>();
+                // Loop over segments
+                for(GpxTrackSegmentModel segment : trackSegmentModels) {
+                    if(segment == firstSegment) {
+                        continue;
+                    }
+                    // Loop over wayPoints in the segment
+                    List<GpxWaypointModel> wayPoints = segment
+                        .getWaypointModels();
+                    removedList.add(segment);
+                    for(GpxWaypointModel waypointModel : wayPoints) {
+                        firstSegment.add(null,
+                            (GpxWaypointModel)waypointModel.clone(),
+                            PasteMode.END);
+                    }
+                }
+                // Remove the segments in the removeList. Has to be done outside
+                // the loop.
+                for(GpxTrackSegmentModel model : removedList) {
+                    trackModel.remove(model);
+                }
+            }
+        } else if(targetModel instanceof GpxTrackSegmentModel) {
+            // Is a track segment, merge all selected
+            // Check they all have the same parent
+            for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+                GpxModel model = (GpxModel)iterator.next();
+                GpxModel parent = model.getParent();
+                if(parent != targetParent) {
+                    SWTUtils
+                        .errMsg("Selected tracks for merge must have the same "
+                            + "parent");
+                    treeViewer.getTree().setRedraw(true);
+                    treeViewer.refresh(true);
+                    return;
+                }
+            }
+            // Check they are contiguous
+            GpxTrackModel parent = (GpxTrackModel)targetParent;
+            List<GpxTrackSegmentModel> segments = parent
+                .getTrackSegmentModels();
+            int firstIndex = segments.indexOf(targetModel);
+            if(firstIndex == -1) {
+                SWTUtils.errMsg("Unexpected error: Could not find first "
+                    + "selected segment");
+                treeViewer.getTree().setRedraw(true);
+                treeViewer.refresh(true);
+                return;
+            }
+            ListIterator<GpxTrackSegmentModel> segIterator = segments
+                .listIterator(firstIndex);
+            for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+                GpxTrackSegmentModel selModel = (GpxTrackSegmentModel)iterator.next();
+                if(!segIterator.hasNext()) {
+                    SWTUtils.errMsg("Unexpected error: Could not find all the "
+                        + "selected segments");
+                    treeViewer.getTree().setRedraw(true);
+                    treeViewer.refresh(true);
+                    return;
+               }
+                GpxTrackSegmentModel segModel = (GpxTrackSegmentModel)segIterator.next();
+                if(segModel != selModel) {
+                    SWTUtils.errMsg("Selected segments must be contiguous");
+                    treeViewer.getTree().setRedraw(true);
+                    treeViewer.refresh(true);
+                    return;
+                }
+            }
+            // Keep a list to use for removing segments
+            List<GpxTrackSegmentModel> removedList = new ArrayList<GpxTrackSegmentModel>();
+            // Define the first segment that will hold all the others
+            GpxTrackSegmentModel firstSegment = (GpxTrackSegmentModel)targetModel;
+            // Merge the selected segments
+            boolean first = true;
+            for(Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+                GpxTrackSegmentModel trackSegmentModel = (GpxTrackSegmentModel)iterator.next();
+                if(trackSegmentModel == firstSegment) {
+                    continue;
+                }
+                // Loop over wayPoints in the segment
+                List<GpxWaypointModel> wayPoints = trackSegmentModel
+                .getWaypointModels();
+                removedList.add(trackSegmentModel);
+                for(GpxWaypointModel waypointModel : wayPoints) {
+                    firstSegment.add(null,
+                        (GpxWaypointModel)waypointModel.clone(),
+                        PasteMode.END);
+                }
+            }
+            // Remove the segments in the removeList. Has to be done outside
+            // the loop.
+            for(GpxTrackSegmentModel model : removedList) {
+                parent.remove(model);
+            }
+        } else {
+            // Should not happen if visibleWhen is implemented correctly
+            SWTUtils.errMsg("Unexpected error: Selection contains a " +
+                targetModel.getClass().getName());
+            return;
+        }
+
+        // Let the treeviewer redraw again
+        treeViewer.getTree().setRedraw(true);
+        treeViewer.refresh(true);
     }
 
     /**
