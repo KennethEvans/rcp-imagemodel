@@ -64,8 +64,12 @@ public class ImageBrowser extends JFrame
     private static final boolean INITIALIZE_PATH = false; // For developing
     private static final boolean INITIAL_CROP_ENABLED = true;
     private static final boolean USE_STATUS_BAR = true;
-    private static final String VERSION_STRING = "Image Browser 3.0.0.0";
+    private static final String VERSION_STRING = "Image Browser 3.0.1.0";
     private static final String INITIAL_PATH = "c:/users/evans/Pictures";
+    private static final String[] HOME_LOCATIONS = {"HOME",
+    "HOME_PATH"};
+    private static final String[] PICTURE_LOCATIONS = {"My Pictures",
+    "Pictures"};
     private static String[] suffixes = {"jpg", "jpe", "jpeg", "gif", "tif",
         "tiff", "png", "bmp"};
 
@@ -229,6 +233,27 @@ public class ImageBrowser extends JFrame
                 dirText.setText(file.getPath());
             }
             populateList(currentDir);
+        } else {
+            // TODO fix this for other [latforms than Windows
+            // Try to find the home directory
+            String userDir = null;
+            for(String dir : HOME_LOCATIONS) {
+                userDir = System.getenv(dir);
+                if(userDir != null) {
+                    break;
+                }
+            }
+            // Try to find the Pictures directory
+            if(userDir != null) {
+                File file;
+                for(String dir : PICTURE_LOCATIONS) {
+                    file = new File(userDir + File.separator + dir);
+                    if(file.exists()) {
+                        currentDir = file.getPath();
+                        break;
+                    }
+                }
+            }
         }
     }
 
