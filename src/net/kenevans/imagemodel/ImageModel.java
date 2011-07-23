@@ -38,7 +38,7 @@ import net.kenevans.imagemodel.utils.Utils;
 
 public class ImageModel implements Printable
 {
-    private static final long serialVersionUID = 1L;
+    // private static final long serialVersionUID = 1L;
     public static double GAMMA_LIGHTEN = 1.1;
     public static double GAMMA_DARKEN = 1. / GAMMA_LIGHTEN;
     private static final String LS = Utils.LS;
