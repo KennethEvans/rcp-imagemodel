@@ -100,6 +100,7 @@ public class ScrolledImagePanel extends JPanel
      */
     public ScrolledImagePanel(ImageModel imageModel, boolean useStatusBar) {
         this.useStatusBar = useStatusBar;
+
         // Set up the ImageModel and add an ImageModelListener
         setImageModel(imageModel);
 
@@ -487,10 +488,10 @@ public class ScrolledImagePanel extends JPanel
      */
     public void zoomFit() {
         if(imagePanel == null) return;
-        Rectangle rect = this.getBounds();
+        Rectangle rect = imagePanel.getBounds();
         zoomToRectangle(rect.width, rect.height);
-        imagePanel.repaint();
-        imagePanel.revalidate();
+//        imagePanel.repaint();
+//        imagePanel.revalidate();
     }
 
     /**
@@ -499,7 +500,7 @@ public class ScrolledImagePanel extends JPanel
      */
     public void zoomFitIfLarger() {
         if(imagePanel == null) return;
-        Rectangle rect = this.getBounds();
+        Rectangle rect = imagePanel.getBounds();
         int imageWidth = 0;
         int imageHeight = 0;
         BufferedImage image = this.getImage();
@@ -512,8 +513,8 @@ public class ScrolledImagePanel extends JPanel
         } else {
             zoomReset();
         }
-        imagePanel.repaint();
-        imagePanel.revalidate();
+//        imagePanel.repaint();
+//        imagePanel.revalidate();
     }
 
     /**
@@ -873,13 +874,12 @@ public class ScrolledImagePanel extends JPanel
         if(useStatusBar) {
             if(statusBar == null) {
                 statusBar = new JLabel();
-                // Use space to keep it from resizing
+                // Use space to keep it from resizing.  Cannot use ""
                 statusBar.setText(" ");
                 statusBar.setToolTipText("Status");
-                statusBar.setText("");
                 statusBar.setBorder(BorderFactory
                     .createBevelBorder(BevelBorder.LOWERED));
-                this.add(statusBar, BorderLayout.PAGE_END);
+                this.add(statusBar, BorderLayout.SOUTH);
             }
         } else {
             if(statusBar != null) {
