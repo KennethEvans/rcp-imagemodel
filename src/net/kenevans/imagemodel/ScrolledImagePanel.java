@@ -6,6 +6,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -30,6 +31,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
 import javax.swing.event.MouseInputAdapter;
 
 import net.kenevans.imagemodel.utils.ImageUtils;
@@ -483,15 +485,73 @@ public class ScrolledImagePanel extends JPanel
         }
     }
 
+    // /**
+    // * Debugging routine that shows sizes of the various components of the
+    // * JPanel.
+    // */
+    // private void debugSizes() {
+    // Rectangle rect1 = imagePanel.getBounds();
+    // System.out.println("imagePanel.getBounds() " + rect1.width + " "
+    // + rect1.height);
+    // Dimension dim1 = imagePanel.getSize();
+    // System.out.println("imagePanel.getSize() " + dim1.width + " "
+    // + dim1.height);
+    // System.out.println("imagePanel.getPreferredSize() " + dim1.width + " "
+    // + dim1.height);
+    //
+    // rect1 = this.getBounds();
+    // System.out.println("this.getBounds() " + rect1.width + " "
+    // + rect1.height);
+    // dim1 = this.getSize();
+    // System.out.println("this.getSize() " + dim1.width + " " + dim1.height);
+    //
+    // rect1 = scrollPane.getBounds();
+    // System.out.println("scrollPane.getBounds() " + rect1.width + " "
+    // + rect1.height);
+    // dim1 = scrollPane.getSize();
+    // System.out.println("scrollPane.getSize() " + dim1.width + " "
+    // + dim1.height);
+    // rect1 = scrollPane.getViewport().getBounds();
+    // System.out.println("scrollPane.getViewport().getBounds() "
+    // + rect1.width + " " + rect1.height);
+    // rect1 = scrollPane.getViewportBorderBounds();
+    // System.out.println("scrollPane.getViewportBorderBounds() "
+    // + rect1.width + " " + rect1.height);
+    //
+    // Border border = scrollPane.getBorder();
+    // System.out.println("scrollPane.getBorder() " + border);
+    // Insets insets = border.getBorderInsets(scrollPane);
+    // System.out.println("  scrollPane.getBorder().getInsets: " + insets);
+    //
+    // rect1 = statusBar.getBounds();
+    // System.out.println("statusBar.getBounds() " + rect1.width + " "
+    // + rect1.height);
+    // dim1 = statusBar.getSize();
+    // System.out.println("statusBar.getSize() " + dim1.width + " "
+    // + dim1.height);
+    // }
+
     /**
      * Zooms to fit the display panel.
      */
     public void zoomFit() {
         if(imagePanel == null) return;
-        Rectangle rect = imagePanel.getBounds();
+
+        // We need to take into account the scrollPane and its border, or we may
+        // get unwanted scroll bars
+        Rectangle rect = scrollPane.getBounds();
+        Border border = scrollPane.getBorder();
+        if(border != null) {
+            Insets insets = border.getBorderInsets(scrollPane);
+            if(insets != null) {
+                rect.width -= insets.right + insets.left;
+                rect.height -= insets.top + insets.bottom;
+            }
+        }
+
         zoomToRectangle(rect.width, rect.height);
-//        imagePanel.repaint();
-//        imagePanel.revalidate();
+        // imagePanel.repaint();
+        // imagePanel.revalidate();
     }
 
     /**
@@ -500,7 +560,19 @@ public class ScrolledImagePanel extends JPanel
      */
     public void zoomFitIfLarger() {
         if(imagePanel == null) return;
-        Rectangle rect = imagePanel.getBounds();
+
+        // We need to take into account the scrollPane and its border, or we may
+        // get unwanted scroll bars
+        Rectangle rect = scrollPane.getBounds();
+        Border border = scrollPane.getBorder();
+        if(border != null) {
+            Insets insets = border.getBorderInsets(scrollPane);
+            if(insets != null) {
+                rect.width -= insets.right + insets.left;
+                rect.height -= insets.top + insets.bottom;
+            }
+        }
+
         int imageWidth = 0;
         int imageHeight = 0;
         BufferedImage image = this.getImage();
@@ -513,8 +585,8 @@ public class ScrolledImagePanel extends JPanel
         } else {
             zoomReset();
         }
-//        imagePanel.repaint();
-//        imagePanel.revalidate();
+        // imagePanel.repaint();
+        // imagePanel.revalidate();
     }
 
     /**
@@ -874,7 +946,7 @@ public class ScrolledImagePanel extends JPanel
         if(useStatusBar) {
             if(statusBar == null) {
                 statusBar = new JLabel();
-                // Use space to keep it from resizing.  Cannot use ""
+                // Use space to keep it from resizing. Cannot use ""
                 statusBar.setText(" ");
                 statusBar.setToolTipText("Status");
                 statusBar.setBorder(BorderFactory
