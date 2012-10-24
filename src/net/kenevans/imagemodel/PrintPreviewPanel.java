@@ -12,7 +12,7 @@ import java.awt.print.PrinterException;
 
 import javax.swing.JPanel;
 
-class PrintPreviewPanel extends JPanel
+public class PrintPreviewPanel extends JPanel
 {
     private static final long serialVersionUID = 1L;
     private Book book;

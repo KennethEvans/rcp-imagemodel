@@ -434,7 +434,6 @@ public class ScrolledImagePanel extends JPanel
         try {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             retVal = ImageUtils.saveImage(image, file);
-            setCursor(Cursor.getDefaultCursor());
         } finally {
             setCursor(oldCursor);
         }

@@ -13,7 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
-class PrintPreviewDialog extends JDialog
+public class PrintPreviewDialog extends JDialog
 {
     private static final long serialVersionUID = 1L;
     private PrintPreviewPanel canvas;

@@ -1290,7 +1290,7 @@ public class ImageBrowser extends JFrame
     }
 
     /**
-     * Toggles scaling the image.
+     * Scales the image according to the fitAlways and fitIfLarger;
      */
     private void fitImage() {
         menuImageFit.setSelected(fitIfLarger);
@@ -1396,7 +1396,7 @@ public class ImageBrowser extends JFrame
         sb.append("manipulation is available from the Image menu." + ls);
         sb.append("" + ls);
         sb.append("The image formats you can use will depend on whether" + ls);
-        sb.append("Java Advanced Imaging (JAI and JAI ImageIO) is" + ls);
+        sb.append("Java Advanced Imaging (JAI and JAI ImageIO) are" + ls);
         sb.append("installed.  You can see the available formats under the "
             + ls);
         sb.append("Info menu." + ls);
