@@ -534,21 +534,22 @@ public class ImageUtils
                 ImageWriteParam iwp = writer.getDefaultWriteParam();
                 iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
                 // Get the compression
-                float compression = .80f;
+                float quality = 95f;
                 String res = null;
                 // Allow 3 tries
                 int count = 0;
                 while(res == null) {
                     // Prompt for compression quality
                     res = JOptionPane.showInputDialog(
-                        (count != 0 ? "Invalid value" + LS : "")
-                            + "Enter the compression (0 - 1)", compression);
+                        (count != 0 ? "Invalid value!" + LS : "")
+                            + "Enter the quality (0 - 100)",
+                        String.format("%.0f", quality));
                     if(res == null) {
                         return false;
                     }
                     try {
-                        compression = Float.parseFloat(res);
-                        if(compression < 0 || compression > 1) {
+                        quality = Float.parseFloat(res);
+                        if(quality < 0 || quality > 100) {
                             res = null;
                         }
                     } catch(NumberFormatException ex) {
@@ -559,8 +560,8 @@ public class ImageUtils
                         return false;
                     }
                 }
-                // Set the compression (0-1)
-                iwp.setCompressionQuality(compression);
+                // Set the quality (0-1)
+                iwp.setCompressionQuality(.01F * quality);
                 FileImageOutputStream output = new FileImageOutputStream(file);
                 writer.setOutput(output);
                 IIOImage iioimage = new IIOImage(rgbImg, null, null);
