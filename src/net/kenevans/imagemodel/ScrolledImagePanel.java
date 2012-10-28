@@ -668,9 +668,15 @@ public class ScrolledImagePanel extends JPanel
         // Needed for keyboard events
         imagePanel.requestFocusInWindow();
 
-        // Print position
-        if(ev.getButton() == MouseEvent.BUTTON3) {
-            System.out.println("x=" + ev.getX() + " y=" + ev.getY());
+        // // Print position
+        // if(ev.getButton() == MouseEvent.BUTTON3) {
+        // // // DEBUG
+        // // System.out.println("x=" + ev.getX() + " y=" + ev.getY());
+        // }
+
+        // Only do this for button 1
+        if(ev.getButton() != MouseEvent.BUTTON1) {
+            return;
         }
 
         // Cancel rectangle
@@ -723,6 +729,11 @@ public class ScrolledImagePanel extends JPanel
      * @param ev
      */
     private void mouseReleased(MouseEvent ev) {
+        // Only do this for button 1
+        if(ev.getButton() != MouseEvent.BUTTON1) {
+            return;
+        }
+
         mouseMoved(ev);
         if(dragging) {
             dragging = false;
@@ -960,4 +971,19 @@ public class ScrolledImagePanel extends JPanel
             }
         }
     }
+
+    /**
+     * @return The value of imagePanel.
+     */
+    public JPanel getImagePanel() {
+        return imagePanel;
+    }
+
+    /**
+     * @return The value of statusBar.
+     */
+    public JLabel getStatusBar() {
+        return statusBar;
+    }
+
 }

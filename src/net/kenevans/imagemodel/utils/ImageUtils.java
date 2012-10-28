@@ -29,8 +29,12 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.FileImageOutputStream;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -517,8 +521,57 @@ public class ImageUtils
 
         // Get the image and write it
         try {
-            ImageIO.write(image, ext, file);
-            image.flush();
+            // Add compression for JPEG
+            if(ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg")) {
+                // First convert it to TYPE_INT_RGB because otherwise it tends
+                // to get interpreted as CMYK since it has 4 channels
+                BufferedImage rgbImg = copyImage(image,
+                    BufferedImage.TYPE_INT_RGB);
+                // Get a writer that will handle compression
+                Iterator<ImageWriter> iter = ImageIO
+                    .getImageWritersByFormatName("jpeg");
+                ImageWriter writer = (ImageWriter)iter.next();
+                ImageWriteParam iwp = writer.getDefaultWriteParam();
+                iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                // Get the compression
+                float compression = .80f;
+                String res = null;
+                // Allow 3 tries
+                int count = 0;
+                while(res == null) {
+                    // Prompt for compression quality
+                    res = JOptionPane.showInputDialog(
+                        (count != 0 ? "Invalid value" + LS : "")
+                            + "Enter the compression (0 - 1)", compression);
+                    if(res == null) {
+                        return false;
+                    }
+                    try {
+                        compression = Float.parseFloat(res);
+                        if(compression < 0 || compression > 1) {
+                            res = null;
+                        }
+                    } catch(NumberFormatException ex) {
+                        res = null;
+                    }
+                    if(++count >= 3) {
+                        Utils.warnMsg("Aborting");
+                        return false;
+                    }
+                }
+                // Set the compression (0-1)
+                iwp.setCompressionQuality(compression);
+                FileImageOutputStream output = new FileImageOutputStream(file);
+                writer.setOutput(output);
+                IIOImage iioimage = new IIOImage(rgbImg, null, null);
+                writer.write(null, iioimage, iwp);
+                // If don't do this other app cannot use the file
+                output.close();
+                writer.dispose();
+            } else {
+                ImageIO.write(image, ext, file);
+                image.flush();
+            }
             // Check for zero length output
             if(file.length() <= 0) {
                 Utils
