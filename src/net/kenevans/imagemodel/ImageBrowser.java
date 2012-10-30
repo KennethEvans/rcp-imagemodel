@@ -64,7 +64,7 @@ public class ImageBrowser extends JFrame
     private static final boolean INITIALIZE_PATH = false; // For developing
     private static final boolean INITIAL_CROP_ENABLED = true;
     private static final boolean USE_STATUS_BAR = true;
-    private static final String VERSION_STRING = "Image Browser 3.1.0";
+    private static final String VERSION_STRING = "Image Browser 3.2.0";
     private static final String INITIAL_PATH = "c:/users/evans/Pictures";
     private static final String[] HOME_LOCATIONS = {"HOME", "HOME_PATH"};
     private static final String[] PICTURE_LOCATIONS = {"My Pictures",
