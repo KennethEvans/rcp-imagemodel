@@ -119,6 +119,87 @@ public class ImageModel implements Printable
         return Printable.PAGE_EXISTS;
     }
 
+    // // DEBUG
+    // /**
+    // * BufferedImage read that does not ignore metadata.
+    // *
+    // * @param stream
+    // * @return
+    // * @throws IOException
+    // */
+    // public static BufferedImage readSpecial(File file) throws IOException {
+    // ImageInputStream stream = ImageIO.createImageInputStream(file);
+    // if(stream == null) {
+    // throw new IIOException("Can't create an ImageInputStream!");
+    // }
+    // if(stream == null) {
+    // throw new IllegalArgumentException("stream == null!");
+    // }
+    //
+    // // DEBUG how many readers
+    // System.out.println();
+    // System.out.println("Get the readers for " + file.getName());
+    // Iterator<ImageReader> iter1 = ImageIO.getImageReaders(stream);
+    // int count = 0;
+    // while(iter1.hasNext()) {
+    // ;
+    // ImageReader reader = (ImageReader)iter1.next();
+    // System.out.println("  " + count++ + " " + reader.getFormatName()
+    // + " " + reader.getClass().getName());
+    // }
+    // System.out.println();
+    //
+    // Iterator<ImageReader> iter = ImageIO.getImageReaders(stream);
+    // if(!iter.hasNext()) {
+    // return null;
+    // }
+    //
+    // ImageReader reader = (ImageReader)iter.next();
+    // ImageReadParam param = reader.getDefaultReadParam();
+    // reader.setInput(stream, true, false);
+    //
+    // System.out
+    // .println(file.getName() + " format=" + reader.getFormatName());
+    // IIOMetadata metadata = reader.getImageMetadata(0);
+    // if(metadata != null) {
+    // String[] formatNames = metadata.getMetadataFormatNames();
+    // if(formatNames != null) {
+    // for(String name : formatNames) {
+    // // System.out.println("  " + name);
+    // Node root = metadata.getAsTree(name);
+    // System.out.println("  " + root.getNodeName());
+    // Node node;
+    // NodeList nodeList = root.getChildNodes();
+    // for(int i = 0; i < nodeList.getLength(); i++) {
+    // node = nodeList.item(i);
+    // System.out.println("    " + node.getNodeName());
+    // NamedNodeMap map = node.getAttributes();
+    // if(map != null) {
+    // for(int j = 0; j < map.getLength(); j++) {
+    // Node node1 = map.item(j);
+    // String attrname = node1.getNodeName();
+    // String attrval = node1.getNodeValue();
+    // System.out.println("      " + attrname + "="
+    // + attrval);
+    // }
+    // }
+    // }
+    // }
+    // }
+    // formatNames = metadata.getExtraMetadataFormatNames();
+    // if(formatNames != null) {
+    // for(String name : formatNames) {
+    // System.out.println("  " + name);
+    // }
+    // }
+    // }
+    //
+    // BufferedImage bi = reader.read(0, param);
+    // stream.close();
+    // reader.dispose();
+    // return bi;
+    // }
+
     public void readImage(File file) {
         this.file = file;
         if(file == null) return;
@@ -128,6 +209,9 @@ public class ImageModel implements Printable
         }
         try {
             BufferedImage newImage = ImageIO.read(file);
+            // // DEBUG
+            // BufferedImage newImage = readSpecial(file);
+
             if(newImage == null) {
                 String msg = "Cannot read file:" + LS + file.getName() + LS;
                 if(!ImageUtils.isImageIOSupported(file)) {
@@ -247,13 +331,14 @@ public class ImageModel implements Printable
         }
         info += LS;
 
-        // Find the ICC profile used
-        String desc = ImageUtils.getICCProfileName(image);
-        if(desc != null) {
-            info += "ICC Profile=" + desc + LS;
-            info += "  (This is what Java ImageIO is using and may not be" + LS
-                + "    the same as any embedded ICC profile in the file.)" + LS;
-        }
+        // The profile is always sRGB as implemented.
+        // // Find the ICC profile used
+        // String desc = ImageUtils.getICCProfileName(image);
+        // if(desc != null) {
+        // info += "ICC Profile=" + desc + LS;
+        // info += "  (This is what Java ImageIO is using and may not be" + LS
+        // + "    the same as any embedded ICC profile in the file.)" + LS;
+        // }
 
         return info;
     }

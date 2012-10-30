@@ -1086,17 +1086,11 @@ public class ImageBrowser extends JFrame
         }
         int result = chooser.showOpenDialog(this);
         if(result == JFileChooser.APPROVE_OPTION) {
-            // Save the selected path for next time
-            File file = new File(currentDir);
-            File parent = file.getParentFile();
-            if(parent != null && parent.exists()) {
-                chooser.setCurrentDirectory(parent);
-            } else if(file != null && file.exists()) {
-                chooser.setCurrentDirectory(file);
-            }
             Cursor oldCursor = getCursor();
             try {
-                file = chooser.getSelectedFile();
+                File file = chooser.getSelectedFile();
+                // Save the selected path for next time
+                currentDir = chooser.getSelectedFile().getParentFile().getPath();
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 imageModel.readImage(file);
                 fitImage();
@@ -1116,12 +1110,12 @@ public class ImageBrowser extends JFrame
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if(currentDir != null) {
             File file = new File(currentDir);
-//            File parent = file.getParentFile();
-//            if(parent != null && parent.exists()) {
-//                chooser.setCurrentDirectory(parent);
-//            } else if(file != null && file.exists()) {
-//                chooser.setCurrentDirectory(file);
-//            }
+            // File parent = file.getParentFile();
+            // if(parent != null && parent.exists()) {
+            // chooser.setCurrentDirectory(parent);
+            // } else if(file != null && file.exists()) {
+            // chooser.setCurrentDirectory(file);
+            // }
             if(file != null && file.exists()) {
                 chooser.setCurrentDirectory(file);
             }
