@@ -7,8 +7,6 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.color.ColorSpace;
-import java.awt.color.ICC_ColorSpace;
-import java.awt.color.ICC_Profile;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -20,7 +18,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ByteLookupTable;
 import java.awt.image.ColorConvertOp;
-import java.awt.image.ColorModel;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.awt.image.LookupOp;
@@ -251,7 +248,7 @@ public class ImageModel implements Printable
         info += LS;
 
         // Find the ICC profile used
-        String desc = getICCProfile(image.getColorModel());
+        String desc = ImageUtils.getICCProfileName(image);
         if(desc != null) {
             info += "ICC Profile=" + desc + LS;
             info += "  (This is what Java ImageIO is using and may not be" + LS
@@ -261,38 +258,6 @@ public class ImageModel implements Printable
         return info;
     }
 
-    /**
-     * Gets the ICC profile from the given ColorModel or returns null on error.
-     * 
-     * @param cm The given ColorModel.
-     * @return The name of the ICC profile.
-     */
-    public static String getICCProfile(ColorModel cm) {
-        String desc = null;
-        // Find if there is an embedded ICC profile
-        ColorSpace cs = cm.getColorSpace();
-        if(cs instanceof ICC_ColorSpace) {
-            ICC_ColorSpace icccs = (ICC_ColorSpace)cs;
-            ICC_Profile profile = icccs.getProfile();
-            // Get the ICC profile tag
-            // It is a Structure containing invariant and localizable
-            // versions of the profile name for display.
-            // Bytes 0-3 are "desc". Bytes 4-7 are nulls. Bytes 8-11 are the
-            // length of the ASCII invariant profile name. The ASCII invariant
-            // part starts at 12 and should end with a null.
-            byte[] data = profile.getData(ICC_Profile.icSigProfileDescriptionTag);
-            if(data != null && data.length > 12) {
-                desc = new String(data).substring(12);
-                // Find any nulls
-                int pos = desc.indexOf('\0');
-                if(pos > -1) {
-                    desc = desc.substring(0, pos);
-                }
-            }
-        }
-        return desc;
-    }
-    
     public void gamma(double gamma) {
         // Check arguments
         if(image == null || image.getWidth() <= 0 || image.getHeight() <= 0)

@@ -13,8 +13,11 @@ import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
+import java.awt.color.ICC_ColorSpace;
+import java.awt.color.ICC_Profile;
 import java.awt.datatransfer.Clipboard;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.ComponentSampleModel;
@@ -580,8 +583,7 @@ public class ImageUtils
                         + LS + file.getPath());
             }
         } catch(Exception ex) {
-            Utils.errMsg("Save image to file failed:" + LS + "File: " + file
-                + LS + ex + LS + ex.getMessage());
+            Utils.excMsg("Save image to file failed", ex);
             retVal = false;
         }
 
@@ -599,8 +601,7 @@ public class ImageUtils
             ImageSelection sel = new ImageSelection(image);
             clip.setContents(sel, null);
         } catch(Exception ex) {
-            Utils
-                .errMsg("Failed to get image" + LS + ex + LS + ex.getMessage());
+            Utils.excMsg("Failed to get image", ex);
         }
 
         return file;
@@ -654,6 +655,216 @@ public class ImageUtils
             image = getImageFromClassResource(frame.getClass(), resource);
         }
         frame.setIconImage(image);
+    }
+
+    /**
+     * Gets whether the given BufferedImage is sRGB or not.
+     * 
+     * @param image
+     * @return
+     */
+    public static boolean isSRGB(BufferedImage image) {
+        if(image == null) {
+            return false;
+        }
+        ColorModel cm = image.getColorModel();
+        if(cm == null) {
+            return false;
+        }
+        ColorSpace cs = cm.getColorSpace();
+        if(cs == null) {
+            return false;
+        }
+        return cs.isCS_sRGB();
+    }
+
+    /**
+     * Gets the ICC profile from the given ColorModel.
+     * 
+     * @param cm The given ColorModel.
+     * @return The profile or null on failure.
+     */
+    public static ICC_Profile getICCProfile(ColorModel cm) {
+        if(cm == null) {
+            return null;
+        }
+        ICC_Profile profile = null;
+        // Find if there is an embedded ICC profile
+        ColorSpace cs = cm.getColorSpace();
+        if(cs instanceof ICC_ColorSpace) {
+            ICC_ColorSpace icccs = (ICC_ColorSpace)cs;
+            profile = icccs.getProfile();
+        }
+        return profile;
+    }
+
+    /**
+     * Gets the name of the given ICC profile from the given BufferedImage.
+     * 
+     * @param image
+     * @return The name of the ICC profile or null on failure.
+     */
+    public static String getICCProfileName(BufferedImage image) {
+        if(image == null) {
+            return null;
+        }
+        ColorModel cm = image.getColorModel();
+        if(cm == null) {
+            return null;
+        }
+        return getICCProfileName(cm);
+    }
+
+    /**
+     * Gets the name of the given ICC profile from the given ColorModel.
+     * 
+     * @param cm
+     * @return The name of the ICC profile or null on failure.
+     */
+    public static String getICCProfileName(ColorModel cm) {
+        if(cm == null) {
+            return null;
+        }
+        ICC_Profile profile = getICCProfile(cm);
+        if(profile == null) {
+            return null;
+        }
+        return getICCProfileName(profile);
+    }
+
+    /**
+     * Gets the name of the given ICC profile.
+     * 
+     * @param profile
+     * @return The name of the ICC profile or null on failure.
+     */
+    public static String getICCProfileName(ICC_Profile profile) {
+        if(profile == null) {
+            return null;
+        }
+        // Get the ICC profile tag
+        // It is a Structure containing invariant and localizable
+        // versions of the profile name for display.
+        // Bytes 0-3 are "desc". Bytes 4-7 are nulls. Bytes 8-11 are the
+        // length of the ASCII invariant profile name. The ASCII invariant
+        // part starts at 12 and should end with a null.
+        String desc = null;
+        byte[] data = profile.getData(ICC_Profile.icSigProfileDescriptionTag);
+        if(data != null && data.length > 12) {
+            desc = new String(data).substring(12);
+            // Find any nulls
+            int pos = desc.indexOf('\0');
+            if(pos > -1) {
+                desc = desc.substring(0, pos);
+            }
+        }
+        return desc;
+    }
+
+    /**
+     * Gets the ICC profile for the given GraphicsDevice.
+     * 
+     * @param gdev
+     * @return The profile or null on failure.
+     */
+    public static ICC_Profile getMonitorProfile(GraphicsDevice gdev) {
+        if(gdev == null) {
+            return null;
+        }
+        ICC_Profile profile = null;
+        try {
+            GraphicsConfiguration gconf = gdev.getDefaultConfiguration();
+            ColorModel cm = gconf.getColorModel();
+            ColorSpace cs = cm.getColorSpace();
+            if(cs instanceof ICC_ColorSpace) {
+                ICC_ColorSpace icccs = (ICC_ColorSpace)cs;
+                profile = icccs.getProfile();
+            }
+        } catch(Exception ex) {
+            // TODO Is showing an error wise?
+            Utils.excMsg("Getting monitor profile failed", ex);
+            return null;
+        }
+        return profile;
+    }
+
+    /**
+     * Gets the ICC profile of the default monitor.
+     * 
+     * @return
+     */
+    public static ICC_Profile getDefaultMonitorProfile() {
+        ICC_Profile profile = null;
+        try {
+            GraphicsEnvironment genv = GraphicsEnvironment
+                .getLocalGraphicsEnvironment();
+            GraphicsDevice gdev = genv.getDefaultScreenDevice();
+            profile = getMonitorProfile(gdev);
+        } catch(Exception ex) {
+            // TODO Is showing an error wise?
+            Utils.excMsg("Getting defualt monitor profile failed", ex);
+            return null;
+        }
+
+        return profile;
+    }
+
+    /**
+     * Gets information about the installed screen devices.
+     * 
+     * @return
+     */
+    public static String getMonitorInfo() {
+        String info = "Monitor Information" + LS;
+        GraphicsEnvironment genv = GraphicsEnvironment
+            .getLocalGraphicsEnvironment();
+        if(genv == null) {
+            info += "  Cannot find local graphics environment";
+            return info;
+        }
+        GraphicsDevice[] devices = genv.getScreenDevices();
+        if(devices == null) {
+            info += "  Cannot find screen devices";
+            return info;
+        }
+        if(devices.length == 0) {
+            info += "  No screen devices found";
+            return info;
+        }
+        GraphicsConfiguration[] configurations;
+        ColorModel cm;
+        for(GraphicsDevice device : devices) {
+            info += "  " + device.getIDstring() + LS;
+            configurations = device.getConfigurations();
+            for(GraphicsConfiguration config : configurations) {
+                cm = config.getColorModel();
+                if(cm != null) {
+                    info += "    ICC Profile="
+                        + ImageUtils.getICCProfileName(cm) + LS;
+                } else {
+                    info += "    ICC Profile=Not Found" + LS;
+                }
+            }
+        }
+        return info;
+    }
+
+    /**
+     * Generates a new image from the given one. The new image has the specified
+     * ICC profile.
+     * 
+     * @param profile
+     * @param image
+     * @return The new image or null on failure.
+     */
+    public static BufferedImage convertProfile(ICC_Profile profile,
+        BufferedImage image) {
+        if(profile == null || image == null) {
+            return null;
+        }
+        ICC_ColorSpace cs = new ICC_ColorSpace(profile);
+        ColorConvertOp op = new ColorConvertOp(cs, null);
+        return op.filter(image, null);
     }
 
 }
