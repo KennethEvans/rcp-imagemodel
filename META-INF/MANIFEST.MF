@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Image Model
 Bundle-SymbolicName: net.kenevans.imagemodel
-Bundle-Version: 2.0.0.0
+Bundle-Version: 2.1.0.0
 Bundle-Vendor: kenevans.net
 Export-Package: net.kenevans.imagemodel
 Require-Bundle: org.eclipse.ui,
