@@ -48,36 +48,36 @@ import net.kenevans.imagemodel.utils.Utils;
  */
 public class ScrolledImagePanel extends JPanel
 {
-    private static final long serialVersionUID = 1L;
-    private static final double ZOOM_FACTOR = 1.5;
-    private double zoom = 1.0;
-    private boolean useStatusBar = false;
+    protected static final long serialVersionUID = 1L;
+    protected static final double ZOOM_FACTOR = 1.5;
+    protected double zoom = 1.0;
+    protected boolean useStatusBar = false;
 
-    private ImageModel imageModel;
-    private ImageModelListener imageModelListener;
-    private MouseInputAdapter mouseAdapter;
-    private DropTargetAdapter dropTargetAdapter;
-    private DropTarget dropTarget;
-    private JScrollPane scrollPane;
-    private JPanel imagePanel;
-    private JLabel statusBar;
+    protected ImageModel imageModel;
+    protected ImageModelListener imageModelListener;
+    protected MouseInputAdapter mouseAdapter;
+    protected DropTargetAdapter dropTargetAdapter;
+    protected DropTarget dropTarget;
+    protected JScrollPane scrollPane;
+    protected JPanel imagePanel;
+    protected JLabel statusBar;
 
     public static enum Mode {
         NONE, CROP
     };
 
-    private Mode mode = Mode.NONE;
-    private Rectangle clipRectangle = new Rectangle(0, 0, 0, 0);
-    private Rectangle oldClipRectangle;
+    protected Mode mode = Mode.NONE;
+    protected Rectangle clipRectangle = new Rectangle(0, 0, 0, 0);
+    protected Rectangle oldClipRectangle;
 
-    private PageFormat pageFormat = PrinterJob.getPrinterJob().defaultPage();
-    private PrintService printService;
-    private PrintRequestAttributeSet printAttributes = new HashPrintRequestAttributeSet();
-    private String defaultPath;
+    protected PageFormat pageFormat = PrinterJob.getPrinterJob().defaultPage();
+    protected PrintService printService;
+    protected PrintRequestAttributeSet printAttributes = new HashPrintRequestAttributeSet();
+    protected String defaultPath;
 
-    private boolean dragging = false;
-    private Point mouseStart = new Point(0, 0);
-    private Point mouseCur = new Point(0, 0);
+    protected boolean dragging = false;
+    protected Point mouseStart = new Point(0, 0);
+    protected Point mouseCur = new Point(0, 0);
 
     // Property change names
     public static final String CLIP_RECTANGLE_CHANGED = ScrolledImagePanel.class
@@ -164,11 +164,11 @@ public class ScrolledImagePanel extends JPanel
     /**
      * Initializes the user interface.
      */
-    private void uiInit() {
+    protected void uiInit() {
         this.setLayout(new BorderLayout());
 
         imagePanel = new JPanel() {
-            private static final long serialVersionUID = 1L;
+            protected static final long serialVersionUID = 1L;
 
             @Override
             protected void paintComponent(Graphics g) {
@@ -488,7 +488,7 @@ public class ScrolledImagePanel extends JPanel
     // * Debugging routine that shows sizes of the various components of the
     // * JPanel.
     // */
-    // private void debugSizes() {
+    // protected void debugSizes() {
     // Rectangle rect1 = imagePanel.getBounds();
     // System.out.println("imagePanel.getBounds() " + rect1.width + " "
     // + rect1.height);
@@ -663,7 +663,7 @@ public class ScrolledImagePanel extends JPanel
      * 
      * @param ev
      */
-    private void mousePressed(MouseEvent ev) {
+    protected void mousePressed(MouseEvent ev) {
         mouseMoved(ev);
         // Needed for keyboard events
         imagePanel.requestFocusInWindow();
@@ -728,7 +728,7 @@ public class ScrolledImagePanel extends JPanel
      * 
      * @param ev
      */
-    private void mouseReleased(MouseEvent ev) {
+    protected void mouseReleased(MouseEvent ev) {
         // Only do this for button 1
         if(ev.getButton() != MouseEvent.BUTTON1) {
             return;
@@ -749,7 +749,7 @@ public class ScrolledImagePanel extends JPanel
      * 
      * @param ev
      */
-    private void mouseDragged(MouseEvent ev) {
+    protected void mouseDragged(MouseEvent ev) {
         if(dragging) {
             mouseCur = ev.getPoint();
             Rectangle newRectangle = new Rectangle();
@@ -774,7 +774,7 @@ public class ScrolledImagePanel extends JPanel
      * 
      * @param ev
      */
-    private void mouseMoved(MouseEvent ev) {
+    protected void mouseMoved(MouseEvent ev) {
         if(useStatusBar || statusBar != null || getImage() == null) {
             int x = (int)(ev.getX() / zoom);
             int y = (int)(ev.getY() / zoom);
@@ -788,7 +788,7 @@ public class ScrolledImagePanel extends JPanel
      * 
      * @param ev
      */
-    private void mouseExited(MouseEvent ev) {
+    protected void mouseExited(MouseEvent ev) {
         if(useStatusBar || statusBar != null || getImage() == null) {
             // Use space to keep it from resizing
             updateStatus(" ");
