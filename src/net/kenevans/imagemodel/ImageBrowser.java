@@ -43,6 +43,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
@@ -54,6 +55,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import net.kenevans.imagemodel.ScrolledImagePanel.Mode;
+import net.kenevans.imagemodel.colorset.ColorSetDialog;
 import net.kenevans.imagemodel.utils.AboutBoxPanel;
 import net.kenevans.imagemodel.utils.ImageUtils;
 import net.kenevans.imagemodel.utils.Utils;
@@ -64,13 +66,16 @@ public class ImageBrowser extends JFrame
     private static final boolean INITIALIZE_PATH = false; // For developing
     private static final boolean INITIAL_CROP_ENABLED = true;
     private static final boolean USE_STATUS_BAR = true;
-    private static final String VERSION_STRING = "Image Browser 3.2.0";
-    private static final String INITIAL_PATH = "c:/users/evans/Pictures";
+    private static final String VERSION_STRING = "Image Browser 4.0.0";
+    // private static final String INITIAL_PATH = "c:/users/evans/Pictures";
+    private static final String INITIAL_PATH = "C:/Users/evans/Pictures/Android/Herondance";
     private static final String[] HOME_LOCATIONS = {"HOME", "HOME_PATH"};
     private static final String[] PICTURE_LOCATIONS = {"My Pictures",
         "Pictures"};
     private static String[] suffixes = {"jpg", "jpe", "jpeg", "gif", "tif",
         "tiff", "png", "bmp"};
+    
+    private File lastColorSetFile;
 
     public static enum ControlPanelMode {
         NONE, OPEN, ZOOM, CROP
@@ -97,8 +102,8 @@ public class ImageBrowser extends JFrame
     private JPanel displayPanel = new JPanel();
     private JSplitPane mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
         listPanel, displayPanel);
-    private DefaultListModel listModel = new DefaultListModel();
-    private JList list = new JList(listModel);
+    private DefaultListModel<File> listModel = new DefaultListModel<File>();
+    private JList<File> list = new JList<File>(listModel);
     private JScrollPane listScrollPane;
     private ScrolledImagePanel imagePanel = null;
     private JMenuBar menuBar = new JMenuBar();
@@ -150,6 +155,8 @@ public class ImageBrowser extends JFrame
     private File directoryFile = null;
     private ImageModel imageModel = new ImageModel();
 
+    private JMenuItem menuColorSet = new JMenuItem();
+
     private JCheckBox controlPanelCropEnableCheckBox;
     private JButton controlPanelCropButton;
     private JButton controlPanelRestoreCropButton;
@@ -197,7 +204,7 @@ public class ImageBrowser extends JFrame
                 Iterator<String> iter1 = readerSuffixes.iterator();
                 int i = 0;
                 while(iter1.hasNext()) {
-                    String suffix = (String)iter1.next();
+                    String suffix = iter1.next();
                     suffixes[i] = suffix;
                     i++;
                 }
@@ -270,8 +277,8 @@ public class ImageBrowser extends JFrame
         });
         if(false) {
             // This version does not show the selection as highlighted
-            list.setCellRenderer(new ListCellRenderer() {
-                public Component getListCellRendererComponent(JList list,
+            list.setCellRenderer(new ListCellRenderer<Object>() {
+                public Component getListCellRendererComponent(JList<?> list,
                     Object value, int index, boolean isSelected,
                     boolean cellHasFocus) {
                     File file = (File)value;
@@ -284,7 +291,7 @@ public class ImageBrowser extends JFrame
             list.setCellRenderer(new DefaultListCellRenderer() {
                 private static final long serialVersionUID = 1L;
 
-                public Component getListCellRendererComponent(JList list,
+                public Component getListCellRendererComponent(JList<?> list,
                     Object value, int index, boolean isSelected,
                     boolean cellHasFocus) {
                     JLabel label = (JLabel)super.getListCellRendererComponent(
@@ -300,7 +307,7 @@ public class ImageBrowser extends JFrame
             list.setCellRenderer(new DefaultListCellRenderer() {
                 private static final long serialVersionUID = 1L;
 
-                public Component getListCellRendererComponent(JList list,
+                public Component getListCellRendererComponent(JList<?> list,
                     Object value, int index, boolean isSelected,
                     boolean cellHasFocus) {
                     JLabel label = (JLabel)super.getListCellRendererComponent(
@@ -457,7 +464,8 @@ public class ImageBrowser extends JFrame
         });
 
         // Crop button
-        button = makeToolBarButton("/resources/crop.gif", "Toggle crop", "Crop");
+        button = makeToolBarButton("/resources/crop.gif", "Toggle crop",
+            "Crop");
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 resetControlPanel(ControlPanelMode.CROP);
@@ -713,8 +721,8 @@ public class ImageBrowser extends JFrame
 
         // File Save as
         menuFileSaveAs.setText("Save As...");
-        menuFileSaveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-            InputEvent.CTRL_MASK));
+        menuFileSaveAs.setAccelerator(
+            KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
         menuFileSaveAs.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 saveAs();
@@ -724,8 +732,8 @@ public class ImageBrowser extends JFrame
 
         // File Print
         menuFilePrint.setText("Print...");
-        menuFilePrint.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
-            InputEvent.CTRL_MASK));
+        menuFilePrint.setAccelerator(
+            KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
         menuFilePrint.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 print();
@@ -766,8 +774,8 @@ public class ImageBrowser extends JFrame
 
         // Edit Copy
         menuEditCopy.setText("Copy");
-        menuEditCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,
-            InputEvent.CTRL_MASK));
+        menuEditCopy.setAccelerator(
+            KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
         menuEditCopy.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 copy();
@@ -777,8 +785,8 @@ public class ImageBrowser extends JFrame
 
         // Edit Paste
         menuEditPaste.setText("Paste");
-        menuEditPaste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
-            InputEvent.CTRL_MASK));
+        menuEditPaste.setAccelerator(
+            KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
         menuEditPaste.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 paste();
@@ -788,8 +796,8 @@ public class ImageBrowser extends JFrame
 
         // Edit Paste and Print
         menuEditPastePrint.setText("Paste and Print");
-        menuEditPastePrint.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B,
-            InputEvent.CTRL_MASK));
+        menuEditPastePrint.setAccelerator(
+            KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK));
         menuEditPastePrint.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 paste();
@@ -1026,8 +1034,8 @@ public class ImageBrowser extends JFrame
 
         // Image Fit
         menuImageFit.setText("Fit Image");
-        menuImageFit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
-            InputEvent.CTRL_MASK));
+        menuImageFit.setAccelerator(
+            KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
         menuImageFit.setState(fitIfLarger);
         menuImageFit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
@@ -1039,8 +1047,8 @@ public class ImageBrowser extends JFrame
 
         // Image Restore
         menuImageRestore.setText("Restore");
-        menuImageRestore.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
-            InputEvent.CTRL_MASK));
+        menuImageRestore.setAccelerator(
+            KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK));
         menuImageRestore.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 if(imageModel == null) return;
@@ -1049,6 +1057,18 @@ public class ImageBrowser extends JFrame
             }
         });
         menuImage.add(menuImageRestore);
+
+        menuImage.add(new JSeparator());
+
+        // Make Color Set
+        menuColorSet.setText("Make Color Set...");
+        menuColorSet.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                if(imageModel == null) return;
+                makeColorSet();
+            }
+        });
+        menuImage.add(menuColorSet);
 
         // Help
         menuHelp.setText("Help");
@@ -1065,8 +1085,9 @@ public class ImageBrowser extends JFrame
         menuHelpAbout.setText("About");
         menuHelpAbout.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                JOptionPane.showMessageDialog(null, new AboutBoxPanel(
-                    VERSION_STRING), "About", JOptionPane.PLAIN_MESSAGE);
+                JOptionPane.showMessageDialog(null,
+                    new AboutBoxPanel(VERSION_STRING), "About",
+                    JOptionPane.PLAIN_MESSAGE);
             }
         });
         menuHelp.add(menuHelpAbout);
@@ -1090,7 +1111,8 @@ public class ImageBrowser extends JFrame
             try {
                 File file = chooser.getSelectedFile();
                 // Save the selected path for next time
-                currentDir = chooser.getSelectedFile().getParentFile().getPath();
+                currentDir = chooser.getSelectedFile().getParentFile()
+                    .getPath();
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 imageModel.readImage(file);
                 fitImage();
@@ -1301,6 +1323,27 @@ public class ImageBrowser extends JFrame
     }
 
     /**
+     * Scales the image according to the fitAlways and fitIfLarger;
+     */
+    private void makeColorSet() {
+        if(imagePanel == null || imageModel == null) {
+            return;
+        }
+        BufferedImage cur = imageModel.getCurrentImage();
+        if(cur == null) return;
+        ColorSetDialog dialog = new ColorSetDialog(this, cur);
+        // For modal, use this and dialog.showDialog() instead of
+        // dialog.setVisible(true)
+        // dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        URL url = ImageBrowser.class.getResource("/ImageBrowser.32x32.gif");
+        if(url != null) {
+            dialog.setIconImage(new ImageIcon(url).getImage());
+        }
+        dialog.setVisible(true);
+    }
+
+    /**
      * Shows the image info.
      */
     private void imageInfo() {
@@ -1317,7 +1360,7 @@ public class ImageBrowser extends JFrame
     private void onListValueChanged(ListSelectionEvent ev) {
         if(ev.getValueIsAdjusting()) return;
         if(imageModel == null) return;
-        File file = (File)list.getSelectedValue();
+        File file = list.getSelectedValue();
         if(file == null) return;
         Cursor oldCursor = getCursor();
         try {
@@ -1383,16 +1426,17 @@ public class ImageBrowser extends JFrame
     private void overview() {
         String ls = Utils.LS;
         StringBuilder sb = new StringBuilder();
-        sb.append("Image Browser allows you to choose a directory and display"
-            + ls);
-        sb.append("images in that directory.  You can save the image as a" + ls);
+        sb.append(
+            "Image Browser allows you to choose a directory and display" + ls);
+        sb.append(
+            "images in that directory.  You can save the image as a" + ls);
         sb.append("new file and do Cut, Copy, and Paste.  Some image" + ls);
         sb.append("manipulation is available from the Image menu." + ls);
         sb.append("" + ls);
         sb.append("The image formats you can use will depend on whether" + ls);
         sb.append("Java Advanced Imaging (JAI and JAI ImageIO) are" + ls);
-        sb.append("installed.  You can see the available formats under the "
-            + ls);
+        sb.append(
+            "installed.  You can see the available formats under the " + ls);
         sb.append("Info menu." + ls);
         sb.append("" + ls);
         sb.append("Accelerator keys:" + ls);
@@ -1509,6 +1553,20 @@ public class ImageBrowser extends JFrame
      */
     public static String getVersionString() {
         return VERSION_STRING;
+    }
+    
+    /**
+     * @return The value of lastColorSetFile.
+     */
+    public File getLastColorSetFile() {
+        return lastColorSetFile;
+    }
+
+    /**
+     * @param lastColorSetFile The new value for lastColorSetFile.
+     */
+    public void setLastColorSetFile(File lastColorSetFile) {
+        this.lastColorSetFile = lastColorSetFile;
     }
 
     /**

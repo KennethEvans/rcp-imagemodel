@@ -32,7 +32,7 @@ import net.kenevans.imagemodel.utils.Utils;
 
 public class ImageViewer extends JFrame
 {
-    private static final String versionString = "Image Viewer 1.0.0.0";
+    private static final String VERSION_STRING = "Image Viewer 1.0.0.0";
     private static final String INITIAL_PATH = "c:/Java/Fit2D";
     private static String[] suffixes = {"jpg", "jpe", "jpeg", "gif", "tif",
         "tiff", "png", "bmp"};
@@ -536,7 +536,7 @@ public class ImageViewer extends JFrame
         menuHelpAbout.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 JOptionPane.showMessageDialog(null, new AboutBoxPanel(
-                    versionString), "About", JOptionPane.PLAIN_MESSAGE);
+                    VERSION_STRING), "About", JOptionPane.PLAIN_MESSAGE);
             }
         });
         menuHelp.add(menuHelpAbout);
@@ -682,10 +682,10 @@ public class ImageViewer extends JFrame
     }
 
     /**
-     * @return The value of versionString.
+     * @return The value of VERSION_STRING.
      */
     public static String getVersionString() {
-        return versionString;
+        return VERSION_STRING;
     }
 
     /**
