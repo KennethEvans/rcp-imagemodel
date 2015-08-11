@@ -443,7 +443,7 @@ public class ColorSetDialog extends JDialog
                 rgb[2]);
             i++;
             out.printf("R:%d, G:%d, B:%d HV:0.00, SV:0.00, VV:0.00 %s" + LS,
-                rgb[0], rgb[1], rgb[2], "Color " + ++i);
+                rgb[0], rgb[1], rgb[2], "Color " + i);
         }
         out.close();
 
